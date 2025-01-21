@@ -37,11 +37,7 @@ onMounted(async () => {
             }
           }
         });
-      } else {
-        console.log('No other tracks found for this artist.');
       }
-    } else {
-      console.log('No release found with the given ACB.');
     }
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -50,40 +46,103 @@ onMounted(async () => {
 
 watchEffect(() => {
   useHead({
-    title: releaseDetails.value.ACB ? `${releaseDetails.value.ACB} - ${releaseDetails.value.artist}` : 'Loading... | Accurate Black',
+    // Verbeterde dynamische title tag
+    title: releaseDetails.value.ACB 
+      ? `${releaseDetails.value.releaseName} by ${releaseDetails.value.artist} | Accurate Black ACB${releaseDetails.value.ACB}`
+      : 'Electronic Music Release | Accurate Black Label',
     meta: [
       {
         name: 'description',
-        content: releaseDetails.value.ACB ? `Explore ${releaseDetails.value.artist}'s latest track ${releaseDetails.value.releaseName}.` : 'Accurate Black - Deep. Dark. Authentic. Profound.'
+        content: releaseDetails.value.ACB 
+          ? `Listen to ${releaseDetails.value.releaseName} by ${releaseDetails.value.artist}. Stream or download this exclusive techno release from Accurate Black. Released as ACB${releaseDetails.value.ACB}.`
+          : 'Discover exclusive electronic music releases from Accurate Black label. Stream and download dark techno tracks from underground artists.'
       },
+      // Canonical URL
+      {
+        rel: 'canonical',
+        href: `https://www.accurateblack.nl/releases/${route.params.id}`
+      },
+      // Keywords
+      {
+        name: 'keywords',
+        content: releaseDetails.value.ACB 
+          ? `${releaseDetails.value.artist}, ${releaseDetails.value.releaseName}, techno music, electronic music, Accurate Black, ACB${releaseDetails.value.ACB}, dark techno`
+          : 'techno music, electronic music, dark techno, underground artists, music releases'
+      },
+      // OpenGraph tags
       {
         property: 'og:title',
-        content: releaseDetails.value.ACB ? `${releaseDetails.value.ACB} - ${releaseDetails.value.artist}` : 'Loading... | Accurate Black',
+        content: releaseDetails.value.ACB 
+          ? `${releaseDetails.value.releaseName} by ${releaseDetails.value.artist} | ACB${releaseDetails.value.ACB}`
+          : 'Electronic Music Release | Accurate Black Label'
       },
       {
         property: 'og:description',
-        content: releaseDetails.value.ACB ? `Explore ${releaseDetails.value.artist}'s latest track ${releaseDetails.value.releaseName}.` : 'Accurate Black - Deep. Dark. Authentic. Profound.',
+        content: releaseDetails.value.ACB 
+          ? `Stream ${releaseDetails.value.releaseName} by ${releaseDetails.value.artist}. New release on Accurate Black label.`
+          : 'Discover exclusive electronic music releases from Accurate Black label.'
+      },
+      {
+        property: 'og:type',
+        content: 'music.song'
       },
       {
         property: 'og:image',
-        content: otherTracksHaveImage.value ? otherTracksImage.value : '/public/img/accurate-black.png',
+        content: releaseDetails.value.imageUrl || '/public/img/accurate-black.png'
       },
-    
+      {
+        property: 'og:url',
+        content: `https://www.accurateblack.nl/releases/${route.params.id}`
+      },
+      // Twitter Cards
       {
         name: 'twitter:card',
         content: 'summary_large_image'
       },
       {
         name: 'twitter:title',
-        content: 'Accurate Black | Deep. Dark. Authentic. Profound.'
+        content: releaseDetails.value.ACB 
+          ? `${releaseDetails.value.releaseName} by ${releaseDetails.value.artist}`
+          : 'Electronic Music Release | Accurate Black Label'
       },
       {
         name: 'twitter:description',
-        content: 'Explore deep, dark, and authentic electronic music with Accurate Black. Feel the beats, not just hear them. Discover our latest releases and top artists.'
+        content: releaseDetails.value.ACB 
+          ? `Stream ${releaseDetails.value.releaseName} by ${releaseDetails.value.artist}. New release on Accurate Black label.`
+          : 'Discover exclusive electronic music releases from Accurate Black label.'
       },
       {
         name: 'twitter:image',
-        content: '/public/img/accurate-black.png'
+        content: releaseDetails.value.imageUrl || '/public/img/accurate-black.png'
+      }
+    ],
+    // MusicRecording Schema
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "MusicRecording",
+          "name": releaseDetails.value.releaseName,
+          "byArtist": {
+            "@type": "MusicGroup",
+            "name": releaseDetails.value.artist,
+            "url": `https://www.accurateblack.nl/artists/${releaseDetails.value.artist}`
+          },
+          "inAlbum": {
+            "@type": "MusicAlbum",
+            "name": releaseDetails.value.releaseName,
+            "albumReleaseType": "EP"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Accurate Black",
+            "url": "https://www.accurateblack.nl"
+          },
+          "image": releaseDetails.value.imageUrl,
+          "url": `https://www.accurateblack.nl/releases/${releaseDetails.value.ACB}`,
+          "identifier": releaseDetails.value.ACB
+        })
       }
     ]
   });
@@ -91,93 +150,112 @@ watchEffect(() => {
 </script>
 
 <template>
-  <section class="section-release-details">
-    <div v-once class="break-line top">
-      <p class="break-line-text">{{ releaseDetails.artist }}</p>
-    </div>
+  <main class="section-release-details">
+    <article>
+      <header>
+        <div v-once class="break-line top">
+          <h1 class="break-line-text">{{ releaseDetails.artist }}</h1>
+        </div>
+      </header>
 
-    <div class="details-container">
-      <div v-if="releaseDetails" class="details-left">
-        <div class="details-left-header">
-          <div class="btn-more back">
-            <NuxtLink to="/releases" class="btn-more-link">
-              <p class="btn-more-p">BACK TO RELEASES</p>
-            </NuxtLink>
+      <div class="details-container">
+        <section v-if="releaseDetails" class="details-left" aria-label="Release Details">
+          <div class="details-left-header">
+            <div class="btn-more back">
+              <NuxtLink to="/releases" class="btn-more-link">
+                <span class="btn-more-p">BACK TO RELEASES</span>
+              </NuxtLink>
+            </div>
+            <p class="acb">ACB{{ releaseDetails.ACB }}</p>
           </div>
 
+          <div class="embedded" v-html="releaseDetails.soundcloudUrl" :title="`${releaseDetails.releaseName} by ${releaseDetails.artist} on SoundCloud`"></div>
 
-          <p class="acb">{{ releaseDetails.ACB }}</p>
-        </div>
-        <div class="embedded" v-html="releaseDetails.soundcloudUrl" title="spotify accurate black"></div>
-
-        <p class="break-line-text artistname">ARTIST</p>
-        <NuxtLink :to="`/artists/${releaseDetails.artist}`" class="h1a">
-
-          <h1 class="artist">{{ releaseDetails.artist }} </h1>
-
-
-
-        </NuxtLink>
-        <p class="break-line-text">EP / TRACK TITLE</p>
-        <p class="release-name">{{ releaseDetails.releaseName }}</p>
-        <p class="break-line-text">TRACKLIST</p>
-        <div class="tracks-container">
-          <div class="tracks" v-for="(track, index) in releaseDetails.tracks" :key="index" :class="{
-            'border-right': index < releaseDetails.tracks.length - 1,
-          }">
-            <p><span class="middot">&middot;</span>{{ track.trackName }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="releaseDetails" class="details-right">
-        <img v-if="releaseDetails.imageUrl" v-lazy="releaseDetails.imageUrl" alt="Release Image" class="release-image"
-          loading="lazy" width="200" height="200" />
-        <div v-if="releaseDetails.digDisLink" class="btn-big buy">
-          <a :href="releaseDetails.digDisLink" class="btn-more-link" target="blanc">
-            <p class="btn-big-p">STREAM NOW!</p>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="rl-trailer" v-if="releaseDetails.releaseTrailer">
-      <div class="break-line bottom">
-        <p class="break-line-text">RELEASE VIDEO</p>
-      </div>
-      <div class="trailer">
-        <div class="trailer-embed" v-html="releaseDetails.releaseTrailer"></div>
-      </div>
-
-
-
-
-    </div>
-
-    <div class="break-line bottom">
-      <p class="break-line-text">OTHER TRACKS</p>
-    </div>
-
-    <div v-if="otherTracks.length > 0" class="more-container">
-      <h2 class="player-header">
-        MORE MUSIC FROM
-        <p class="player-header-p">{{ releaseDetails.artist }}</p>
-      </h2>
-      <div class="other-tracks-grid">
-        <div v-for="track in otherTracks" :key="track.ACB" class="other-track">
-          <NuxtLink :to="`/releases/${track.ACB}`">
-            <NuxtImg v-if="track.imageUrl" :src="track.imageUrl" alt="Track Image" class="other-track-image"
-              loading="lazy" width="200" height="200" />
-            <p v-else>{{ track.releaseName }}</p>
+          <h2 class="break-line-text artistname">ARTIST</h2>
+          <NuxtLink :to="`/artists/${releaseDetails.artist}`" class="h1a">
+            <p class="artist">{{ releaseDetails.artist }}</p>
           </NuxtLink>
 
-        </div>
+          <h2 class="break-line-text">EP / TRACK TITLE</h2>
+          <p class="release-name">{{ releaseDetails.releaseName }}</p>
+
+          <h2 class="break-line-text">TRACKLIST</h2>
+          <div class="tracks-container">
+            <div 
+              v-for="(track, index) in releaseDetails.tracks" 
+              :key="index" 
+              class="tracks" 
+              :class="{'border-right': index < releaseDetails.tracks.length - 1}"
+            >
+              <p><span class="middot" aria-hidden="true">&middot;</span>{{ track.trackName }}</p>
+            </div>
+          </div>
+        </section>
+
+        <aside v-if="releaseDetails" class="details-right">
+          <img 
+            v-if="releaseDetails.imageUrl" 
+            v-lazy="releaseDetails.imageUrl" 
+            :alt="`${releaseDetails.releaseName} by ${releaseDetails.artist} - Album Cover`" 
+            class="release-image"
+            loading="lazy" 
+            width="200" 
+            height="200" 
+          />
+          <div v-if="releaseDetails.digDisLink" class="btn-big buy">
+            <a :href="releaseDetails.digDisLink" class="btn-more-link" target="_blank" rel="noopener">
+              <span class="btn-big-p">STREAM NOW!</span>
+            </a>
+          </div>
+        </aside>
       </div>
-    </div>
-    <div v-else class="more-container">
-      <h2 class="no-more">NO OTHER TRACKS YET</h2>
-    </div>
-  </section>
+
+      <section v-if="releaseDetails.releaseTrailer" class="rl-trailer" aria-label="Release Video">
+        <h2 class="break-line bottom">
+          <span class="break-line-text">RELEASE VIDEO</span>
+        </h2>
+        <div class="trailer">
+          <div class="trailer-embed" v-html="releaseDetails.releaseTrailer"></div>
+        </div>
+      </section>
+
+      <section aria-label="Other Tracks">
+        <h2 class="break-line bottom">
+          <span class="break-line-text">OTHER TRACKS</span>
+        </h2>
+
+        <div v-if="otherTracks.length > 0" class="more-container">
+          <h3 class="player-header">
+            MORE MUSIC FROM
+            <span class="player-header-p">{{ releaseDetails.artist }}</span>
+          </h3>
+          <div class="other-tracks-grid">
+            <article 
+              v-for="track in otherTracks" 
+              :key="track.ACB" 
+              class="other-track"
+            >
+              <NuxtLink :to="`/releases/${track.ACB}`">
+                <img 
+                  v-if="track.imageUrl" 
+                  :src="track.imageUrl" 
+                  :alt="`${track.releaseName} by ${track.artist} - Album Cover`" 
+                  class="other-track-image"
+                  loading="lazy" 
+                  width="200" 
+                  height="200" 
+                />
+                <p v-else>{{ track.releaseName }}</p>
+              </NuxtLink>
+            </article>
+          </div>
+        </div>
+        <div v-else class="more-container">
+          <p class="no-more">NO OTHER TRACKS YET</p>
+        </div>
+      </section>
+    </article>
+  </main>
 </template>
 
 <style scoped lang="scss">

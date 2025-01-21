@@ -3,19 +3,31 @@ import { ref, onMounted } from 'vue'
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
 
 useHead({
-  title: 'ACB | RELEASES - Discover the Latest Music Hits',
+  // Verbeterde title tag met focus keywords vooraan
+  title: 'Latest Techno Releases | Accurate Black - Electronic Music Label',
   meta: [
     {
       name: 'description',
-      content: 'Explore the latest music releases from Accurate Black. Listen to new tracks from our artists and stay updated with the freshest hits.'
+      // Verbeterde meta description met call-to-action en keywords
+      content: 'Stream and download the latest techno releases from Accurate Black. New dark electronic music every month. Features top underground artists, exclusive tracks, and limited vinyl releases.'
     },
+    // Canonical URL
+    {
+      rel: 'canonical',
+      href: 'https://www.accurateblack.nl/releases'
+    },
+    // Verbeterde OpenGraph tags
     {
       property: 'og:title',
-      content: 'ACB | RELEASES - Discover the Latest Releases'
+      content: 'Latest Techno Releases | Accurate Black - Electronic Music Label'
     },
     {
       property: 'og:description',
-      content: 'Explore the latest music releases from Accurate Black. Listen to new tracks from our artists and stay updated with the freshest hits.'
+      content: 'Stream and download the latest techno releases from Accurate Black. New dark electronic music every month. Features top underground artists and exclusive tracks.'
+    },
+    {
+      property: 'og:type',
+      content: 'website'
     },
     {
       property: 'og:image',
@@ -25,49 +37,67 @@ useHead({
       property: 'og:url',
       content: 'https://www.accurateblack.nl/releases'
     },
+    // Verbeterde Twitter Cards
     {
       name: 'twitter:card',
       content: 'summary_large_image'
     },
     {
       name: 'twitter:title',
-      content: 'ACB | RELEASES - Discover the Latest Music Hits'
+      content: 'Latest Techno Releases | Accurate Black - Electronic Music Label'
     },
     {
       name: 'twitter:description',
-      content: 'Explore the latest music releases from Accurate Black. Listen to new tracks from top artists and stay updated with the freshest hits.'
+      content: 'Stream and download the latest techno releases from Accurate Black. New dark electronic music every month. Features top underground artists and exclusive tracks.'
     },
     {
       name: 'twitter:image',
       content: 'https://www.accurateblack.nl/public/img/accurate-black.png'
     },
+    // Verbeterde keywords
     {
       name: 'keywords',
-      content: 'music releases, Accurate Black, new tracks, latest hits, electronic music'
+      content: 'techno releases, electronic music, dark techno, underground music, vinyl releases, Accurate Black label, techno artists, new music releases'
+    },
+    // Extra meta tags
+    {
+      name: 'robots',
+      content: 'index, follow'
+    },
+    {
+      name: 'viewport',
+      content: 'width=device-width, initial-scale=1'
     }
   ],
   script: [
+    // Verbeterd MusicPlaylist Schema
     {
       type: 'application/ld+json',
       json: {
         "@context": "https://schema.org",
-        "@type": "MusicGroup",
-        "name": "Accurate Black",
-        "url": "https://www.accurateblack.nl",
-        "logo": "https://www.accurateblack.nl/public/img/accurate-black.png",
-        "sameAs": [
-          "https://www.facebook.com/accurateblack",
-          "https://www.instagram.com/accurate_black",
-          "https://tiktok.com/@accurateblack",
-          "https://soundcloud.com/accurateblack"
-        ],
-        "description": "Explore the latest music releases from Accurate Black. Listen to new tracks from our artists and stay updated with the freshest hits."
+        "@type": "MusicPlaylist",
+        "name": "Accurate Black Latest Releases",
+        "url": "https://www.accurateblack.nl/releases",
+        "description": "Latest techno and electronic music releases from Accurate Black label",
+        "numTracks": "10",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Accurate Black",
+          "url": "https://www.accurateblack.nl",
+          "logo": "https://www.accurateblack.nl/public/img/accurate-black.png",
+          "sameAs": [
+            "https://www.facebook.com/accurateblack",
+            "https://www.instagram.com/accurate_black",
+            "https://tiktok.com/@accurateblack",
+            "https://soundcloud.com/accurateblack"
+          ]
+        }
       }
     }
   ]
 })
 
-
+// Rest van de setup code blijft hetzelfde
 const showData = ref(false)
 const spotlightItem = ref({})
 const tableData = ref([])
@@ -87,7 +117,6 @@ onMounted(async () => {
   
   sortedTableData.value = tableData.value.slice().sort((a, b) => {
     if (a.ACB === b.ACB) {
-     
       return a.releaseName.localeCompare(b.releaseName)
     } else {
       return b.ACB - a.ACB
@@ -98,70 +127,98 @@ onMounted(async () => {
 
   showData.value = true
 })
-
 </script>
 
 <template>
-  <section class="section-releases">
-    <div class="break-line top">
-      <p class="break-line-text" v-once>OUR LATEST RELEASE!</p>
-    </div>
-    
-    <div v-if="spotlightItem.releaseName">
-      <div class="spotlight-container fade-in" v-motion-slide-visible-top>
-        <div class="spotlight-left">
-          <div class="spotlight-text">
-            <h1 class="spotlight-text header">~ OUT NOW ~</h1>
-            <h1 class="spotlight-text acb">{{ getHighestPropertyValue('ACB') }}</h1>
-            <p class="spotlight-text title">{{ spotlightItem.releaseName }}</p>
-            <p class="spotlight-text artist">{{ spotlightItem.artist }}</p>
-            <div class="btn-more">
-              <NuxtLink :to="`/releases/${spotlightItem.ACB}`" class="btn-more-link">
-                <p class="btn-more-p">CHECK OUT & LISTEN</p>
-              </NuxtLink>
-            </div>
-            <div class="lights"></div>
-          </div>
+  <main class="section-releases">
+    <article>
+      <header>
+        <h1 class="sr-only">Latest Techno Releases - Accurate Black Label</h1>
+        <div class="break-line top">
+          <p class="break-line-text" v-once>OUR LATEST RELEASE!</p>
         </div>
-
-        <div class="spotlight-right">
-          <img v-lazy="getHighestPropertyValue('imageUrl')" alt="Spotlight" class="spotlight-image" loading="lazy" width="200" height="200"/>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <div class="break-line bottom">
-        <p class="break-line-text-bottom" v-once>ALL RELEASES</p>
-      </div>
-    </div>
-
-    <div v-if="showData" class="grid-container fade-in">
-      <div v-for="(item) in sortedTableData.slice(1)" :key="item.ACB">
-        <div class="data-releases">
-          <div>
-            <img v-lazy="item.imageUrl" alt="artwork" class="grid-image" @click="openModal(item)" loading="lazy"
-            width="200" height="200"/>
-          </div>
-          <div class="text-box">
-            <p class="p-acb">{{ item.ACB }}</p>
-            <p class="p-track">{{ item.releaseName }}</p>
-            <p class="p-artist">{{ item.artist }}</p>
-            <div class="btn-more">
-              <NuxtLink :to="`/releases/${item.ACB}`" class="btn-more-link">
-                <p class="btn-more-p">CHECK OUT & LISTEN</p>
-              </NuxtLink>
+      </header>
+      
+      <section v-if="spotlightItem.releaseName" aria-label="Featured Release">
+        <div class="spotlight-container fade-in" v-motion-slide-visible-top>
+          <div class="spotlight-left">
+            <div class="spotlight-text">
+              <h2 class="spotlight-text header">~ OUT NOW ~</h2>
+              <p class="spotlight-text acb">{{ getHighestPropertyValue('ACB') }}</p>
+              <h3 class="spotlight-text title">{{ spotlightItem.releaseName }}</h3>
+              <p class="spotlight-text artist">{{ spotlightItem.artist }}</p>
+              <div class="btn-more">
+                <NuxtLink :to="`/releases/${spotlightItem.ACB}`" class="btn-more-link">
+                  <span class="btn-more-p">CHECK OUT & LISTEN</span>
+                </NuxtLink>
+              </div>
+              <div class="lights"></div>
             </div>
           </div>
+
+          <div class="spotlight-right">
+            <img 
+              v-lazy="getHighestPropertyValue('imageUrl')" 
+              :alt="`${spotlightItem.releaseName} by ${spotlightItem.artist}`" 
+              class="spotlight-image" 
+              loading="lazy" 
+              width="200" 
+              height="200"
+            />
+          </div>
         </div>
-      </div>
-    </div>
-  </section>
+      </section>
+
+      <section aria-label="All Releases">
+        <div class="break-line bottom">
+          <h2 class="break-line-text-bottom" v-once>ALL RELEASES</h2>
+        </div>
+
+        <div v-if="showData" class="grid-container fade-in">
+          <article v-for="(item) in sortedTableData.slice(1)" :key="item.ACB" class="release-item">
+            <div class="data-releases">
+              <div>
+                <img 
+                  v-lazy="item.imageUrl" 
+                  :alt="`${item.releaseName} by ${item.artist}`" 
+                  class="grid-image" 
+                  @click="openModal(item)" 
+                  loading="lazy"
+                  width="200" 
+                  height="200"
+                />
+              </div>
+              <div class="text-box">
+                <p class="p-acb">{{ item.ACB }}</p>
+                <h3 class="p-track">{{ item.releaseName }}</h3>
+                <p class="p-artist">{{ item.artist }}</p>
+                <div class="btn-more">
+                  <NuxtLink :to="`/releases/${item.ACB}`" class="btn-more-link">
+                    <span class="btn-more-p">CHECK OUT & LISTEN</span>
+                  </NuxtLink>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </article>
+  </main>
 </template>
 
 
 
 <style scoped lang="scss">
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
 
 
 .section-releases {

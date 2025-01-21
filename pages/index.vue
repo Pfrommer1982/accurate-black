@@ -2,7 +2,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
 
-
 const tableData = ref([]);
 
 const sortedTableData = computed(() => {
@@ -30,19 +29,37 @@ const fetchTableData = async () => {
 onMounted(fetchTableData);
 
 useHead({
-  title: 'Accurate Black | Deep. Dark. Authentic. Profound.',
+  // Verbeterde title tag met belangrijke keywords vooraan
+  title: 'Electronic Music Label | Accurate Black - Deep Dark Techno',
+  
   meta: [
     {
       name: 'description',
-      content: 'Explore deep, dark, and authentic electronic music with Accurate Black. Feel the beats, not just hear them. Discover our latest releases and our artists.'
+      // Verbeterde meta description met call-to-action
+      content: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos. Dark, deep, and authentic sound.'
     },
+    // Keywords meta tag (optioneel, maar kan helpen)
+    {
+      name: 'keywords',
+      content: 'techno music, electronic music label, dark techno, underground music, techno artists, music releases, demo submission'
+    },
+    // Canonical URL om duplicate content te voorkomen
+    {
+      rel: 'canonical',
+      href: 'https://www.accurateblack.nl'
+    },
+    // Verbeterde social media tags
     {
       property: 'og:title',
-      content: 'Accurate Black | Deep. Dark. Authentic. Profound.'
+      content: 'Electronic Music Label | Accurate Black - Deep Dark Techno'
     },
     {
       property: 'og:description',
-      content: 'Explore deep, dark, and authentic electronic music with Accurate Black. Feel the beats, not just hear them. Discover our latest releases and our artists.'
+      content: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.'
+    },
+    {
+      property: 'og:type',
+      content: 'website'
     },
     {
       property: 'og:image',
@@ -52,31 +69,49 @@ useHead({
       property: 'og:url',
       content: 'https://www.accurateblack.nl'
     },
+    // Twitter Cards optimalisatie
     {
       name: 'twitter:card',
       content: 'summary_large_image'
     },
     {
       name: 'twitter:title',
-      content: 'Accurate Black | Deep. Dark. Authentic. Profound.'
+      content: 'Electronic Music Label | Accurate Black - Deep Dark Techno'
     },
     {
       name: 'twitter:description',
-      content: 'Explore deep, dark, and authentic electronic music with Accurate Black. Feel the beats, not just hear them. Discover our latest releases and top artists.'
+      content: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.'
     },
     {
       name: 'twitter:image',
       content: '/public/img/accurate-black.png'
+    },
+    // Extra meta tags voor betere indexering
+    {
+      name: 'robots',
+      content: 'index, follow'
+    },
+    {
+      name: 'viewport',
+      content: 'width=device-width, initial-scale=1'
     }
   ],
   script: [
-    // Website Structured Data
+    // Verbeterde Website Structured Data
     {
       type: 'application/ld+json',
       json: {
         "@context": "https://schema.org",
-        "@type": "WebSite",
+        "@type": "Organization",
+        "name": "Accurate Black",
         "url": "https://www.accurateblack.nl",
+        "logo": "https://www.accurateblack.nl/public/img/accurate-black.png",
+        "description": "Electronic music label specializing in deep, dark techno music",
+        "sameAs": [
+          "https://www.facebook.com/accurateblack",
+          "https://www.instagram.com/accurateblack",
+          "https://soundcloud.com/accurateblack"
+        ],
         "potentialAction": {
           "@type": "SearchAction",
           "target": "https://www.accurateblack.nl/?s={search_term_string}",
@@ -84,7 +119,7 @@ useHead({
         }
       }
     },
-    // Breadcrumb Structured Data
+    // Verbeterde Breadcrumb Structured Data
     {
       type: 'application/ld+json',
       json: {
@@ -100,13 +135,13 @@ useHead({
           {
             "@type": "ListItem",
             "position": 2,
-            "name": "Releases",
+            "name": "Latest Releases",
             "item": "https://www.accurateblack.nl/releases"
           },
           {
             "@type": "ListItem",
             "position": 3,
-            "name": "Artists",
+            "name": "Featured Artists",
             "item": "https://www.accurateblack.nl/artists"
           },
           {
@@ -118,19 +153,19 @@ useHead({
           {
             "@type": "ListItem",
             "position": 5,
-            "name": "Techtonic",
+            "name": "Techtonic Events",
             "item": "https://www.accurateblack.nl/techtonic"
           },
           {
             "@type": "ListItem",
             "position": 6,
-            "name": "Demo Submission",
+            "name": "Submit Demo",
             "item": "https://www.accurateblack.nl/demo-submission"
           },
           {
             "@type": "ListItem",
             "position": 7,
-            "name": "About Us",
+            "name": "About Accurate Black",
             "item": "https://www.accurateblack.nl/about"
           }
         ]
@@ -138,27 +173,35 @@ useHead({
     }
   ]
 });
-
 </script>
-
 
 <template>
   <div class="page-container">
-    <Hero :spotlightItems="spotlightItems" />
-    <FeaturedArtists />
-    <SpotlightShow />
-
-    
+    <!-- Toegevoegde semantische HTML structuur -->
+    <main>
+      <h1 class="sr-only">Accurate Black - Electronic Music Label</h1>
+      <Hero :spotlightItems="spotlightItems" />
+      <FeaturedArtists />
+      <SpotlightShow />
+    </main>
   </div>
 </template>
 
 <style lang="scss" scoped>
-
-
 .page-container {
   display: flex;
   flex-direction: column;
   gap: 4rem;
+}
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 </style>
