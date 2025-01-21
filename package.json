@@ -1,0 +1,32 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@dargmuesli/nuxt-cookie-control": "^8.3.4",
+    "@emailjs/browser": "^4.3.3",
+    "@nuxt/image": "^1.7.0",
+    "@nuxt/ui": "^2.16.0",
+    "@nuxtjs/robots": "^3.0.0",
+    "@nuxtjs/seo": "2.0.0-rc.23",
+    "@nuxtjs/sitemap": "^5.2.0",
+    "@vueuse/motion": "^2.2.3",
+    "dropzone": "6.0.0-beta.2",
+    "firebase": "^10.12.2",
+    "firebase-admin": "^12.1.1",
+    "nuxt": "^3.11.2",
+    "nuxt-icon": "^0.6.10",
+    "nuxt-precompress": "^0.5.9",
+    "vue": "^3.4.27"
+  },
+  "devDependencies": {
+    "sass": "^1.77.3"
+  }
+}

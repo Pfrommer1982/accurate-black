@@ -1,0 +1,65 @@
+.facebook {
+    color: var(--primary-grey-dark);
+    transform: scale(2.4);
+    &:hover {
+      @include respond(phone){
+        transform: scale(2.5)
+      }
+      transform: scale(2.3);
+      color: #425F9C;
+    }
+  }
+  
+  .spotify {
+    color: var(--primary-grey-dark);
+    transform: scale(2.4);
+    &:hover {
+      transform: scale(2.3);
+      color: #2ED965;
+    }
+  }
+
+  .soundcloud {
+    color: var(--primary-grey-dark);
+    transform: scale(2.8);
+    &:hover {
+      transform: scale(2.7);
+      color: #FF5C26;
+    }
+  }
+
+  .tiktok {
+    color: var(--primary-grey-dark);
+    transform: scale(1.9);
+    &:hover {
+   transform: scale(1.8);   
+color:  cyan;
+    }
+  }
+
+  .youtube{
+    color: var(--primary-grey-dark);
+    transform: scale(2.8);
+    &:hover {
+      transform: scale(2.7);
+      color: #FF2126;
+    }
+  }
+
+  .instagram{
+    color: var(--primary-grey-dark);
+    transform: scale(2.8);
+    &:hover {
+      transform: scale(2.7);
+     color: pink
+    }
+  }
+
+  .twitter{
+    color: var(--primary-grey-dark);
+    transform: scale(2.8);
+    &:hover {
+      transform: scale(2.7);
+     color: #2CA3F2
+    }
+  }

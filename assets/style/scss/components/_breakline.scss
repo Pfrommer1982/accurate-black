@@ -1,0 +1,24 @@
+.break-line {
+    display: flex;
+    width: 100%;
+    margin-top: 3.5rem;
+    height: 2rem;
+    min-height: 2rem;
+    border-top: 1px solid var(--primary-grey-light1);
+    color: var(--primary-grey-light1);
+    font-weight: 100;
+  
+  
+    &.top {
+      .break-line-text {
+        margin-top: .5rem;
+        background-color: transparent;
+        animation-name: moveInTop;
+        animation-duration: 1s;
+        animation-timing-function: ease-out;
+      }
+    }
+    &.bottom {
+      margin-top: 2rem;
+    }
+  }

@@ -1,0 +1,21 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": { 
+    "source": "--preset=firebase/.output/server",
+    "runtime": "nodejs18"  
+  },
+  "hosting": [
+    {
+      "site": "accurate-black-378d3",
+      "public": "--preset=firebase/.output/public",
+      "cleanUrls": true,
+      "rewrites": [{ "source": "**", "function": "server" }]
+    }
+  ]
+}

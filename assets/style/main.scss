@@ -1,0 +1,27 @@
+
+
+:root {
+    --primary-grey: #aaaaaa;
+    --primary-grey-light1: #bbbbbb;
+    --primary-grey-light2: #888888;
+    --primary-grey-dark: #333333;
+    --primary-grey-dark-opacity: rgba(128, 128, 128, 0.154);
+  
+    --almost-black: rgb(11, 11, 11);
+  }
+  
+  
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;  
+  }
+  
+  html {
+    background-color: #000000;
+    font-family: Oswald, sans-serif;
+    
+    
+  }
+  
