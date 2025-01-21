@@ -11,6 +11,8 @@ export default defineNuxtConfig({
     '@nuxtjs/seo',
   ],
 
+ 
+
   // CSS
   css: ['@/assets/style/main.scss'],
 
