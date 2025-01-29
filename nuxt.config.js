@@ -210,14 +210,8 @@ export default defineNuxtConfig({
 
   // Nitro Config
   nitro: {
-    preset: 'firebase',
-    firebase: {
-      gen: 2,
-      httpsOptions: {
-        region: 'europe-west1',
-        maxInstances: 3,
-      },
-    },
+    preset: 'vercel',
+    
   },
 
   // Server Target
