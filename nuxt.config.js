@@ -11,8 +11,6 @@ export default defineNuxtConfig({
     '@nuxtjs/seo',
   ],
 
- 
-
   // CSS
   css: ['@/assets/style/main.scss'],
 
@@ -40,12 +38,16 @@ export default defineNuxtConfig({
   // Robots
   robots: {
     UserAgent: '*',
-    Disallow: '',
+    Disallow: '/admin/',
+    Allow: '/',
   },
 
   // Site URL (SEO)
   site: {
     url: 'https://www.accurateblack.nl',
+    name: 'Accurate Black',
+    description: 'Discover cutting-edge techno & electronic music at Accurate Black label.',
+    defaultLocale: 'en',
   },
 
   // Sitemap & Generate Routes Helper
@@ -95,6 +97,8 @@ export default defineNuxtConfig({
   // Image Module Config
   image: {
     formats: ['webp'],
+    domains: ['www.accurateblack.nl'],
+    provider: 'ipx',
   },
 
   // App Meta and Links
@@ -116,6 +120,7 @@ export default defineNuxtConfig({
           href: 'https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap',
           onload: "this.onload=null;this.rel='stylesheet'",
         },
+        { rel: 'canonical', href: 'https://www.accurateblack.nl' },
       ],
       meta: [
         // Default meta tags
@@ -146,11 +151,15 @@ export default defineNuxtConfig({
         },
         {
           property: 'og:image',
-          content: '/public/img/accurate-black.png',
+          content: 'https://www.accurateblack.nl/public/img/accurate-black.png',
         },
         {
           property: 'og:url',
           content: 'https://www.accurateblack.nl',
+        },
+        {
+          property: 'og:type',
+          content: 'website',
         },
         // Twitter Card meta tags
         {
@@ -167,12 +176,26 @@ export default defineNuxtConfig({
         },
         {
           name: 'twitter:image',
-          content: '/public/img/accurate-black.png',
+          content: 'https://www.accurateblack.nl/public/img/accurate-black.png',
         },
-        // Canonical URL
+      ],
+      script: [
+        // Structured Data (JSON-LD)
         {
-          rel: 'canonical',
-          href: 'https://www.accurateblack.nl',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MusicGroup",
+            "name": "Accurate Black",
+            "description": "Discover cutting-edge techno & electronic music at Accurate Black label.",
+            "url": "https://www.accurateblack.nl",
+            "image": "https://www.accurateblack.nl/public/img/accurate-black.png",
+            "sameAs": [
+              "https://facebook.com/accurateblack",
+              "https://twitter.com/accurateblack",
+              "https://instagram.com/accurateblack"
+            ]
+          }),
         },
       ],
     },
@@ -207,14 +230,14 @@ export default defineNuxtConfig({
     og: {
       title: 'Electronic Music Label | Accurate Black - Deep Dark Techno',
       description: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
-      image: '/public/img/accurate-black.png',
+      image: 'https://www.accurateblack.nl/public/img/accurate-black.png',
       url: 'https://www.accurateblack.nl',
     },
     twitter: {
       card: 'summary_large_image',
       title: 'Electronic Music Label | Accurate Black - Deep Dark Techno',
       description: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
-      image: '/public/img/accurate-black.png',
+      image: 'https://www.accurateblack.nl/public/img/accurate-black.png',
     },
     canonical: 'https://www.accurateblack.nl',
     robots: 'index, follow',
