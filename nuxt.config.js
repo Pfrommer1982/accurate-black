@@ -35,6 +35,13 @@ export default defineNuxtConfig({
     },
   },
 
+  // Experimental Features
+  experimental: {
+    payloadExtraction: true,
+    renderJsonPayloads: true,
+    viewTransition: true
+  },
+
   // Robots
   robots: {
     UserAgent: '*',
@@ -70,14 +77,35 @@ export default defineNuxtConfig({
       splitChunks: {
         layouts: true,
         pages: true,
-        commons: true,
+        commons: true
       },
+      minimize: true,
+      minimizer: {
+        minifyCSS: true,
+        minifyJS: true
+      }
     },
     terser: {
       terserOptions: {
-        compress: { drop_console: true },
-      },
+        compress: {
+          drop_console: process.env.NODE_ENV === 'production',
+          drop_debugger: true
+        }
+      }
     },
+    html: {
+      minify: {
+        collapseBooleanAttributes: true,
+        decodeEntities: true,
+        minifyCSS: true,
+        minifyJS: true,
+        processConditionalComments: true,
+        removeEmptyAttributes: true,
+        removeRedundantAttributes: true,
+        trimCustomFragments: true,
+        useShortDoctype: true
+      }
+    }
   },
 
   // Render Optimization
@@ -85,25 +113,34 @@ export default defineNuxtConfig({
     http2: { push: true },
     compressor: {
       brotli: { threshold: 10240 },
+      gzip: { threshold: 10240 }
     },
+    static: {
+      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days cache
+    }
   },
 
   // Performance Config
   performance: {
-    prefetch: false,
+    prefetch: true,
     preload: true,
+    serviceWorker: true
   },
 
   // Image Module Config
   image: {
-    formats: ['webp'],
+    formats: ['webp', 'avif'],
     domains: ['www.accurateblack.nl'],
-    provider: 'ipx',
+    quality: 80,
+    densities: [1, 2],
+    preload: true
   },
 
   // App Meta and Links
   app: {
     head: {
+      titleTemplate: '%s | Accurate Black',
+      defaultTitle: 'Accurate Black - Electronic Music Label',
       htmlAttrs: { lang: 'en' },
       link: [
         {
@@ -185,16 +222,22 @@ export default defineNuxtConfig({
           type: 'application/ld+json',
           innerHTML: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "MusicGroup",
+            "@type": "Organization",
             "name": "Accurate Black",
-            "description": "Discover cutting-edge techno & electronic music at Accurate Black label.",
+            "description": "Deep. Dark. Authentic. Profound. We delve into the depths of electronic music. This is where the beats are felt, not just heard. We are Accurate Black.",
             "url": "https://www.accurateblack.nl",
+            "logo": "https://www.accurateblack.nl/public/img/accurate-black.png",
             "image": "https://www.accurateblack.nl/public/img/accurate-black.png",
             "sameAs": [
               "https://facebook.com/accurateblack",
               "https://twitter.com/accurateblack",
               "https://instagram.com/accurateblack"
-            ]
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer service",
+              "email": "info.accurateblack@gmail.com"
+            }
           }),
         },
       ],
@@ -211,7 +254,6 @@ export default defineNuxtConfig({
   // Nitro Config
   nitro: {
     preset: 'vercel',
-    
   },
 
   // Server Target

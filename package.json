@@ -16,7 +16,6 @@
     "@nuxt/ui": "^2.16.0",
     "@nuxtjs/robots": "^3.0.0",
     "@nuxtjs/seo": "2.0.0-rc.23",
-    "@nuxtjs/sitemap": "^5.2.0",
     "@vueuse/motion": "^2.2.3",
     "dropzone": "6.0.0-beta.2",
     "firebase": "^10.12.2",

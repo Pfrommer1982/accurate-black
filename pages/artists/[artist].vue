@@ -49,24 +49,7 @@ export default {
                     this.currentSoundcloudUrl = this.soundcloudUrls[acbIdentifier];
 
                  
-                    useHead({
-                        link: [
-                            { rel: 'preload', as: 'image', href: this.imageUrl },
-
-                        ],
-                        title: `ACB | ${this.artist}`,
-                        meta: [
-                            { name: 'description', content: this.bio },
-                            { property: 'og:title', content: `ACB | ${this.artist}` },
-                            { property: 'og:description', content: this.bio },
-                            { property: 'og:image', content: this.imageUrl },
-                            { property: 'og:url', content: window.location.href },
-                            { name: 'twitter:card', content: 'summary_large_image' },
-                            { name: 'twitter:title', content: `ACB | ${this.artist}` },
-                            { name: 'twitter:description', content: this.bio },
-                            { name: 'twitter:image', content: this.imageUrl }
-                        ]
-                    });
+                    
                 }
             } else {
                 console.error('Artist not found');
