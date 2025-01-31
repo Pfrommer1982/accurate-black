@@ -11,6 +11,21 @@ export default defineNuxtConfig({
     '@nuxtjs/seo',
   ],
 
+  // Image Module Config
+  image: {
+    provider: 'ipx',
+    preload: true,
+    quality: 80,
+    format: ['webp', 'avif'],
+    screens: {
+      sm: 640,
+      md: 768,
+      lg: 1024,
+    },
+    densities: [1, 2],
+    domains: ['www.accurateblack.nl'],
+  },
+
   // CSS
   css: ['@/assets/style/main.scss'],
 
@@ -39,7 +54,7 @@ export default defineNuxtConfig({
   experimental: {
     payloadExtraction: true,
     renderJsonPayloads: true,
-    viewTransition: true
+    viewTransition: true,
   },
 
   // Robots
@@ -77,21 +92,21 @@ export default defineNuxtConfig({
       splitChunks: {
         layouts: true,
         pages: true,
-        commons: true
+        commons: true,
       },
       minimize: true,
       minimizer: {
         minifyCSS: true,
-        minifyJS: true
-      }
+        minifyJS: true,
+      },
     },
     terser: {
       terserOptions: {
         compress: {
           drop_console: process.env.NODE_ENV === 'production',
-          drop_debugger: true
-        }
-      }
+          drop_debugger: true,
+        },
+      },
     },
     html: {
       minify: {
@@ -103,9 +118,9 @@ export default defineNuxtConfig({
         removeEmptyAttributes: true,
         removeRedundantAttributes: true,
         trimCustomFragments: true,
-        useShortDoctype: true
-      }
-    }
+        useShortDoctype: true,
+      },
+    },
   },
 
   // Render Optimization
@@ -113,27 +128,18 @@ export default defineNuxtConfig({
     http2: { push: true },
     compressor: {
       brotli: { threshold: 10240 },
-      gzip: { threshold: 10240 }
+      gzip: { threshold: 10240 },
     },
     static: {
-      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days cache
-    }
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 dagen cache
+    },
   },
 
   // Performance Config
   performance: {
     prefetch: true,
     preload: true,
-    serviceWorker: true
-  },
-
-  // Image Module Config
-  image: {
-    formats: ['webp', 'avif'],
-    domains: ['www.accurateblack.nl'],
-    quality: 80,
-    densities: [1, 2],
-    preload: true
+    serviceWorker: true,
   },
 
   // App Meta and Links
@@ -160,7 +166,6 @@ export default defineNuxtConfig({
         { rel: 'canonical', href: 'https://www.accurateblack.nl' },
       ],
       meta: [
-        // Default meta tags
         {
           name: 'description',
           content: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
@@ -177,7 +182,6 @@ export default defineNuxtConfig({
           name: 'viewport',
           content: 'width=device-width, initial-scale=1',
         },
-        // Open Graph meta tags
         {
           property: 'og:title',
           content: 'Electronic Music Label | Accurate Black - Deep Dark Techno',
@@ -198,7 +202,6 @@ export default defineNuxtConfig({
           property: 'og:type',
           content: 'website',
         },
-        // Twitter Card meta tags
         {
           name: 'twitter:card',
           content: 'summary_large_image',
@@ -217,7 +220,6 @@ export default defineNuxtConfig({
         },
       ],
       script: [
-        // Structured Data (JSON-LD)
         {
           type: 'application/ld+json',
           innerHTML: JSON.stringify({

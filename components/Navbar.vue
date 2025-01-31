@@ -62,7 +62,7 @@ export default {
       <div class="break-line top">
         <p class="break-line-text">MENU</p>
       </div>
-      <NuxtImg src="/img/Accurate-menu.webp" alt="menu logo" class="menu-logo" loading="lazy" />
+      <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/Accurate-menu.webp?updatedAt=1738326085492" alt="menu logo" class="menu-logo" loading="lazy" />
 
       <ul class="navigation__list">
         <li class="navigation__item">

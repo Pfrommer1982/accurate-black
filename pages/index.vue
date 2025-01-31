@@ -41,7 +41,7 @@ onMounted(fetchTableData);
     <main>
       <h1 class="sr-only">Accurate Black - Electronic Music Label</h1>
       <Hero :spotlightItems="spotlightItems" />
-      <FeaturedArtists />
+      <FeaturedArtists class="featuredArtist"/>
       <SpotlightShow />
     </main>
   </div>
@@ -64,4 +64,12 @@ onMounted(fetchTableData);
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+.featuredArtist {
+  @include respond(phone) {
+    flex-direction: column;
+    margin-top: 0rem;
+  
+  }}
+  
 </style>

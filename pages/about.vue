@@ -57,7 +57,7 @@
         class="pic"
       >
         <NuxtImg
-          src="/img/Robbi Altidore.webp"
+          src="https://ik.imagekit.io/pweehbu88/icons/Robbi%20Altidore.webp?updatedAt=1738326085511"
           alt="Robin Plompen Accurate Black"
           loading="lazy"
           class="mp"

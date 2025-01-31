@@ -32,49 +32,49 @@
             <a href="https://open.spotify.com/user/31dtsb4cdpslbtgu672zypx7jnxa?si=265ee0fc0f23402a" target="_blank"
               aria-label="Spotify">
               <div class="icon-bg">
-                <NuxtImg src="/img/icons/spotify.svg" class="btn-socials" alt="Spotify" loading="lazy"
+                <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/spotify.svg?updatedAt=1738326108910" class="btn-socials" alt="Spotify" loading="lazy"
                 width="200" height="200"/>
               </div>
             </a>
             <a href="https://soundcloud.com/accuratemusic" target="_blank" aria-label="SoundCloud">
               <div class="icon-bg">
-                <NuxtImg src="/img/icons/soundcloud.svg" class="btn-socials" alt="SoundCloud" loading="lazy"
+                <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/soundcloud.svg?updatedAt=1738326109033" class="btn-socials" alt="SoundCloud" loading="lazy"
                 width="200" height="200"/>
               </div>
             </a>
             <a href="https://www.youtube.com/channel/UCyl1a0TvGcYpysq3i3l9_qQ" target="_blank" aria-label="YouTube">
               <div class="icon-bg">
-                <NuxtImg src="/img/icons/youtube.svg" class="btn-socials" alt="YouTube" loading="lazy"
+                <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/youtube.svg?updatedAt=1738326109085" class="btn-socials" alt="YouTube" loading="lazy"
                 width="200" height="200"/>
               </div>
             </a>
             <a href="https://www.facebook.com/profile.php?id=100063451548903" target="_blank" aria-label="Facebook">
               <div class="icon-bg">
-                <NuxtImg src="/img/icons/facebook.svg" class="btn-socials" alt="Facebook" loading="lazy"
+                <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/facebook.svg?updatedAt=1738326109074" class="btn-socials" alt="Facebook" loading="lazy"
                 width="200" height="200"/>
               </div>
             </a>
             <a href="https://www.instagram.com/accurate_black/" target="_blank" aria-label="Instagram">
               <div class="icon-bg">
-                <NuxtImg src="/img/icons/instagram.svg" class="btn-socials" alt="Instagram" loading="lazy"
+                <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/instagram.svg?updatedAt=1738326109056" class="btn-socials" alt="Instagram" loading="lazy"
                 width="200" height="200"/>
               </div>
             </a>
             <a href="https://www.tiktok.com/@accurateblack" target="_blank" aria-label="TikTok">
               <div class="icon-bg">
-                <NuxtImg src="/img/icons/tiktok.svg" class="btn-socials" alt="TikTok" loading="lazy"
+                <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/tiktok.svg?updatedAt=1738326109056" class="btn-socials" alt="TikTok" loading="lazy"
                 width="200" height="200"/>
               </div>
             </a>
             <a href="https://twitter.com/AccurateBlack" target="_blank" aria-label="X">
               <div class="icon-bg">
-                <NuxtImg src="/img/icons/x.svg" class="btn-socials" alt="X" loading="lazy"
+                <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/x.svg?updatedAt=1738326109023" class="btn-socials" alt="X" loading="lazy"
                 width="200" height="200"/>
               </div>
             </a>
             <a href="https://www.beatport.com/label/accurate-black/71241" target="_blank" aria-label="Beatport">
               <div class="icon-bg">
-                <NuxtImg src="/img/icons/beatport.svg" class="btn-socials" alt="Beatport" loading="lazy"
+                <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/tiktok.svg?updatedAt=1738326109056" class="btn-socials" alt="Beatport" loading="lazy"
                 width="200" height="200"/>
               </div>
             </a>
@@ -84,11 +84,11 @@
           <div class="left-section">
   
             <a href="https://www.linkedin.com/in/christoph-pfrommer/" target="_blank">
-              <NuxtImg src="/img/CPWD-logo.svg" alt="Christoph Pfrommer" class="left1" loading="lazy"
+              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/CPWD-logo.png?updatedAt=1738326085392" alt="Christoph Pfrommer" class="left1" loading="lazy"
               width="200" height="200" />
             </a>
           </div>
-          <NuxtImg src="/img/Accurate-menu.webp" alt="accurate black" class="big-logo" loading="lazy" 
+          <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/Accurate-menu.webp?updatedAt=1738326085492" alt="accurate black" class="big-logo" loading="lazy" 
           width="1412" height="285"/>
           <LogoText class="logo-text" />
           <div class="right-section">

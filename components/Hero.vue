@@ -1,7 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
-import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
-
+import { ref, onMounted, computed, onBeforeUnmount, watch } from 'vue'
 
 const props = defineProps({
   spotlightItems: {
@@ -10,11 +8,36 @@ const props = defineProps({
   }
 });
 
+const loading = ref(true)
 const tableData = ref([])
+const backgroundColors = ref({})
+const currentSpotlightIndex = ref(0)
+const progressWidth = ref(100)
+let animationFrameId = null
 
-const getHighestPropertyValue = (property) => {
-  return tableData.value.length > 0 ? tableData.value[0][property] || (property === 'ACB' ? null : '') : null
-}
+// Snelheidsregeling (pas de delay aan om de snelheid te wijzigen)
+const delay = 80; // 80ms vertraging tussen updates
+
+const getDominantColor = async (imageUrl) => {
+  const thumbnailUrl = `${imageUrl}?tr=w-1,h-1`;
+  try {
+    const response = await fetch(thumbnailUrl);
+    const blob = await response.blob();
+    const img = await createImageBitmap(blob);
+    const canvas = new OffscreenCanvas(1, 1);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, 1, 1);
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+    return `rgb(${r}, ${g}, ${b})`;
+  } catch (error) {
+    console.error('Error getting dominant color:', error);
+    return 'rgb(42, 42, 42)';
+  }
+};
+
+const currentSpotlightItem = computed(() => 
+  spotlightItems.value[currentSpotlightIndex.value]
+)
 
 const sortedTableData = computed(() => {
   return tableData.value.slice().sort((a, b) => {
@@ -30,9 +53,10 @@ const spotlightItems = computed(() => {
   return sortedTableData.value.slice(0, 4)
 })
 
-let currentSpotlightIndex = ref(0)
-let carouselInterval = null
-let progressWidth = ref(100)
+const currentBackgroundColor = computed(() => {
+  const currentItem = spotlightItems.value[currentSpotlightIndex.value];
+  return currentItem ? backgroundColors.value[currentItem.ACB] || 'rgb(42, 42, 42)' : 'rgb(42, 42, 42)';
+});
 
 const nextSpotlight = () => {
   currentSpotlightIndex.value = (currentSpotlightIndex.value + 1) % 4
@@ -43,50 +67,85 @@ const changeSlide = (index) => {
   currentSpotlightIndex.value = index
   progressWidth.value = 100
 }
+
+watch(() => spotlightItems.value, async (items) => {
+  if (items && items.length > 0) {
+    for (const item of items) {
+      if (!backgroundColors.value[item.ACB]) {
+        backgroundColors.value[item.ACB] = await getDominantColor(item.imageUrl);
+      }
+    }
+  }
+}, { immediate: true });
+
+const head = {
+  link: computed(() => [
+    {
+      rel: 'preload',
+      as: 'image',
+      href: spotlightItems.value?.[currentSpotlightIndex.value]?.imageUrl + '?tr=w-800,q-80'
+    }
+  ])
+}
+
+const animateProgress = () => {
+  if (progressWidth.value > 0) {
+    progressWidth.value -= 1; // Verlaag de progressie
+    setTimeout(() => {
+      animationFrameId = requestAnimationFrame(animateProgress); // Voeg een vertraging toe
+    }, delay);
+  } else {
+    nextSpotlight(); // Ga naar de volgende slide
+    progressWidth.value = 100; // Reset de progressie
+    animationFrameId = requestAnimationFrame(animateProgress); // Start de animatie opnieuw
+  }
+};
+
 onMounted(async () => {
   try {
-    const db = getFirestore()
-    const usersCollection = collection(db, 'users')
-    const q = query(usersCollection, orderBy('ACB', 'desc'))
-    const querySnapshot = await getDocs(q)
-
-    const uniqueReleases = new Set()
-    const uniqueTableData = []
-
-    querySnapshot.forEach(doc => {
-      const data = { id: doc.id, ...doc.data() }
-      if (!uniqueReleases.has(data.ACB)) {
-        uniqueReleases.add(data.ACB)
-        uniqueTableData.push(data)
-      }
-    })
-
-    tableData.value = uniqueTableData.slice(0, 4)
+    const { getFirestore, collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
+    const db = getFirestore();
+    const q = query(
+      collection(db, 'users'), 
+      orderBy('ACB', 'desc'),
+      limit(4)
+    );
     
-    if (process.client) {
-      carouselInterval = setInterval(() => {
-        progressWidth.value -= 1
-        if (progressWidth.value <= 0) {
-          nextSpotlight()
-        }
-      }, 80)
+    const querySnapshot = await getDocs(q);
+    tableData.value = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    loading.value = false;
+    
+    if (process.client && tableData.value.length) {
+      animateProgress(); // Start de carousel animatie
     }
   } catch (error) {
-    console.error('Error fetching data:', error)
+    console.error('Error fetching data:', error);
+    loading.value = false;
   }
-})
-
-
-
+});
 
 onBeforeUnmount(() => {
-  clearInterval(carouselInterval)
-})
+  // Zorg ervoor dat de animatie stopt wanneer de component wordt vernietigd
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+  }
+});
 </script>
-
 <template>
+  <section class="section-releases">
+    <div v-if="loading" class="skeleton-loader">
+      <div class="skeleton-image"></div>
+      <div class="skeleton-text">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-description"></div>
+      </div>
+    </div>
 
-    <section class="section-releases">
+    <template v-else>
       <div class="break-line top">
         <p class="break-line-text" v-once>WELCOME</p>
       </div>
@@ -97,12 +156,25 @@ onBeforeUnmount(() => {
         </NuxtLink>
       </div>
 
-      <div v-for="(spotlightItem, index) in spotlightItems" :key="spotlightItem.id" class="hero" v-show="currentSpotlightIndex === index">
-        <div>
-          <img :src="spotlightItem.imageUrl" alt="bg" class="bg-image"  />
+      <div v-for="(spotlightItem, index) in spotlightItems" 
+           :key="spotlightItem.ACB" 
+           class="hero" 
+           v-show="currentSpotlightIndex === index">
+        <div class="bg-container" :style="{
+          background: `linear-gradient(45deg, ${currentBackgroundColor}, rgba(26, 26, 26, 0.9))`
+        }">
+          <div class="bg-overlay"></div>
         </div>
         <div class="spotlight-container">
-          <NuxtImg :src="spotlightItem.imageUrl" alt="Spotlight" class="spotlight-image"  />
+          <NuxtImg 
+            :src="spotlightItem.imageUrl" 
+            :alt="spotlightItem.releaseName" 
+            class="spotlight-image" 
+            sizes="sm:100vw md:50vw lg:400px"
+            format="webp"
+            loading="lazy"
+        
+          />
           <div class="spotlight-text">
             <p class="title">{{ spotlightItem.releaseName }}</p>
             <p class="artist">{{ spotlightItem.artist }}</p>
@@ -117,7 +189,11 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="progress-bars" v-if="spotlightItems.length > 0">
-        <div v-for="(item, index) in Array(4)" :key="index" class="progress-bar" :class="{ active: index === currentSpotlightIndex }" @click="changeSlide(index)">
+        <div v-for="(item, index) in Array(4)" 
+             :key="spotlightItems[index]?.ACB" 
+             class="progress-bar" 
+             :class="{ active: index === currentSpotlightIndex }" 
+             @click="changeSlide(index)">
           <div class="progress" :style="{ width: (index === currentSpotlightIndex ? progressWidth : 0) + '%' }"></div>
           <p class="slide-title">{{ spotlightItems[index].releaseName }}</p>
           <p class="slide-artist">{{ spotlightItems[index].artist }}</p>
@@ -127,13 +203,11 @@ onBeforeUnmount(() => {
       <div class="single-progress-bar" v-if="spotlightItems.length > 0">
         <div class="progress" :style="{ width: progressWidth + '%' }"></div>
       </div>
-    </section>
-
+    </template>
+  </section>
 </template>
 
-
 <style scoped lang="scss">
-
 .section-releases {
   padding: 0 2rem; 
   width: 100%;
@@ -145,6 +219,46 @@ onBeforeUnmount(() => {
   @include respond(phone) {
     padding: 0 1em;
   }
+}
+
+.skeleton-loader {
+  width: 100%;
+  height: 50vh;
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-image {
+  width: 30rem;
+  height: 30rem;
+  background-color: #2a2a2a;
+  margin: 6rem;
+}
+
+.skeleton-text {
+  width: 50%;
+}
+
+.skeleton-title {
+  height: 4rem;
+  background-color: #2a2a2a;
+  margin-bottom: 2rem;
+}
+
+.skeleton-description {
+  height: 1.2rem;
+  background-color: #2a2a2a;
+  width: 75%;
 }
 
 .header {
@@ -180,16 +294,18 @@ onBeforeUnmount(() => {
   width: 50%;
 }
 
-.bg-image {
+.bg-container {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 50vh;
+  height: 80vh;
   z-index: -1;
-
   filter: opacity(.55) blur(30px);
-  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: background-image;
 
   @include respond(tab-land) {
     height: 58%;
@@ -199,17 +315,15 @@ onBeforeUnmount(() => {
   }
   @include respond(phone) {
     height: 100%;
-
   }
 }
-
-
 
 .hero {
   display: flex;
   justify-items: center;
   align-items: center;
   width: 100%;
+
 }
 
 .spotlight-container {
@@ -226,6 +340,7 @@ onBeforeUnmount(() => {
   @include respond(phone) {
     flex-direction: column;
     margin-top: 0rem;
+  
   }
 }
 
@@ -240,7 +355,7 @@ onBeforeUnmount(() => {
   border-radius: 3px;
   z-index: 2;
   box-shadow: 0 25px 25px rgba(0, 0, 0, 0.4);
-
+  will-change: transform;
 
   @include respond(tab-land) {
     width: 20rem;
@@ -255,11 +370,11 @@ onBeforeUnmount(() => {
 
 @keyframes slideInLetter {
   0% {
-    transform: translateX(-20rem);
+    transform: translate3d(-20rem, 0, 0);
     opacity: 0;
   }
   100% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
 }
@@ -269,6 +384,8 @@ onBeforeUnmount(() => {
   flex-direction: column;
   text-align: left;
   animation: slideInLetter 1s ease forwards;
+  will-change: transform;
+  
   @include respond(tab-port) {
     height: 18rem;
   }
@@ -282,14 +399,10 @@ onBeforeUnmount(() => {
   margin-bottom: 2rem;
   font-size: 4rem;
 
-
   @include respond(tab-land) {
     font-size: 2rem;
     margin-bottom: 1rem;
   }
-  @include respond(phone) {   
- 
-}
 }
 
 .artist {
@@ -303,7 +416,6 @@ onBeforeUnmount(() => {
   }
   @include respond(phone) {
     margin-bottom: 0;
-
   }
 }
 
@@ -364,7 +476,7 @@ onBeforeUnmount(() => {
   transition: width 0.04s;
   top: 0;
   right: 0;
-
+  will-change: width;
 }
 
 .active .progress {
@@ -377,8 +489,6 @@ onBeforeUnmount(() => {
   font-weight: 100;
   width: 20rem;
   color: var(--primary-grey-light1);
-  
-
 }
 
 .slide-artist {
@@ -413,7 +523,4 @@ onBeforeUnmount(() => {
     background-color: white;
   }
 }
-
-
-
 </style>
