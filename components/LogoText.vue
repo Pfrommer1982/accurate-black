@@ -10,7 +10,7 @@
       <span class="T" id="T">T</span>
       <span class="E" id="E">E</span>
       <span class="black" id="black">
-        <img src="/img/black.webp" alt="black" loading="lazy" />
+        <img src="https://ik.imagekit.io/pweehbu88/icons/black.webp?updatedAt=1738326085405" alt="black" loading="lazy" />
       </span>
     </div>
   </div>

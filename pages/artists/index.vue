@@ -33,7 +33,6 @@ export default {
 
     onMounted(fetchArtists);
 
-
     const handleImageError = (artist) => {
       artist.artistImageUrl = "https://www.accurateblack.nl/public/img/artistprofiledummy.png";
     };
@@ -48,32 +47,38 @@ export default {
 
 
 <template>
-  <Suspense>
-  <section class="section-artist">
-    <div class="break-line top">
-      <p class="break-line-text" v-once>ACCURATE BLACK ARTISTS</p>
-    </div>
 
-    <div class="grid-container">
-      <div v-for="(artist, index) in artists" :key="index" class="artist-profile-card">
-        <NuxtLink :to="`/artists/${artist.artist}`">
-          <img v-lazy="artist.artistImageUrl || '/public/img/artistprofiledummy.png'" alt="Artist Image" class="artist-image" @error="handleImageError(artist)" 
-          width="200" height="200" loading="lazy"/>
-          <div class="text-box">
-            <div class="artist-name">{{ artist.artist }}</div>
-          </div>
-        </NuxtLink>
+    <section class="section-artist">
+      <div class="break-line top">
+        <p class="break-line-text" v-once>ACCURATE BLACK ARTISTS</p>
       </div>
-    </div>
-  </section>
-</Suspense>
+
+      <div class="grid-container">
+        <div v-for="(artist, index) in artists" :key="index" class="artist-profile-card">
+          <NuxtLink :to="`/artists/${artist.artist}`">
+            <NuxtImg 
+  :src="artist.artistImageUrl" 
+  alt="Artist Image" 
+  class="artist-image" 
+  @error="handleImageError" 
+  loading="lazy"
+  width="450" 
+  height="450"/>
+
+    
+            <div class="text-box">
+              <div class="artist-name">{{ artist.artist }}</div>
+            </div>
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
 </template>
 
 
 
 <style lang="scss" scoped>
-
-
 .section-artist {
   padding: 0 2rem;
 
@@ -85,18 +90,13 @@ export default {
 .grid-container {
   grid-column-gap: 2rem;
   grid-row-gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, .5fr));
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
   display: grid;
-  flex-direction: column;
   margin-bottom: 2rem;
   margin-top: 6rem;
   width: 100%;
   justify-content: center;
   text-transform: uppercase;
-
-  @include respond(tab-land) {
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-  }
 
   @include respond(tab-port) {
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
@@ -104,11 +104,10 @@ export default {
 
   @include respond(phone) {
     grid-template-columns: repeat(2, 1fr);
-    grid-column-gap: .6rem;
-    grid-row-gap: .5rem;
-    transform: scale(.9);
-    margin-top: -6rem;
-    margin-bottom: -6rem;
+    grid-column-gap: 0.6rem;
+    grid-row-gap: 0.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
   }
 }
 
@@ -131,6 +130,8 @@ export default {
   filter: grayscale(1) contrast(.75);
   width: 100%;
   height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
 }
 
 .text-box {
@@ -148,7 +149,6 @@ export default {
 
   @include respond(phone) {
     font-size: 1.4rem;
-
   }
 }
 </style>

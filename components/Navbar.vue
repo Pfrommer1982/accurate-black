@@ -96,7 +96,7 @@ export default {
 
             <a href="https://www.linkedin.com/in/christoph-pfrommer/" target="_blank" >
               <p class="website">WEBSITE BY</p>
-              <NuxtImg src="/img/CPWD-logo.svg" alt="Christoph Pfrommer" class="cp-logo" loading="lazy" />
+              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/CPWD-logo.png?updatedAt=1738326085392" alt="Christoph Pfrommer" class="cp-logo" loading="lazy" />
             </a>
           </div>
         </li>

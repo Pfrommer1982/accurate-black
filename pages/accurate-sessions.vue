@@ -72,7 +72,7 @@ export default {
     </div>
     <ul>
       <li v-for="radioshow in radioshowList" :key="radioshow.id">
-        <div class="sc-embed" v-html="radioshow.sessionLink"></div>
+        <div class="sc-embed" v-html="radioshow.sessionLink" title="soundcloud-link"></div>
         <div v-once class="break-line top">
           <p class="break-line-text"></p>
         </div>

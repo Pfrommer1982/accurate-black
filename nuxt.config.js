@@ -9,6 +9,8 @@ export default defineNuxtConfig({
     '@nuxtjs/robots',
     '@nuxtjs/sitemap',
     '@nuxtjs/seo',
+    '@nuxt/scripts'
+
   ],
 
   // Image Module Config
@@ -68,7 +70,7 @@ export default defineNuxtConfig({
   site: {
     url: 'https://www.accurateblack.nl',
     name: 'Accurate Black',
-    description: 'Discover cutting-edge techno & electronic music at Accurate Black label.',
+    description: 'Deep. Dark. Authentic. Profound. We delve into the depths of electronic music. This is where the beats are felt, not just heard. We are Accurate Black.',
     defaultLocale: 'en',
   },
 
@@ -280,6 +282,8 @@ export default defineNuxtConfig({
     canonical: 'https://www.accurateblack.nl',
     robots: 'index, follow',
   },
+
+  compatibilityDate: '2025-01-31'
 });
 
 // Helper function for dynamic routes
