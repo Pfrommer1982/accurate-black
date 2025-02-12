@@ -37,15 +37,16 @@ export default defineNuxtConfig({
       preprocessorOptions: {
         scss: {
           additionalData: `
-            @import "@/assets/style/scss/abstracts/_mixins.scss";
-            @import "@/assets/style/scss/abstracts/_variables.scss";
-            @import "@/assets/style/scss/base/_animations.scss";
-            @import "@/assets/style/scss/base/_base.scss";
-            @import "@/assets/style/scss/base/_typography.scss";
-            @import "@/assets/style/scss/base/_utilities.scss";
-            @import "@/assets/style/scss/components/_breakline.scss";
-            @import "@/assets/style/scss/components/_button-big.scss";
-            @import "@/assets/style/scss/components/_button-small.scss";
+          @use 'assets/style/scss/abstracts/_mixins' as *;
+
+            @use "@/assets/style/scss/abstracts/_variables.scss";
+            @use "@/assets/style/scss/base/_animations.scss";
+            @use "@/assets/style/scss/base/_base.scss";
+            @use "@/assets/style/scss/base/_typography.scss";
+            @use "@/assets/style/scss/base/_utilities.scss";
+            @use "@/assets/style/scss/components/_breakline.scss";
+            @use "@/assets/style/scss/components/_button-big.scss";
+            @use "@/assets/style/scss/components/_button-small.scss";
           `,
         },
       },

@@ -1,10 +1,11 @@
+
+
+
 .facebook {
     color: var(--primary-grey-dark);
     transform: scale(2.4);
     &:hover {
-      @include respond(phone){
-        transform: scale(2.5)
-      }
+     
       transform: scale(2.3);
       color: #425F9C;
     }

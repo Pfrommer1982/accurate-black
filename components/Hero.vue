@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
   padding: 0 2rem; 
   width: 100%;
   height: 100%;
-  min-height: 75vh;
+  min-height: 55vh;
   box-sizing: border-box;
   margin-bottom: 4rem;
 
@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
 
 .skeleton-loader {
   width: 100%;
-  height: 50vh;
+  height: 55vh;
   background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
