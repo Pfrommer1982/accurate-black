@@ -5,6 +5,11 @@ import { getFirestore, collection, getDocs, query, orderBy, limit } from 'fireba
 const latestRadioshow = ref(null);
 const latestAccurateSession = ref(null);
 
+// Helper functie voor het toevoegen van title attribuut
+const addTitleToIframe = (embedHtml, title) => {
+  return embedHtml.replace('<iframe', `<iframe title="${title}"`);
+};
+
 const fetchLatestContent = async () => {
   try {
     const db = getFirestore();
@@ -44,7 +49,10 @@ onMounted(fetchLatestContent);
     </div>
 
     <div v-if="latestRadioshow">
-      <div class="sc-embed" v-html="latestRadioshow.embeddedLink"></div>
+      <div class="sc-embed" v-html="addTitleToIframe(
+        latestRadioshow.embeddedLink, 
+        'Latest Techtonic Radio Show by Robbi Altidore'
+      )"></div>
       <div v-once class="break-line top">
         <p class="break-line-text"></p>
       </div>
@@ -53,7 +61,7 @@ onMounted(fetchLatestContent);
       <p>No radioshow available.</p>
     </div>
 
-    <h4>ACCURATE BLACK PRESENTS:</h4>
+    <div>ACCURATE BLACK PRESENTS:</div>
     <div class="header">
       <h1 class="h1">ACCURATE SESSIONS</h1>
       <NuxtLink to="/accurate-sessions" class="btn-more-link check-out">
@@ -62,7 +70,10 @@ onMounted(fetchLatestContent);
     </div>
 
     <div v-if="latestAccurateSession">
-      <div class="sc-embed" v-html="latestAccurateSession.sessionLink"></div>
+      <div class="sc-embed" v-html="addTitleToIframe(
+        latestAccurateSession.sessionLink,
+        'Latest Accurate Session SoundCloud Player'
+      )"></div>
       <div v-once class="break-line top">
         <p class="break-line-text"></p>
       </div>
@@ -72,7 +83,6 @@ onMounted(fetchLatestContent);
     </div>
   </section>
 </template>
-
 <style lang="scss" scoped>
 
 

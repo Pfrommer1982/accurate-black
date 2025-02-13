@@ -172,7 +172,7 @@ onBeforeUnmount(() => {
             class="spotlight-image" 
             sizes="sm:100vw md:50vw lg:400px"
             format="webp"
-            loading="lazy"
+            loading="eager"
         
           />
           <div class="spotlight-text">
