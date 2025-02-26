@@ -4,7 +4,8 @@ import { ref, onMounted, computed, onBeforeUnmount, watch } from 'vue'
 const props = defineProps({
   spotlightItems: {
     type: Array,
-    required: true
+    required: true,
+    default: () => []
   }
 });
 
@@ -14,11 +15,14 @@ const backgroundColors = ref({})
 const currentSpotlightIndex = ref(0)
 const progressWidth = ref(100)
 let animationFrameId = null
+let animationTimer = null
 
 // Snelheidsregeling (pas de delay aan om de snelheid te wijzigen)
 const delay = 80; // 80ms vertraging tussen updates
 
 const getDominantColor = async (imageUrl) => {
+  if (!imageUrl) return 'rgb(42, 42, 42)';
+  
   const thumbnailUrl = `${imageUrl}?tr=w-1,h-1`;
   try {
     const response = await fetch(thumbnailUrl);
@@ -35,23 +39,19 @@ const getDominantColor = async (imageUrl) => {
   }
 };
 
-const currentSpotlightItem = computed(() => 
-  spotlightItems.value[currentSpotlightIndex.value]
-)
-
 const sortedTableData = computed(() => {
   return tableData.value.slice().sort((a, b) => {
     if (a.ACB === b.ACB) {
-      return a.releaseName.localeCompare(b.releaseName)
+      return a.releaseName?.localeCompare(b.releaseName || '') || 0;
     } else {
-      return b.ACB - a.ACB
+      return (b.ACB || 0) - (a.ACB || 0);
     }
-  })
-})
+  });
+});
 
 const spotlightItems = computed(() => {
-  return sortedTableData.value.slice(0, 4)
-})
+  return sortedTableData.value.slice(0, 4);
+});
 
 const currentBackgroundColor = computed(() => {
   const currentItem = spotlightItems.value[currentSpotlightIndex.value];
@@ -59,45 +59,58 @@ const currentBackgroundColor = computed(() => {
 });
 
 const nextSpotlight = () => {
-  currentSpotlightIndex.value = (currentSpotlightIndex.value + 1) % 4
-  progressWidth.value = 100
-}
+  currentSpotlightIndex.value = (currentSpotlightIndex.value + 1) % Math.min(4, spotlightItems.value.length || 1);
+  progressWidth.value = 100;
+};
 
 const changeSlide = (index) => {
-  currentSpotlightIndex.value = index
-  progressWidth.value = 100
-}
+  if (index >= 0 && index < spotlightItems.value.length) {
+    currentSpotlightIndex.value = index;
+    progressWidth.value = 100;
+    
+    // Stop en herstart de animatie
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+    if (animationTimer) {
+      clearTimeout(animationTimer);
+    }
+    animationFrameId = requestAnimationFrame(animateProgress);
+  }
+};
 
 watch(() => spotlightItems.value, async (items) => {
   if (items && items.length > 0) {
     for (const item of items) {
-      if (!backgroundColors.value[item.ACB]) {
+      if (item && item.ACB && item.imageUrl && !backgroundColors.value[item.ACB]) {
         backgroundColors.value[item.ACB] = await getDominantColor(item.imageUrl);
       }
     }
   }
 }, { immediate: true });
 
-const head = {
-  link: computed(() => [
+useHead(() => ({
+  link: [
     {
       rel: 'preload',
       as: 'image',
-      href: spotlightItems.value?.[currentSpotlightIndex.value]?.imageUrl + '?tr=w-800,q-80'
+      href: spotlightItems.value?.[currentSpotlightIndex.value]?.imageUrl 
+        ? `${spotlightItems.value[currentSpotlightIndex.value].imageUrl}?tr=w-800,q-80` 
+        : ''
     }
-  ])
-}
+  ]
+}));
 
 const animateProgress = () => {
   if (progressWidth.value > 0) {
     progressWidth.value -= 1; // Verlaag de progressie
-    setTimeout(() => {
-      animationFrameId = requestAnimationFrame(animateProgress); // Voeg een vertraging toe
+    animationTimer = setTimeout(() => {
+      animationFrameId = requestAnimationFrame(animateProgress);
     }, delay);
   } else {
     nextSpotlight(); // Ga naar de volgende slide
     progressWidth.value = 100; // Reset de progressie
-    animationFrameId = requestAnimationFrame(animateProgress); // Start de animatie opnieuw
+    animationFrameId = requestAnimationFrame(animateProgress);
   }
 };
 
@@ -119,8 +132,11 @@ onMounted(async () => {
     
     loading.value = false;
     
-    if (process.client && tableData.value.length) {
-      animateProgress(); // Start de carousel animatie
+    if (typeof window !== 'undefined' && tableData.value.length) {
+      // Vertraag de start van de animatie om ervoor te zorgen dat de component volledig is geladen
+      setTimeout(() => {
+        animationFrameId = requestAnimationFrame(animateProgress);
+      }, 500);
     }
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -129,29 +145,35 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  // Zorg ervoor dat de animatie stopt wanneer de component wordt vernietigd
+  // Zorg ervoor dat alle animatie-resources worden opgeruimd
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+  if (animationTimer) {
+    clearTimeout(animationTimer);
+    animationTimer = null;
   }
 });
 </script>
+
 <template>
-  <section class="section-releases">
-    <div v-if="loading" class="skeleton-loader">
-      <div class="skeleton-image"></div>
-      <div class="skeleton-text">
+  <section class="section-releases" aria-label="Nieuwste releases">
+    <div v-if="loading" class="skeleton-loader" aria-label="Bezig met laden van nieuwste releases">
+      <div class="skeleton-image" aria-hidden="true"></div>
+      <div class="skeleton-text" aria-hidden="true">
         <div class="skeleton-title"></div>
         <div class="skeleton-description"></div>
       </div>
     </div>
 
-    <template v-else>
+    <template v-else-if="spotlightItems.length > 0">
       <div class="break-line top">
-        <p class="break-line-text" v-once>WELCOME</p>
+        <p class="break-line-text">WELCOME</p>
       </div>
       <div class="header">
         <h1 class="h1">LATEST RELEASES</h1>
-        <NuxtLink to="/releases" class="btn-more-link top-btn">
+        <NuxtLink to="/releases" class="btn-more-link top-btn" aria-label="Bekijk alle releases">
           <p class="btn-more-p">VIEW ALL RELEASES</p>
         </NuxtLink>
       </div>
@@ -159,28 +181,29 @@ onBeforeUnmount(() => {
       <div v-for="(spotlightItem, index) in spotlightItems" 
            :key="spotlightItem.ACB" 
            class="hero" 
-           v-show="currentSpotlightIndex === index">
+           v-show="currentSpotlightIndex === index"
+           :aria-hidden="currentSpotlightIndex !== index">
         <div class="bg-container" :style="{
           background: `linear-gradient(45deg, ${currentBackgroundColor}, rgba(26, 26, 26, 0.9))`
-        }">
-          <div class="bg-overlay"></div>
-        </div>
+        }" aria-hidden="true"></div>
         <div class="spotlight-container">
           <NuxtImg 
             :src="spotlightItem.imageUrl" 
-            :alt="spotlightItem.releaseName" 
+            :alt="`Album cover voor ${spotlightItem.releaseName} door ${spotlightItem.artist}`"
             class="spotlight-image" 
-            sizes="sm:100vw md:50vw lg:400px"
+            width="480"
+            height="480"
+            sizes="(max-width: 768px) 288px, (max-width: 1024px) 320px, 480px"
             format="webp"
             loading="eager"
-        
+            fetchpriority="high"
           />
           <div class="spotlight-text">
             <p class="title">{{ spotlightItem.releaseName }}</p>
             <p class="artist">{{ spotlightItem.artist }}</p>
             <p class="desc">{{ spotlightItem.description }}</p>
             <div class="btn-more container">
-              <NuxtLink :to="`/releases/${spotlightItem.ACB}`" class="btn-more-link check-out">
+              <NuxtLink :to="`/releases/${spotlightItem.ACB}`" class="btn-more-link check-out" :aria-label="`Bekijk en luister naar ${spotlightItem.releaseName} door ${spotlightItem.artist}`">
                 <p class="btn-more-p">CHECK OUT & LISTEN</p>
               </NuxtLink>
             </div>
@@ -188,22 +211,29 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div class="progress-bars" v-if="spotlightItems.length > 0">
-        <div v-for="(item, index) in Array(4)" 
-             :key="spotlightItems[index]?.ACB" 
+      <div class="progress-bars" role="tablist" aria-label="Release navigatie">
+        <div v-for="(item, index) in spotlightItems.slice(0, 4)" 
+             :key="item?.ACB || index" 
              class="progress-bar" 
              :class="{ active: index === currentSpotlightIndex }" 
-             @click="changeSlide(index)">
+             @click="changeSlide(index)"
+             role="tab"
+             :aria-selected="index === currentSpotlightIndex"
+             :aria-label="`Toon ${item?.releaseName || 'release'} door ${item?.artist || 'artiest'}`">
           <div class="progress" :style="{ width: (index === currentSpotlightIndex ? progressWidth : 0) + '%' }"></div>
-          <p class="slide-title">{{ spotlightItems[index].releaseName }}</p>
-          <p class="slide-artist">{{ spotlightItems[index].artist }}</p>
+          <p class="slide-title">{{ item?.releaseName }}</p>
+          <p class="slide-artist">{{ item?.artist }}</p>
         </div>
       </div>
 
-      <div class="single-progress-bar" v-if="spotlightItems.length > 0">
+      <div class="single-progress-bar" aria-hidden="true" v-if="spotlightItems.length > 0">
         <div class="progress" :style="{ width: progressWidth + '%' }"></div>
       </div>
     </template>
+
+    <div v-else class="no-releases" aria-label="Geen releases gevonden">
+      <p>Er zijn momenteel geen releases beschikbaar.</p>
+    </div>
   </section>
 </template>
 
@@ -221,12 +251,25 @@ onBeforeUnmount(() => {
   }
 }
 
+.no-releases {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 55vh;
+  font-size: 1.2rem;
+  color: var(--primary-grey-light1);
+}
+
 .skeleton-loader {
   width: 100%;
   height: 55vh;
   background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes loading {
@@ -268,7 +311,7 @@ onBeforeUnmount(() => {
   width: 100%;
   margin-bottom: -4rem; 
   position: relative;
-  z-index: 100;
+  z-index: 2;
   @include respond(phone){
     margin-bottom: .5rem;
   }
@@ -300,7 +343,7 @@ onBeforeUnmount(() => {
   left: 0;
   width: 100%;
   height: 80vh;
-  z-index: -1;
+  z-index: 0;
   filter: opacity(.55) blur(30px);
   background-size: cover;
   background-position: center;
@@ -323,7 +366,7 @@ onBeforeUnmount(() => {
   justify-items: center;
   align-items: center;
   width: 100%;
-
+  position: relative;
 }
 
 .spotlight-container {
@@ -332,6 +375,8 @@ onBeforeUnmount(() => {
   width: 100%;
   margin-bottom: 2rem;
   min-height: 40vh;
+  position: relative;
+  z-index: 1;
 
   @include respond(tab-port) {
     flex-direction: column;
@@ -340,7 +385,6 @@ onBeforeUnmount(() => {
   @include respond(phone) {
     flex-direction: column;
     margin-top: 0rem;
-  
   }
 }
 
@@ -348,14 +392,14 @@ onBeforeUnmount(() => {
   width: 30rem;
   height: 30rem;
   max-width: 750px;
-  aspect-ratio: 4/3;
+  aspect-ratio: 1/1;
   display: flex;
   justify-content: center;
   margin: 6rem;
   border-radius: 3px;
   z-index: 2;
   box-shadow: 0 25px 25px rgba(0, 0, 0, 0.4);
-  will-change: transform;
+  object-fit: cover;
 
   @include respond(tab-land) {
     width: 20rem;
@@ -384,7 +428,6 @@ onBeforeUnmount(() => {
   flex-direction: column;
   text-align: left;
   animation: slideInLetter 1s ease forwards;
-  will-change: transform;
   
   @include respond(tab-port) {
     height: 18rem;
@@ -458,6 +501,8 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   margin-top: -2rem;
   cursor: pointer;
+  position: relative;
+  z-index: 3;
 
   @include respond(phone) {
     display: none;
@@ -473,14 +518,10 @@ onBeforeUnmount(() => {
 
 .progress {
   height: 100%;
-  transition: width 0.04s;
+  background-color: white;
+  transition: width 0.04s linear;
   top: 0;
   right: 0;
-  will-change: width;
-}
-
-.active .progress {
-  background-color: white;
 }
 
 .slide-title,
@@ -489,6 +530,9 @@ onBeforeUnmount(() => {
   font-weight: 100;
   width: 20rem;
   color: var(--primary-grey-light1);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .slide-artist {
@@ -512,6 +556,7 @@ onBeforeUnmount(() => {
   background-color: var(--primary-grey-light2);
   position: relative;
   margin-top: 4rem;
+  z-index: 3;
 
   @include respond(phone) {
     display: block;
@@ -519,8 +564,8 @@ onBeforeUnmount(() => {
 
   .progress {
     height: 100%;
-    transition: width 0.04s;
     background-color: white;
+    transition: width 0.04s linear;
   }
 }
 </style>
