@@ -10,7 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@dargmuesli/nuxt-cookie-control": "^8.5.4",
+    "@dargmuesli/nuxt-cookie-control": "^8.6.1",
     "@emailjs/browser": "^4.4.1",
     "@nuxt/image": "^1.10.0",
     "@nuxt/scripts": "0.9.5",
@@ -21,12 +21,12 @@
     "dropzone": "6.0.0-beta.2",
     "firebase": "^10.14.1",
     "firebase-admin": "^12.7.0",
-    "nuxt": "^3.16.1",
+    "nuxt": "^3.16.2",
     "nuxt-icon": "^0.6.10",
     "nuxt-precompress": "^0.5.9",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "sass": "^1.86.0"
+    "sass": "^1.86.3"
   }
 }
