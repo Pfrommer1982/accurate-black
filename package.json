@@ -16,7 +16,6 @@
     "@nuxt/scripts": "0.9.5",
     "@nuxt/ui": "^2.21.1",
     "@nuxtjs/robots": "^5.2.8",
-    "@nuxtjs/seo": "2.0.0-rc.23",
     "@vueuse/motion": "^2.2.6",
     "dropzone": "6.0.0-beta.2",
     "firebase": "^10.14.1",
@@ -24,9 +23,19 @@
     "nuxt": "^3.16.2",
     "nuxt-icon": "^0.6.10",
     "nuxt-precompress": "^0.5.9",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "sass": "^1.86.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "undici": ">=6.23.0",
+      "tar": ">=7.5.10",
+      "serialize-javascript": ">=7.0.3",
+      "valibot": ">=1.2.0",
+      "@tootallnate/once": ">=3.0.1"
+    }
   }
 }
