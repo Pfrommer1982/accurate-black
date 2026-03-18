@@ -2,9 +2,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
 
-definePageMeta({
-  title: 'Home'
-})
 
 useHead({
   title: 'Home'

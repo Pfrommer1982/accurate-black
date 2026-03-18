@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-const radioshowList = ref([])
+type RadioshowItem = { title: string; link: string; pubDate: string; embedLink: string; embedHtml: string }
+type SoundcloudResponse =
+  | { count: number; source: string; items: RadioshowItem[] }
+  | { error: string; details: string; timestamp: string; triedUrls: string[] }
+
+const radioshowList = ref<RadioshowItem[]>([])
 const loading = ref(true)
 const error = ref('')
 
@@ -12,16 +17,16 @@ useHead({
 const fetchRadioshows = async () => {
   try {
     loading.value = true
-    const data = await $fetch('/api/soundcloud')
+    const data = await $fetch<SoundcloudResponse>('/api/soundcloud')
     
-    if (data.error) {
-      error.value = data
+    if ('error' in data) {
+      error.value = data.error
     } else {
       radioshowList.value = data.items || []
     }
   } catch (err) {
     console.error('Error fetching radioshows:', err)
-    error.value = 'Kon radioshows niet laden: ' + err.message
+    error.value = 'Kon radioshows niet laden: ' + (err instanceof Error ? err.message : String(err))
   } finally {
     loading.value = false
   }
@@ -56,10 +61,6 @@ onMounted(() => {
     <!-- Error state -->
     <div v-else-if="error" class="error">
       <p>{{ error }}</p>
-      <details v-if="typeof error === 'object'">
-        <summary>Meer details</summary>
-        <pre>{{ JSON.stringify(error, null, 2) }}</pre>
-      </details>
     </div>
     
     <!-- Radioshows lijst -->

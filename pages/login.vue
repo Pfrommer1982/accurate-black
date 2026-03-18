@@ -23,6 +23,7 @@ import useLogin from '../composables/useLogin';
 
 export default {
   setup() {
+    useHead({ title: 'Login' })
     const email = ref('');
     const password = ref('');
     const { login, error } = useLogin();

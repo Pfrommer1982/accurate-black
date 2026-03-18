@@ -1,5 +1,5 @@
-<script>
-
+<script setup lang="ts">
+useHead({ title: 'Privacy Policy' })
 </script>
 <template>
   <section class="section-privacy">
@@ -86,9 +86,7 @@
   </section>
 </template>
 
-<script>
 
-  </script>
 
 <style scoped lang="scss">
 

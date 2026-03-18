@@ -83,6 +83,9 @@
 import emailjs from '@emailjs/browser';
 
 export default {
+  setup() {
+    useHead({ title: 'Demo Submission' })
+  },
   data() {
     return {
       formData: {

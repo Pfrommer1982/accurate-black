@@ -4,6 +4,7 @@ import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 export default {
   setup() {
+    useHead({ title: 'Artists' })
     const artists = ref([]);
 
     const fetchArtists = async () => {

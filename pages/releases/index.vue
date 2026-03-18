@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
 
-
+useHead({ title: 'Releases' })
 // Rest van de setup code blijft hetzelfde
 const showData = ref(false)
 const spotlightItem = ref({})

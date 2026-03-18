@@ -147,6 +147,8 @@ export default defineNuxtConfig({
           onload: "this.onload=null;this.rel='stylesheet'",
         },
         { rel: 'canonical', href: 'https://www.accurateblack.nl' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       ],
       meta: [
         {
