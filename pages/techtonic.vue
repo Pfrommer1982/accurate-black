@@ -1,65 +1,31 @@
-<script>
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, orderBy, deleteDoc, limit, doc } from 'firebase/firestore';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
 
-const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-};
+const radioshowList = ref([])
+const loading = ref(true)
+const error = ref('')
 
-const firebaseApp = initializeApp(firebaseConfig);
-
-export default {
-  async created() {
-    await this.fetchRadioshows();
-    useHead({
-      title: 'TECHTONIC BY ROBBI ALTIDORE'
-    });
-  },
-  methods: {
-    async fetchRadioshows() {
-      try {
-        const db = getFirestore(firebaseApp);
-        const radioshowCollection = collection(db, 'radioshow');
-        const q = query(radioshowCollection, orderBy('uploadDate', 'desc'), limit(5));
-        const querySnapshot = await getDocs(q);
-
-        let radioshowList = [];
-        querySnapshot.forEach((doc) => {
-          radioshowList.push({ ...doc.data(), id: doc.id });
-        });
-
-        this.radioshowList = radioshowList;
-
-         const allDocsSnapshot = await getDocs(query(radioshowCollection, orderBy('uploadDate', 'desc')));
-        const allDocs = [];
-        allDocsSnapshot.forEach((doc) => {
-          allDocs.push({ ...doc.data(), id: doc.id });
-        });
-
- 
-        if (allDocs.length > 15) {
-          const docsToDelete = allDocs.slice(15);
-          for (const docToDelete of docsToDelete) {
-            await deleteDoc(doc(radioshowCollection, docToDelete.id));
-          }
-        }
-
-      } catch (error) {
-        console.error('Error fetching radioshow list: ', error);
-      }
-    },
-  },
-  data() {
-    return {
-      radioshowList: []
-    };
+const fetchRadioshows = async () => {
+  try {
+    loading.value = true
+    const data = await $fetch('/api/soundcloud')
+    
+    if (data.error) {
+      error.value = data
+    } else {
+      radioshowList.value = data.items || []
+    }
+  } catch (err) {
+    console.error('Error fetching radioshows:', err)
+    error.value = 'Kon radioshows niet laden: ' + err.message
+  } finally {
+    loading.value = false
   }
-};
+}
+
+onMounted(() => {
+  fetchRadioshows()
+})
 </script>
 
 <template>
@@ -67,67 +33,63 @@ export default {
     <div v-once class="break-line top">
       <p class="break-line-text">TECHTONIC BY ROBBI ALTIDORE</p>
     </div>
-    <h4>ACCURATE BLACK PRESENTS : </h4>
+    <h4>ACCURATE BLACK PRESENTS :</h4>
     <div class="header">
-        <h1 class="h1 inprogress">ROBBI ALTIDORE - TECHTONIC <a class="" href="https://inprogressradio.com/index.php/members/robbi-altidore/" target="_blank">@INPROGRESSRADIO.COM</a></h1>
+      <h1 class="h1 inprogress">
+        ROBBI ALTIDORE - TECHTONIC
+        <a
+          href="https://inprogressradio.com/index.php/members/robbi-altidore/"
+          target="_blank"
+        >@INPROGRESSRADIO.COM</a>
+      </h1>
     </div>
-    <ul>
-      <li v-for="radioshow in radioshowList" :key="radioshow.id">
-        <div class="sc-embed" v-html="radioshow.embeddedLink" title="soundcloud-link"></div>
+    
+    <!-- Loading state -->
+    <div v-if="loading" class="loading">
+      <p>Radioshows laden...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div v-else-if="error" class="error">
+      <p>{{ error }}</p>
+      <details v-if="typeof error === 'object'">
+        <summary>Meer details</summary>
+        <pre>{{ JSON.stringify(error, null, 2) }}</pre>
+      </details>
+    </div>
+    
+    <!-- Radioshows lijst -->
+    <ul v-else-if="radioshowList.length > 0">
+      <li v-for="(radioshow, index) in radioshowList" :key="index">
+        <div class="radioshow-info">
+          <h3>{{ radioshow.title }}</h3>
+          <p class="date">{{ new Date(radioshow.pubDate).toLocaleDateString('nl-NL') }}</p>
+        </div>
+        
+        <div class="sc-embed" v-html="radioshow.embedHtml" title="soundcloud-embed"></div>
+        
         <div v-once class="break-line top">
           <p class="break-line-text"></p>
         </div>
       </li>
     </ul>
+    
+    <!-- Geen radioshows -->
+    <div v-else class="no-shows">
+      <p>Geen radioshows gevonden</p>
+    </div>
   </section>
 </template>
 
 <style lang="scss" scoped>
-
-
 .section-radioshow {
   padding: 0 2rem;
   overflow: hidden;
   @include respond(phone) {
     padding: 0 1rem;
-    overflow: hidden;
-  }
-}
-.headers{
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  margin-top: 2rem;
-  color: var(--primary-grey-light1)
-}
-.sc-embed {
-  margin-top: 3rem;
-}
-.date {
-  color: white;
-}
-
-a {
-  text-decoration: none;
-  color: var(--primary-grey-light2);
-
-  &:hover {
-    color: var(--primary-grey-light1);
-
   }
 }
 
-h4{
-    margin-top: 2rem;
-    font-size: 2rem;
-    @include respond(phone){
-      font-size: 1.6rem;
-    }
-}
- 
 .headers {
   display: flex;
   width: 100%;
@@ -136,5 +98,51 @@ h4{
   align-items: center;
   margin-top: 2rem;
   color: var(--primary-grey-light1);
+}
+
+.sc-embed {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.radioshow-info {
+  margin-top: 3rem;
+  
+  h3 {
+    color: var(--primary-grey-light1);
+    margin-bottom: 0.5rem;
+  }
+}
+
+.date {
+  color: var(--primary-grey-light2);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.loading, .error, .no-shows {
+  text-align: center;
+  padding: 2rem;
+  color: var(--primary-grey-light2);
+}
+
+.error {
+  color: #ff5500;
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary-grey-light2);
+  &:hover {
+    color: var(--primary-grey-light1);
+  }
+}
+
+h4 {
+  margin-top: 2rem;
+  font-size: 2rem;
+  @include respond(phone) {
+    font-size: 1.6rem;
+  }
 }
 </style>

@@ -7,8 +7,8 @@ export default defineNuxtConfig({
     'nuxt-icon',
     '@dargmuesli/nuxt-cookie-control',
     '@nuxtjs/robots',
-    '@nuxtjs/sitemap',
-    '@nuxtjs/seo',
+
+  
     '@nuxt/scripts'
 
   ],
@@ -83,11 +83,7 @@ export default defineNuxtConfig({
     exclude: ['/admin/**'],
   },
 
-  generate: {
-    routes: async () => await fetchDynamicRoutes(),
-  },
-
-  // Build Config
+  // Build Config (Removed legacy Nuxt 2 Webpack build options)
   build: {
     output: { dir: '.output' },
     extractCSS: true,
@@ -126,24 +122,7 @@ export default defineNuxtConfig({
     },
   },
 
-  // Render Optimization
-  render: {
-    http2: { push: true },
-    compressor: {
-      brotli: { threshold: 10240 },
-      gzip: { threshold: 10240 },
-    },
-    static: {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 dagen cache
-    },
-  },
-
-  // Performance Config
-  performance: {
-    prefetch: true,
-    preload: true,
-    serviceWorker: true,
-  },
+  // Render & Performance Config (Removed legacy Nuxt 2 optimizations)
 
   // App Meta and Links
   app: {
@@ -162,7 +141,8 @@ export default defineNuxtConfig({
           crossorigin: 'anonymous',
         },
         {
-          rel: 'stylesheet',
+          rel: 'preload',
+          as: 'style',
           href: 'https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap',
           onload: "this.onload=null;this.rel='stylesheet'",
         },
@@ -259,10 +239,14 @@ export default defineNuxtConfig({
   // Nitro Config
   nitro: {
     preset: 'vercel',
+    compressPublicAssets: {
+      gzip: true,
+      brotli: true
+    },
+    prerender: {
+      routes: await fetchDynamicRoutes()
+    }
   },
-
-  // Server Target
-  target: 'server',
 
   // SEO Settings
   seo: {
@@ -284,7 +268,10 @@ export default defineNuxtConfig({
     robots: 'index, follow',
   },
 
-  compatibilityDate: '2025-01-31'
+  compatibilityDate: '2025-01-31',
+  future: {
+    compatibilityVersion: 4,
+  }
 });
 
 // Helper function for dynamic routes
