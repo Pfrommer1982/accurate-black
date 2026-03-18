@@ -14,24 +14,23 @@ const fetchLatestContent = async () => {
   try {
     const db = getFirestore();
 
-    const radioshowQuery = query(collection(db, 'radioshow'), orderBy('uploadDate', 'desc'), limit(1));
     const accurateSessionQuery = query(collection(db, 'accurate-sessions'), orderBy('sessionDate', 'desc'), limit(1));
 
-    const [radioshowSnapshot, accurateSessionSnapshot] = await Promise.all([
-      getDocs(radioshowQuery),
-      getDocs(accurateSessionQuery)
+    const [accurateSessionSnapshot, scData] = await Promise.all([
+      getDocs(accurateSessionQuery),
+      $fetch('/api/soundcloud')
     ]);
-
-    radioshowSnapshot.forEach(doc => {
-      latestRadioshow.value = doc.data();
-    });
 
     accurateSessionSnapshot.forEach(doc => {
       latestAccurateSession.value = doc.data();
     });
 
+    if (!scData.error && scData.items && scData.items.length > 0) {
+      latestRadioshow.value = scData.items[0];
+    }
+
   } catch (error) {
-    
+    console.error('Error fetching spotlight content:', error);
   }
 };
 
@@ -50,7 +49,7 @@ onMounted(fetchLatestContent);
 
     <div v-if="latestRadioshow">
       <div class="sc-embed" v-html="addTitleToIframe(
-        latestRadioshow.embeddedLink, 
+        latestRadioshow.embedHtml, 
         'Latest Techtonic Radio Show by Robbi Altidore'
       )"></div>
       <div v-once class="break-line top">

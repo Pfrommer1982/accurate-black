@@ -5,6 +5,10 @@ const radioshowList = ref([])
 const loading = ref(true)
 const error = ref('')
 
+useHead({
+  title: 'Techtonic'
+})
+
 const fetchRadioshows = async () => {
   try {
     loading.value = true

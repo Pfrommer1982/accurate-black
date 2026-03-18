@@ -6,6 +6,10 @@ definePageMeta({
   title: 'Home'
 })
 
+useHead({
+  title: 'Home'
+})
+
 const tableData = ref([]);
 
 const sortedTableData = computed(() => {
