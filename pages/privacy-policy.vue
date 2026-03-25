@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: 'Privacy Policy' })
+usePageSeo('Privacy Policy')
 </script>
 <template>
   <section class="section-privacy">
@@ -8,7 +8,7 @@ useHead({ title: 'Privacy Policy' })
         <p class="break-line-text">PRIVACY POLICY</p>
 
         <div class="btn-big prv">
-          <a href="/" class="btn-big-link">
+          <a href="/" class="btn-big-link" v-scramble.hover>
             <p class="btn-big-p"> BACK HOME</p>
           </a>
         </div>

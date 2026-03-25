@@ -2,7 +2,14 @@
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore'
 
 
+import { ref } from 'vue';
+
 export default {
+    setup() {
+        const pageTitle = ref('Artist');
+        usePageSeo(pageTitle);
+        return { pageTitle };
+    },
     data() {
         return {
             artist: '',
@@ -31,6 +38,7 @@ export default {
                 reversedDocs.forEach(doc => {
                     const data = doc.data();
                     this.artist = data.artist;
+                    this.pageTitle = data.artist;
                     this.bio = data.bio;
                     this.socialLinks = data.socialLinks || [];
                     this.artistImageUrl = data.artistImageUrl;
@@ -47,9 +55,6 @@ export default {
                     this.imageUrl = this.imageUrls[0];
                     const acbIdentifier = this.acbIdentifiers[0];
                     this.currentSoundcloudUrl = this.soundcloudUrls[acbIdentifier];
-
-                 
-                    
                 }
             } else {
                 console.error('Artist not found');
@@ -84,14 +89,15 @@ export default {
         <div class="break-line top">
             <p class="break-line-text">{{ artist }}</p>
         </div>
+
         <div class="header-container">
-            <NuxtImg :src="imageUrl" alt="" class="header-image" loading="lazy" width="1500" height="1500"/>
+            <NuxtImg :src="imageUrl" alt="" class="header-image" loading="lazy" width="1500" height="1500" />
         </div>
     </section>
 
     <section class="body-top">
         <div class="left">
-            <NuxtImg :src="artistImageUrl" :alt="artist" class="body-image" loading="lazy" width="200" height="200"/>
+            <NuxtImg :src="artistImageUrl" :alt="artist" class="body-image" loading="lazy" width="200" height="200" />
             <h3 class="biography">BIOGRAPHY</h3>
             <p class="bio" v-if="bio">{{ bio }}</p>
             <p v-else class="bio no">No biography yet...</p>
@@ -100,7 +106,8 @@ export default {
         <div class="right">
             <h3 class="follow">FOLLOW {{ artist }} ON:</h3>
             <div class="socials">
-                <a v-for="(link, index) in socialLinks" :key="index" :href="link" target="_blank" aria-label='social'>
+                <a v-for="(link, index) in socialLinks" :key="index" :href="link" target="_blank" aria-label='social'
+                    v-scramble.hover>
                     <div class="icon-bg" v-if="link.includes('spotify')">
                         <Icon name="simple-icons:spotify" class="btn-socials" loading="lazy" />
                     </div>
@@ -140,7 +147,8 @@ export default {
             <div class="card-list">
                 <div v-for="(image, index) in imageUrls" :key="index">
                     <NuxtImg :src="image" alt="" class="card-list-item" @click="changeHeaderImage(image, index)"
-                        :aria-label="'Change header image to release ' + (index + 1)" loading="lazy" width="200" height="200"/>
+                        :aria-label="'Change header image to release ' + (index + 1)" loading="lazy" width="200"
+                        height="200" />
                 </div>
             </div>
         </div>
@@ -148,8 +156,6 @@ export default {
 </template>
 
 <style scoped lang="scss">
-
-
 .section-artist-profile {
     padding: 0 2rem;
     overflow: hidden;
@@ -165,6 +171,13 @@ export default {
     @include respond(tab-port) {
         flex-direction: column;
     }
+}
+
+.back {
+    position: absolute;
+    top: 6rem;
+    left: 1rem;
+
 }
 
 .header-image {
@@ -224,8 +237,6 @@ export default {
     margin-top: 10rem;
     justify-content: center;
     align-items: center;
-
-
 
     @include respond(tab-port) {
         flex-direction: column;

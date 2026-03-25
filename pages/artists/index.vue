@@ -38,118 +38,140 @@ export default {
       artist.artistImageUrl = "https://www.accurateblack.nl/public/img/artistprofiledummy.png";
     };
 
-    return {
-      artists,
-      handleImageError
-    };
+    return { artists, handleImageError };
   }
 };
 </script>
 
-
 <template>
+  <section class="section-artist">
+    <div class="break-line top">
+      <p class="break-line-text" v-once>ACCURATE BLACK ARTISTS</p>
+    </div>
 
-    <section class="section-artist">
-      <div class="break-line top">
-        <p class="break-line-text" v-once>ACCURATE BLACK ARTISTS</p>
-      </div>
-
-      <div class="grid-container">
-        <div v-for="(artist, index) in artists" :key="index" class="artist-profile-card">
-          <NuxtLink :to="`/artists/${artist.artist}`">
-            <NuxtImg 
-  :src="artist.artistImageUrl" 
-  alt="Artist Image" 
-  class="artist-image" 
-  @error="handleImageError" 
-  loading="lazy"
-  width="450" 
-  height="450"/>
-
-    
-            <div class="text-box">
-              <div class="artist-name">{{ artist.artist }}</div>
-            </div>
-          </NuxtLink>
+    <div class="grid-container">
+      <NuxtLink
+        v-for="(artist, index) in artists"
+        :key="index"
+        :to="`/artists/${artist.artist}`"
+        class="artist-card"
+      >
+        <NuxtImg
+          :src="artist.artistImageUrl"
+          alt="Artist Image"
+          class="artist-image"
+          @error="handleImageError(artist)"
+          loading="lazy"
+          width="450"
+          height="450"
+        />
+        <div class="artist-overlay">
+          <p class="artist-name" v-scramble.hover>{{ artist.artist }}</p>
+          <span class="artist-cta">VIEW PROFILE</span>
         </div>
-      </div>
-    </section>
-
+      </NuxtLink>
+    </div>
+  </section>
 </template>
-
-
 
 <style lang="scss" scoped>
 .section-artist {
-  padding: 0 2rem;
+  padding: 0 2rem 4rem;
 
   @include respond(phone) {
-    padding: 0 1rem;
+    padding: 0 1rem 2rem;
   }
 }
 
 .grid-container {
-  grid-column-gap: 2rem;
-  grid-row-gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
   display: grid;
-  margin-bottom: 2rem;
-  margin-top: 6rem;
-  width: 100%;
-  justify-content: center;
-  text-transform: uppercase;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: 2px;
+  margin-top: 2rem;
 
   @include respond(tab-port) {
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   }
 
   @include respond(phone) {
     grid-template-columns: repeat(2, 1fr);
-    grid-column-gap: 0.6rem;
-    grid-row-gap: 0.5rem;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+    margin-top: 1rem;
   }
 }
 
-.artist-profile-card {
-  color: var(--primary-grey-light1);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--primay-grey-dark-opacity);
-  border-radius: 3px;
+.artist-card {
+  position: relative;
+  display: block;
   overflow: hidden;
-  width: 100%;
-  background-color: rgb(17, 17, 17);
+  text-decoration: none;
+  background-color: #111;
+  aspect-ratio: 1 / 1;
 
-  &:hover {
-    transform: scale(1.01);
+  &:hover .artist-image {
+    filter: grayscale(0) brightness(0.55);
+    transform: scale(1.04);
+  }
+
+  &:hover .artist-overlay {
+    opacity: 1;
+  }
+
+  &:hover .artist-name {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  &:hover .artist-cta {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
 .artist-image {
-  filter: grayscale(1) contrast(.75);
   width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   object-fit: cover;
+  filter: grayscale(1) brightness(0.65);
+  transition: filter 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  display: block;
 }
 
-.text-box {
-  height: 6rem;
+.artist-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.2rem 1.4rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
 .artist-name {
-  font-size: 2rem;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  align-items: center;
-  color: var(--primary-grey-light1);
-  padding: 1rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.3rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s ease 0.05s, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) 0.05s;
 
   @include respond(phone) {
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
+}
+
+.artist-cta {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--primary-grey-light2);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.35s ease 0.1s, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) 0.1s;
 }
 </style>

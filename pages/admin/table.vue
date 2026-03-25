@@ -106,17 +106,17 @@ export default {
             <div class="break-line-text">
                 <div class="man-nav">
                     <div class="btn-more back">
-                        <NuxtLink to="/admin/releasesform" class="btn-more-link">
+                        <NuxtLink to="/admin/releasesform" class="btn-more-link" v-scramble.hover>
                             <p class="btn-more-p">RELEASE TOEVOEGEN</p>
                         </NuxtLink>
                     </div>
                     <div class="btn-more back">
-                        <NuxtLink to="/admin/radioshow" class="btn-more-link">
+                        <NuxtLink to="/admin/radioshow" class="btn-more-link" v-scramble.hover>
                             <p class="btn-more-p">RADIOSHOW TOEVOEGEN</p>
                         </NuxtLink>
                     </div>
                     <div class="btn-more back">
-                        <NuxtLink to="/admin/table" class="btn-more-link">
+                        <NuxtLink to="/admin/table" class="btn-more-link" v-scramble.hover>
                             <p class="btn-more-p">OVERZICHT/DELETE</p>
                         </NuxtLink>
                     </div>
@@ -136,7 +136,7 @@ export default {
 
                     <div class="accordion-header" @click="toggleRow(index)">
                         <span>{{ user.ACB }} - {{ user.artist }}</span>
-                        <button class="btn-more accordion-toggle-btn">
+                        <button class="btn-more accordion-toggle-btn" v-scramble.hover>
                             <p class="btn-more-p">{{ isOpen[users.findIndex(u => u.id === user.id)] ? 'Sluiten' : 'Openen' }}</p>
                         </button>
                     </div>
@@ -182,7 +182,7 @@ export default {
                                         <input v-model="editedUser.socialLinks[linkIndex]">
                                     </div>
                                 </div>
-                                <button @click="addSocialLink">Extra link toevoegen</button>
+                                <button @click="addSocialLink" v-scramble.hover>Extra link toevoegen</button>
                             </div>
                         </div>
 
@@ -199,10 +199,10 @@ export default {
 
                         <div class="section-action-buttons">
                             <div class="btn-update">
-                                <button class="btn-update-p " @click="updateUser(index)">Bijwerken</button>
+                                <button class="btn-update-p " @click="updateUser(index)" v-scramble.hover>Bijwerken</button>
                             </div>
                             <div class="btn-delete">
-                                <button class="btn-delete-p " @click="deleteUser(index)">Verwijderen</button>
+                                <button class="btn-delete-p " @click="deleteUser(index)" v-scramble.hover>Verwijderen</button>
                             </div>
                         </div>
                     </div>

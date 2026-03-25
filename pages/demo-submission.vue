@@ -61,7 +61,7 @@
               <textarea name="message" v-model="formData.message" required></textarea>
             </div>
 
-            <button type="submit" class="btn-more">
+            <button type="submit" class="btn-more" v-scramble.hover>
               <p class="btn-more-p">SUBMIT</p>
             </button>
           </form>
@@ -84,7 +84,7 @@ import emailjs from '@emailjs/browser';
 
 export default {
   setup() {
-    useHead({ title: 'Demo Submission' })
+    usePageSeo('Demo Submission')
   },
   data() {
     return {

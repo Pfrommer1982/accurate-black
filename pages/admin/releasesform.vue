@@ -4,17 +4,17 @@
       <div class="break-line-text">
         <div class="man-nav">
           <div class="btn-more back">
-            <NuxtLink to="/admin/releasesform" class="btn-more-link">
+            <NuxtLink to="/admin/releasesform" class="btn-more-link" v-scramble.hover>
               <p class="btn-more-p">RELEASE TOEVOEGEN</p>
             </NuxtLink>
           </div>
           <div class="btn-more back">
-            <NuxtLink to="/admin/radioshow" class="btn-more-link">
+            <NuxtLink to="/admin/radioshow" class="btn-more-link" v-scramble.hover>
               <p class="btn-more-p">RADIOSHOW TOEVOEGEN</p>
             </NuxtLink>
           </div>
           <div class="btn-more back">
-            <NuxtLink to="/admin/table" class="btn-more-link">
+            <NuxtLink to="/admin/table" class="btn-more-link" v-scramble.hover>
               <p class="btn-more-p">OVERZICHT/DELETE</p>
             </NuxtLink>
           </div>
@@ -46,10 +46,10 @@
             </div>
           </div>
           <div class="action-buttons">
-            <button type="button" class="btn-update" @click="addSocialLink" v-if="socialLinks.length < 6">
+            <button type="button" class="btn-update" @click="addSocialLink" v-if="socialLinks.length < 6" v-scramble.hover>
               <p class="btn-update-p">Add Social</p>
             </button>
-            <button type="button" class="btn-delete" @click="removeSocialLink(index)">
+            <button type="button" class="btn-delete" @click="removeSocialLink(index)" v-scramble.hover>
               <p class="btn-delete-p">Remove Social</p>
             </button>
           </div>
@@ -65,10 +65,10 @@
               </div>
             </div>
             <div class="action-buttons">
-              <button type="button" class="btn-update" @click="addTrack">
+              <button type="button" class="btn-update" @click="addTrack" v-scramble.hover>
                 <p class="btn-update-p">Add Track</p>
               </button>
-              <button type="button" class="btn-delete" @click="removeTrack(index)">
+              <button type="button" class="btn-delete" @click="removeTrack(index)" v-scramble.hover>
                 <p class="btn-delete-p">Remove Track</p>
               </button>
             </div>
@@ -96,10 +96,10 @@
           </div>
         </div>
         <div class="action-buttons">
-          <button type="submit" class="btn-update send">
+          <button type="submit" class="btn-update send" v-scramble.hover>
             <p class="btn-update-p">Submit Data</p>
           </button>
-          <button type="button" class="btn-delete" @click="clearForm">
+          <button type="button" class="btn-delete" @click="clearForm" v-scramble.hover>
             <p class="btn-delete-p">Clear Form</p>
           </button>
         </div>

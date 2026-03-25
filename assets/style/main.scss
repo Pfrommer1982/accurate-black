@@ -2,6 +2,10 @@
 
 
 :root {
+    --spacing-sm: 1rem;
+    --spacing-md: 2rem;
+    --spacing-lg: 4rem;
+    --spacing-xl: 6rem;
     --primary-grey: #aaaaaa;
     --primary-grey-light1: #bbbbbb;
     --primary-grey-light2: #888888;
@@ -22,7 +26,6 @@
   html {
     background-color: #000000;
     font-family: Oswald, sans-serif;
-    
-    
+    scroll-behavior: smooth;
   }
   

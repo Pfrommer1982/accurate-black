@@ -66,28 +66,28 @@ export default {
 
       <ul class="navigation__list">
         <li class="navigation__item">
-          <NuxtLink to="/" class="navigation__link" @click="toggleMenu">HOME</NuxtLink>
+          <NuxtLink to="/" class="navigation__link" v-scramble.hover @click="toggleMenu">HOME</NuxtLink>
         </li>
         <li class="navigation__item">
-          <NuxtLink to="/releases" class="navigation__link" @click="toggleMenu">( NEW ) RELEASES</NuxtLink>
+          <NuxtLink to="/releases" class="navigation__link" v-scramble.hover @click="toggleMenu">( NEW ) RELEASES</NuxtLink>
         </li>
         <li class="navigation__item">
-          <NuxtLink to="/artists" class="navigation__link" @click="toggleMenu">ARTISTS</NuxtLink>
+          <NuxtLink to="/artists" class="navigation__link" v-scramble.hover @click="toggleMenu">ARTISTS</NuxtLink>
         </li>
         <li class="navigation__item">
-          <NuxtLink to="/accurate-sessions" class="navigation__link" @click="toggleMenu">ACCURATE SESSIONS</NuxtLink>
+          <NuxtLink to="/accurate-sessions" class="navigation__link" v-scramble.hover @click="toggleMenu">ACCURATE SESSIONS</NuxtLink>
         </li>
         <li class="navigation__item">
-          <NuxtLink to="/techtonic" class="navigation__link" @click="toggleMenu">TECHTONIC</NuxtLink>
+          <NuxtLink to="/techtonic" class="navigation__link" v-scramble.hover @click="toggleMenu">TECHTONIC</NuxtLink>
         </li>
         <li class="navigation__item">
-          <NuxtLink to="/demo-submission" class="navigation__link" @click="toggleMenu">DEMO SUBMISSION</NuxtLink>
+          <NuxtLink to="/demo-submission" class="navigation__link" v-scramble.hover @click="toggleMenu">DEMO SUBMISSION</NuxtLink>
         </li>
         <li class="navigation__item">
-          <NuxtLink to="/about" class="navigation__link" @click="toggleMenu">ABOUT US</NuxtLink>
+          <NuxtLink to="/about" class="navigation__link" v-scramble.hover @click="toggleMenu">ABOUT US</NuxtLink>
         </li>
         <li class="navigation__item">
-          <NuxtLink to="/login" class="navigation__link admin" @click="handleAdminLinkClick && toggleMenu">ADMIN
+          <NuxtLink to="/login" class="navigation__link admin" v-scramble.hover @click="handleAdminLinkClick && toggleMenu">ADMIN
           </NuxtLink>
         </li>
         <li class="navigation__item ">

@@ -4,28 +4,17 @@ import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/fire
 
 const tableData = ref([]);
 
-const sortedTableData = computed(() => {
-  return tableData.value;
-});
-
 const spotlightItems = computed(() => {
-  return sortedTableData.value.slice(0, 4);
-});
-
-const featuredArtistImages = computed(() => {
-  return spotlightItems.value.map(item => item.artistImageUrl);
-});
-
-const uniqueFeaturedArtistImages = computed(() => {
-  const uniqueImages = [];
-  const addedUrls = new Set();
-  for (const imageUrl of featuredArtistImages.value) {
-    if (!addedUrls.has(imageUrl)) {
-      uniqueImages.push(imageUrl);
-      addedUrls.add(imageUrl);
+  const seen = new Set();
+  const unique = [];
+  for (const item of tableData.value) {
+    if (!seen.has(item.artist)) {
+      seen.add(item.artist);
+      unique.push(item);
     }
+    if (unique.length >= 4) break;
   }
-  return uniqueImages;
+  return unique;
 });
 
 onMounted(async () => {
@@ -38,42 +27,45 @@ onMounted(async () => {
 </script>
 
 <template>
+  <section class="section-featured">
+    <div class="header">
+      <h1 class="h1">FEATURED ARTISTS</h1>
+      <NuxtLink to="/artists" class="btn-more-link" v-scramble.hover>
+        <p class="btn-more-p">VIEW ALL ARTISTS</p>
+      </NuxtLink>
+    </div>
 
-    <section class="section-featured">
-      <div class="header">
-        <h1 class="h1">FEATURED ARTISTS</h1>
-        <NuxtLink to="/artists" class="btn-more-link check-out">
-          <p class="btn-more-p">VIEW ALL ARTISTS</p>
-        </NuxtLink>
-      </div>
-      <div class="featured-grid">
-        <div v-for="(imageUrl, index) in uniqueFeaturedArtistImages" :key="index" class="featured-artist">
-          <NuxtLink :to="`/artists/${spotlightItems[index].artist}`">
-            <img v-lazy="imageUrl" alt="Featured Artist" class="featured-artist-image" loading="lazy" width="200" height="200" />
-            <p class="featured-name">{{ spotlightItems[index].artist }}</p>
-            <p class="profile">VIEW PROFILE</p>
-          </NuxtLink>
+    <div class="artist-strip" v-if="spotlightItems.length">
+      <NuxtLink
+        v-for="(item, index) in spotlightItems"
+        :key="item.id"
+        :to="`/artists/${item.artist}`"
+        class="artist-panel"
+        :style="{ backgroundImage: item.artistImageUrl ? `url('${item.artistImageUrl}')` : 'none' }"
+        :aria-label="`View profile of ${item.artist}`"
+      >
+        <div class="panel-overlay"></div>
+        <div class="panel-content">
+          <p class="panel-name">{{ item.artist }}</p>
+          <span class="panel-cta" v-scramble.hover>VIEW PROFILE</span>
         </div>
-      </div>
-    </section>
+      </NuxtLink>
+    </div>
 
+    <div class="artist-strip" v-else>
+      <div v-for="n in 4" :key="n" class="artist-panel skeleton-panel"></div>
+    </div>
+  </section>
 </template>
 
 <style scoped lang="scss">
-
-
 .section-featured {
-  padding: 0 2rem;
+  padding: 0 2rem 4rem;
+  background-color: #000;
   overflow: hidden;
-  width: 100%;
-  box-sizing: border-box;
-  background-color: black;
-  min-height: 40vh;
 
   @include respond(phone) {
-    padding: 0 1em;
-    margin-top: -6rem;
-    margin-bottom: -6rem;
+    padding: 0 1rem 2rem;
   }
 }
 
@@ -83,7 +75,7 @@ onMounted(async () => {
   justify-content: space-between;
   width: 100%;
   margin-top: 2rem;
-  margin-bottom: -4rem;
+  margin-bottom: 2rem;
   position: relative;
   z-index: 100;
 }
@@ -92,7 +84,7 @@ onMounted(async () => {
   font-size: 2rem;
   margin: 0;
   width: 50%;
-  
+
   @include respond(phone) {
     font-size: 1.4rem;
   }
@@ -108,88 +100,114 @@ onMounted(async () => {
   margin: 0;
 }
 
-.featured-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
-  gap: 1rem;
-  margin: 6rem 0;
-  justify-content: center;
-  align-items: center;
+.artist-strip {
+  display: flex;
+  width: 100%;
+  height: 36vh;
+  gap: 2px;
 
+  @include respond(tab-port) {
+    height: 30vh;
+  }
 
+  @include respond(phone) {
+    height: auto;
+    flex-direction: column;
+    gap: 2px;
+  }
 }
 
-.featured-artist {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.skeleton-panel {
+  background: linear-gradient(90deg, #111 25%, #1c1c1c 50%, #111 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.artist-panel {
   position: relative;
-  filter: grayscale(1) contrast(0.75);
+  flex: 1;
+  min-width: 0;
+  background-size: cover;
+  background-position: center;
+  background-color: #111;
+  overflow: hidden;
+  text-decoration: none;
   cursor: pointer;
+  transition: flex 0.5s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s ease;
+  filter: grayscale(0.6) contrast(0.85);
+
+  @include respond(phone) {
+    flex: none;
+    height: 36vw;
+    width: 100%;
+    filter: grayscale(0.3);
+  }
 
   &:hover {
-    opacity: 0.6;
+    flex: 2.2;
+    filter: grayscale(0) contrast(1);
+
+    .panel-overlay {
+      background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+    }
+
+    .panel-name {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .panel-cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
-.featured-artist-image {
-  aspect-ratio: 1/1;
-  width: 40rem;
-  height: 40rem;
-  object-fit: cover;
-  border-radius: 3px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  @include respond(tab-land) {
-    height: 25rem;
-    width: 25rem;
-    object-position: center;
-  }
-  
-  @include respond(tab-port) {
-    height: 20rem;
-    width: 20rem;
-    object-position: center;
-  }
-  
-  @include respond(phone) {
-    height: 15rem;
-    width: 15rem;
-    object-position: center;
-  }
-}
-
-.featured-name {
+.panel-overlay {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 5;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 3px;
-  font-size: 1rem;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.05) 60%, transparent 100%);
+  transition: background 0.4s ease;
 }
 
-.profile {
+.panel-content {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 3px;
-  font-size: 1.5rem;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem 1.2rem;
+  z-index: 2;
+}
+
+.panel-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.3rem;
   opacity: 0;
-  transition: opacity 0.3s ease;
-
-  @include respond(tab-land) {
-    font-size: 1.2rem;
-  }
+  transform: translateY(8px);
+  transition: opacity 0.35s ease 0.05s, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) 0.05s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.featured-artist:hover .profile {
-  opacity: 1;
+.panel-cta {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--primary-grey-light2);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.35s ease 0.1s, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) 0.1s;
 }
 </style>

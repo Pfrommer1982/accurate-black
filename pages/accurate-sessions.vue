@@ -15,7 +15,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 
 export default {
   setup() {
-    useHead({ title: 'Accurate Sessions' })
+    usePageSeo('Accurate Sessions')
   },
   async created() {
     await this.fetchRadioshows();

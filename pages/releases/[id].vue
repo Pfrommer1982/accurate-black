@@ -9,6 +9,7 @@ const otherTracksImage = ref('');
 const otherTracksHaveImage = ref(false);
 
 const route = useRoute();
+usePageSeo(() => releaseDetails.value?.ACB ? releaseDetails.value.ACB : 'Release');
 
 onMounted(async () => {
   const db = getFirestore();
@@ -60,17 +61,17 @@ onMounted(async () => {
         <section v-if="releaseDetails" class="details-left" aria-label="Release Details">
           <div class="details-left-header">
             <div class="btn-more back">
-              <NuxtLink to="/releases" class="btn-more-link">
+              <NuxtLink to="/releases" class="btn-more-link" v-scramble.hover>
                 <span class="btn-more-p">BACK TO RELEASES</span>
               </NuxtLink>
             </div>
-            <p class="acb">ACB{{ releaseDetails.ACB }}</p>
+            <p class="acb">{{ releaseDetails.ACB }}</p>
           </div>
 
           <div class="embedded" v-html="releaseDetails.soundcloudUrl" :title="`${releaseDetails.releaseName} by ${releaseDetails.artist} on SoundCloud`"></div>
 
           <h2 class="break-line-text artistname">ARTIST</h2>
-          <NuxtLink :to="`/artists/${releaseDetails.artist}`" class="h1a">
+          <NuxtLink :to="`/artists/${releaseDetails.artist}`" class="h1a" v-scramble.hover>
             <p class="artist">{{ releaseDetails.artist }}</p>
           </NuxtLink>
 
@@ -101,7 +102,7 @@ onMounted(async () => {
             height="200" 
           />
           <div v-if="releaseDetails.digDisLink" class="btn-big buy">
-            <a :href="releaseDetails.digDisLink" class="btn-more-link" target="_blank" rel="noopener">
+            <a :href="releaseDetails.digDisLink" class="btn-more-link" target="_blank" rel="noopener" v-scramble.hover>
               <span class="btn-big-p">STREAM NOW!</span>
             </a>
           </div>
@@ -133,7 +134,7 @@ onMounted(async () => {
               :key="track.ACB" 
               class="other-track"
             >
-              <NuxtLink :to="`/releases/${track.ACB}`">
+              <NuxtLink :to="`/releases/${track.ACB}`" v-scramble.hover>
                 <img 
                   v-if="track.imageUrl" 
                   :src="track.imageUrl" 

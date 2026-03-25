@@ -41,15 +41,17 @@ onMounted(fetchLatestContent);
   <section class="section-content">
     <h1>ACCURATE BLACK PRESENTS:</h1>
     <div class="header">
-      <h1 class="h1 inprogress">ROBBI ALTIDORE - TECHTONIC <a href="https://inprogressradio.com/index.php/members/robbi-altidore/" target="_blank">@INPROGRESSRADIO.COM</a></h1>
-      <NuxtLink to="/techtonic" class="btn-more-link check-out">
+      <h1 class="h1 inprogress">ROBBI ALTIDORE - TECHTONIC <a
+          href="https://inprogressradio.com/index.php/members/robbi-altidore/" target="_blank">@INPROGRESSRADIO.COM</a>
+      </h1>
+      <NuxtLink to="/techtonic" class="btn-more-link check-out" v-scramble.hover>
         <p class="btn-more-p">TECHTONIC SHOWS</p>
       </NuxtLink>
     </div>
 
     <div v-if="latestRadioshow">
       <div class="sc-embed" v-html="addTitleToIframe(
-        latestRadioshow.embedHtml, 
+        latestRadioshow.embedHtml,
         'Latest Techtonic Radio Show by Robbi Altidore'
       )"></div>
       <div v-once class="break-line top">
@@ -63,7 +65,7 @@ onMounted(fetchLatestContent);
     <div>ACCURATE BLACK PRESENTS:</div>
     <div class="header">
       <h1 class="h1">ACCURATE SESSIONS</h1>
-      <NuxtLink to="/accurate-sessions" class="btn-more-link check-out">
+      <NuxtLink to="/accurate-sessions" class="btn-more-link check-out" v-scramble.hover>
         <p class="btn-more-p">ACCURATE SESSIONS</p>
       </NuxtLink>
     </div>
@@ -83,13 +85,12 @@ onMounted(fetchLatestContent);
   </section>
 </template>
 <style lang="scss" scoped>
-
-
 .section-content {
-  padding: 0 2rem;
-  min-height: 80vh;
+  padding: 2rem 2rem;
+
   overflow: hidden;
   background-color: var(--primary-grey-dark-opacity);
+
   @include respond(phone) {
     padding: 0 1rem;
     overflow: hidden;
@@ -122,6 +123,7 @@ h4 {
 a {
   text-decoration: none;
   color: var(--primary-grey-light2);
+
   &:hover {
     color: var(--primary-grey-light1);
   }

@@ -4,17 +4,17 @@
       <div class="break-line-text">
         <div class="man-nav">
           <div class="btn-more back">
-            <NuxtLink to="/admin/releasesform" class="btn-more-link">
+            <NuxtLink to="/admin/releasesform" class="btn-more-link" v-scramble.hover>
               <p class="btn-more-p">RELEASE TOEVOEGEN</p>
             </NuxtLink>
           </div>
           <div class="btn-more back">
-            <NuxtLink to="/admin/radioshow" class="btn-more-link">
+            <NuxtLink to="/admin/radioshow" class="btn-more-link" v-scramble.hover>
               <p class="btn-more-p">RADIOSHOW TOEVOEGEN</p>
             </NuxtLink>
           </div>
           <div class="btn-more back">
-            <NuxtLink to="/admin/table" class="btn-more-link">
+            <NuxtLink to="/admin/table" class="btn-more-link" v-scramble.hover>
               <p class="btn-more-p">OVERZICHT/DELETE</p>
             </NuxtLink>
           </div>
@@ -47,7 +47,7 @@
           required
         />
 
-        <button class="btn btn-success" type="submit">Uploaden</button>
+        <button class="btn btn-success" type="submit" v-scramble.hover>Uploaden</button>
       </form>
       <div v-if="showSuccessMessage" class="success-message">
         Radioshow succesvol geüpload!
@@ -79,7 +79,7 @@
           required
         />
 
-        <button class="btn btn-success" type="submit">Uploaden</button>
+        <button class="btn btn-success" type="submit" v-scramble.hover>Uploaden</button>
       </form>
       <div v-if="showSessionSuccessMessage" class="success-message">
         Accurate session succesvol geüpload!

@@ -2,10 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
 
-
-useHead({
-  title: 'Home'
-})
+usePageSeo('Home')
 
 const tableData = ref([]);
 
@@ -32,27 +29,25 @@ const fetchTableData = async () => {
 };
 
 onMounted(fetchTableData);
-
-
 </script>
 
 <template>
-  <div class="page-container">
-    <!-- Toegevoegde semantische HTML structuur -->
-    <main>
-      <h1 class="sr-only">Accurate Black - Electronic Music Label</h1>
-      <Hero :spotlightItems="spotlightItems" />
-      <FeaturedArtists class="featuredArtist"/>
-      <SpotlightShow />
-    </main>
-  </div>
+  <main class="main-homepage">
+    <h1 class="sr-only">Accurate Black - Electronic Music Label</h1>
+    <Hero :spotlightItems="spotlightItems" />
+    <IntroBlock />
+    <FeaturedArtists class="featuredArtist"/>
+    <SpotlightShow />
+    <MediaGrid />
+  </main>
 </template>
 
 <style lang="scss" scoped>
-.page-container {
+.main-homepage {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  background-color: #000;
+  width: 100%;
 }
 
 .sr-only {
@@ -70,7 +65,6 @@ onMounted(fetchTableData);
   @include respond(phone) {
     flex-direction: column;
     margin-top: 0rem;
-  
-  }}
-  
+  }
+}
 </style>

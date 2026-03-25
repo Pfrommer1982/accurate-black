@@ -4,25 +4,25 @@
       <nav class="navigation" aria-label="Footer Navigation">
         <ul class="nav-links">
           <li>
-            <NuxtLink class="link" to="/">HOME</NuxtLink>
+            <NuxtLink class="link" v-scramble.hover to="/">HOME</NuxtLink>
           </li>
           <li>
-            <NuxtLink class="link" to="/releases">RELEASES</NuxtLink>
+            <NuxtLink class="link" v-scramble.hover to="/releases">RELEASES</NuxtLink>
           </li>
           <li>
-            <NuxtLink class="link" to="/artists">ARTISTS</NuxtLink>
+            <NuxtLink class="link" v-scramble.hover to="/artists">ARTISTS</NuxtLink>
           </li>
           <li>
-            <NuxtLink class="link" to="/accurate-sessions">ACCURATE SESSIONS</NuxtLink>
+            <NuxtLink class="link" v-scramble.hover to="/accurate-sessions">ACCURATE SESSIONS</NuxtLink>
           </li>
           <li>
-            <NuxtLink class="link" to="/techtonic">TECHTONIC</NuxtLink>
+            <NuxtLink class="link" v-scramble.hover to="/techtonic">TECHTONIC</NuxtLink>
           </li>
           <li>
-            <NuxtLink class="link" to="/demo-submission">DEMO SUBMISSION</NuxtLink>
+            <NuxtLink class="link" v-scramble.hover to="/demo-submission">DEMO SUBMISSION</NuxtLink>
           </li>
           <li>
-            <NuxtLink class="link" to="/about">ABOUT US</NuxtLink>
+            <NuxtLink class="link" v-scramble.hover to="/about">ABOUT US</NuxtLink>
           </li>
         </ul>
       </nav>

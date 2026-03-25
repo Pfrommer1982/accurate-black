@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
 
-useHead({ title: 'Releases' })
+usePageSeo('Releases')
 // Rest van de setup code blijft hetzelfde
 const showData = ref(false)
 const spotlightItem = ref({})
@@ -54,7 +54,7 @@ onMounted(async () => {
               <h3 class="spotlight-text title">{{ spotlightItem.releaseName }}</h3>
               <p class="spotlight-text artist">{{ spotlightItem.artist }}</p>
               <div class="btn-more">
-                <NuxtLink :to="`/releases/${spotlightItem.ACB}`" class="btn-more-link">
+                <NuxtLink :to="`/releases/${spotlightItem.ACB}`" class="btn-more-link" v-scramble.hover>
                   <span class="btn-more-p">CHECK OUT & LISTEN</span>
                 </NuxtLink>
               </div>
@@ -99,7 +99,7 @@ onMounted(async () => {
                 <h3 class="p-track">{{ item.releaseName }}</h3>
                 <p class="p-artist">{{ item.artist }}</p>
                 <div class="btn-more">
-                  <NuxtLink :to="`/releases/${item.ACB}`" class="btn-more-link">
+                  <NuxtLink :to="`/releases/${item.ACB}`" class="btn-more-link" v-scramble.hover>
                     <span class="btn-more-p">CHECK OUT & LISTEN</span>
                   </NuxtLink>
                 </div>

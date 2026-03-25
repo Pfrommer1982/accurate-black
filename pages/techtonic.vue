@@ -10,9 +10,7 @@ const radioshowList = ref<RadioshowItem[]>([])
 const loading = ref(true)
 const error = ref('')
 
-useHead({
-  title: 'Techtonic'
-})
+usePageSeo('Techtonic')
 
 const fetchRadioshows = async () => {
   try {

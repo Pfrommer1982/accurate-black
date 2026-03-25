@@ -9,7 +9,7 @@
         <input type="email" v-model="email" required>
         <label for="password">Password:</label>
         <input type="password" v-model="password" required>
-        <button type="submit">Log in</button>
+        <button type="submit" v-scramble.hover>Log in</button>
         <div class="error" v-if="error">{{ error }}</div>
       </form>
     </section>
