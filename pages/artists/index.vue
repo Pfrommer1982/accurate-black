@@ -1,46 +1,72 @@
-<script>
-import { ref, onMounted } from 'vue';
+<script setup>
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
-export default {
-  setup() {
-    useHead({ title: 'Artists' })
-    const artists = ref([]);
+useHead({ title: 'Artists' })
+const artists = ref([]);
+let ctx;
 
-    const fetchArtists = async () => {
-      try {
-        const db = getFirestore();
-        const querySnapshot = await getDocs(collection(db, 'users'));
-        const artistsMap = {};
+const fetchArtists = async () => {
+  try {
+    const db = getFirestore();
+    const querySnapshot = await getDocs(collection(db, 'users'));
+    const artistsMap = {};
 
-        querySnapshot.forEach(doc => {
-          const data = doc.data();
-          const artistId = data.artist;
-          if (!artistsMap[artistId]) {
-            artistsMap[artistId] = {
-              artist: data.artist,
-              artistImageUrl: data.artistImageUrl,
-              acbValues: []
-            };
-          }
-          artistsMap[artistId].acbValues.push(data.ACB);
-        });
-
-        artists.value = Object.values(artistsMap);
-      } catch (error) {
-        console.error('Error fetching artists:', error);
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      const artistId = data.artist;
+      if (!artistsMap[artistId]) {
+        artistsMap[artistId] = {
+          artist: data.artist,
+          artistImageUrl: data.artistImageUrl,
+          acbValues: []
+        };
       }
-    };
+      artistsMap[artistId].acbValues.push(data.ACB);
+    });
 
-    onMounted(fetchArtists);
+    artists.value = Object.values(artistsMap);
 
-    const handleImageError = (artist) => {
-      artist.artistImageUrl = "https://www.accurateblack.nl/public/img/artistprofiledummy.png";
-    };
+    nextTick(async () => {
+      if (import.meta.client) {
+        const { gsap } = await import('gsap')
+        const { ScrollTrigger } = await import('gsap/ScrollTrigger')
+        gsap.registerPlugin(ScrollTrigger)
 
-    return { artists, handleImageError };
+        ctx = gsap.context(() => {
+          gsap.set('.artist-card', { y: 50, opacity: 0 });
+
+          ScrollTrigger.batch('.artist-card', {
+            onEnter: elements => {
+              gsap.to(elements, {
+                y: 0,
+                opacity: 1,
+                stagger: 0.15,
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            },
+            start: "top 85%",
+            once: true
+          });
+        });
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching artists:', error);
   }
 };
+
+onMounted(fetchArtists);
+
+const handleImageError = (artist) => {
+  artist.artistImageUrl = "https://www.accurateblack.nl/public/img/artistprofiledummy.png";
+};
+
+onUnmounted(() => {
+  if (ctx) ctx.revert();
+});
 </script>
 
 <template>

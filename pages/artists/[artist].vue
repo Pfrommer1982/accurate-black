@@ -1,86 +1,115 @@
-<script>
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore'
+<script setup>
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 
+const route = useRoute();
 
-import { ref } from 'vue';
+const artist = ref('');
+const bio = ref('');
+const imageUrl = ref('');
+const artistImageUrl = ref('');
+const socialLinks = ref([]);
+const imageUrls = ref([]);
+const acbIdentifiers = ref([]);
+const soundcloudUrls = ref({});
+const lastThreeSoundcloudUrls = ref([]);
+const currentSoundcloudUrl = ref('');
+const showFullBio = ref(false);
 
-export default {
-    setup() {
-        const pageTitle = ref('Artist');
-        usePageSeo(pageTitle);
-        return { pageTitle };
-    },
-    data() {
-        return {
-            artist: '',
-            bio: '',
-            imageUrl: '',
-            artistImageUrl: '',
-            socialLinks: [],
-            imageUrls: [],
-            acbIdentifiers: [],
-            soundcloudUrls: {},
-            lastThreeSoundcloudUrls: [],
-            currentSoundcloudUrl: '',
-            showFullBio: false,
-        }
-    },
+const pageTitle = ref('Artist');
+usePageSeo(pageTitle);
 
-    async created() {
-        try {
-            const artistName = this.$route.params.artist;
-            const db = getFirestore();
-            const q = query(collection(db, 'users'), where('artist', '==', artistName));
-            const querySnapshot = await getDocs(q);
+let ctx = null;
 
-            if (!querySnapshot.empty) {
-                const reversedDocs = querySnapshot.docs.reverse();
-                reversedDocs.forEach(doc => {
-                    const data = doc.data();
-                    this.artist = data.artist;
-                    this.pageTitle = data.artist;
-                    this.bio = data.bio;
-                    this.socialLinks = data.socialLinks || [];
-                    this.artistImageUrl = data.artistImageUrl;
-                    this.acbIdentifiers.push(data.ACB);
-                    this.imageUrls.push(data.imageUrl);
-                    this.soundcloudUrls[data.ACB] = data.soundcloudUrl;
-                });
+const fetchArtistData = async () => {
+    try {
+        const artistName = route.params.artist;
+        const db = getFirestore();
+        const q = query(collection(db, 'users'), where('artist', '==', artistName));
+        const querySnapshot = await getDocs(q);
 
-                this.acbIdentifiers.sort((a, b) => b - a);
+        if (!querySnapshot.empty) {
+            const reversedDocs = querySnapshot.docs.reverse();
+            reversedDocs.forEach(doc => {
+                const data = doc.data();
+                artist.value = data.artist;
+                pageTitle.value = data.artist;
+                bio.value = data.bio;
+                socialLinks.value = data.socialLinks || [];
+                artistImageUrl.value = data.artistImageUrl;
+                acbIdentifiers.value.push(data.ACB);
+                imageUrls.value.push(data.imageUrl);
+                soundcloudUrls.value[data.ACB] = data.soundcloudUrl;
+            });
 
-                this.lastThreeSoundcloudUrls = this.acbIdentifiers.map(acb => this.soundcloudUrls[acb]).slice(0, 3);
+            acbIdentifiers.value.sort((a, b) => b - a);
 
-                if (this.imageUrls.length > 0) {
-                    this.imageUrl = this.imageUrls[0];
-                    const acbIdentifier = this.acbIdentifiers[0];
-                    this.currentSoundcloudUrl = this.soundcloudUrls[acbIdentifier];
-                }
-            } else {
-                console.error('Artist not found');
+            lastThreeSoundcloudUrls.value = acbIdentifiers.value
+                .map(acb => soundcloudUrls.value[acb])
+                .slice(0, 3);
+
+            if (imageUrls.value.length > 0) {
+                imageUrl.value = imageUrls.value[0];
+                const acbIdentifier = acbIdentifiers.value[0];
+                currentSoundcloudUrl.value = soundcloudUrls.value[acbIdentifier];
             }
-        } catch (error) {
-            console.error('Error fetching artist:', error);
+        } else {
+            console.error('Artist not found');
         }
-    },
-    methods: {
-        getSocialLink(platform) {
-            const link = this.socialLinks.find((link) => link.includes(platform));
-            return link ? link : '#';
-        },
-        changeHeaderImage(imageUrl, index) {
-            this.imageUrl = imageUrl;
-            const acbIdentifier = this.acbIdentifiers[index];
-            this.currentSoundcloudUrl = this.soundcloudUrls[acbIdentifier];
-        },
-        changeSoundcloudUrl(index) {
-            this.currentSoundcloudUrl = this.lastThreeSoundcloudUrls[index];
-        },
-        toggleBio() {
-            this.showFullBio = !this.showFullBio;
+    } catch (error) {
+        console.error('Error fetching artist:', error);
+    }
+};
+
+const getSocialLink = (platform) => {
+    const link = socialLinks.value.find((link) => link.includes(platform));
+    return link ? link : '#';
+};
+
+const changeHeaderImage = (newImageUrl, index) => {
+    imageUrl.value = newImageUrl;
+    const acbIdentifier = acbIdentifiers.value[index];
+    currentSoundcloudUrl.value = soundcloudUrls.value[acbIdentifier];
+};
+
+const changeSoundcloudUrl = (index) => {
+    currentSoundcloudUrl.value = lastThreeSoundcloudUrls.value[index];
+};
+
+onMounted(async () => {
+    await fetchArtistData();
+
+    nextTick(async () => {
+        if (import.meta.client) {
+            const { gsap } = await import('gsap');
+            const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+            gsap.registerPlugin(ScrollTrigger);
+            
+            ctx = gsap.context(() => {
+                gsap.set('.card-list-item', { y: 50, opacity: 0 });
+
+                ScrollTrigger.batch('.card-list-item', {
+                    onEnter: elements => {
+                        gsap.to(elements, {
+                            y: 0,
+                            opacity: 1,
+                            stagger: 0.15,
+                            duration: 0.8,
+                            ease: "power2.out"
+                        });
+                    },
+                    start: "top 85%",
+                    once: true
+                });
+            });
         }
-    },
-}
+    });
+});
+
+onUnmounted(() => {
+    if (ctx) ctx.revert();
+});
 </script>
 
 <template>

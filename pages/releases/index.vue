@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
 
 useHead({
@@ -11,6 +11,7 @@ usePageSeo('Releases')
 const showData = ref(false)
 const spotlightItem = ref({})
 const tableData = ref([])
+let ctx;
 
 const getHighestPropertyValue = (property) => {
   return tableData.value.length > 0 ? tableData.value[0][property] || (property === 'ACB' ? null : '') : null
@@ -36,7 +37,38 @@ onMounted(async () => {
   spotlightItem.value = sortedTableData.value.length > 0 ? sortedTableData.value[0] : {};
 
   showData.value = true
+
+  nextTick(async () => {
+    if (import.meta.client) {
+      const { gsap } = await import('gsap')
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger')
+      gsap.registerPlugin(ScrollTrigger)
+
+      ctx = gsap.context(() => {
+        // Initial setup for the items
+        gsap.set('.release-item', { y: 50, opacity: 0 });
+
+        ScrollTrigger.batch('.release-item', {
+          onEnter: elements => {
+            gsap.to(elements, {
+              y: 0,
+              opacity: 1,
+              stagger: 0.15,
+              duration: 0.8,
+              ease: "power2.out"
+            });
+          },
+          start: "top 85%",
+          once: true
+        });
+      });
+    }
+  });
 })
+
+onUnmounted(() => {
+  if (ctx) ctx.revert();
+});
 </script>
 
 <template>
