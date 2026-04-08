@@ -1,4 +1,7 @@
 <script setup lang="ts">
+useHead({
+  title: 'Privacy Policy'
+})
 usePageSeo('Privacy Policy')
 </script>
 <template>

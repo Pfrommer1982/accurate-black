@@ -1,37 +1,27 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-
 type RadioshowItem = { title: string; link: string; pubDate: string; embedLink: string; embedHtml: string }
 type SoundcloudResponse =
   | { count: number; source: string; items: RadioshowItem[] }
   | { error: string; details: string; timestamp: string; triedUrls: string[] }
 
-const radioshowList = ref<RadioshowItem[]>([])
-const loading = ref(true)
-const error = ref('')
+const { data, error: fetchError } = await useAsyncData('soundcloud-list', () => $fetch<SoundcloudResponse>('/api/soundcloud'))
+
+const radioshowList = computed<RadioshowItem[]>(() => {
+  if (data.value && !('error' in data.value)) {
+    return data.value.items || []
+  }
+  return []
+})
+
+const error = computed(() => {
+  if (fetchError.value) return 'Netwerkfout bij het laden van radioshows'
+  if (data.value && 'error' in data.value) return data.value.error
+  return ''
+})
 
 usePageSeo('Techtonic')
-
-const fetchRadioshows = async () => {
-  try {
-    loading.value = true
-    const data = await $fetch<SoundcloudResponse>('/api/soundcloud')
-    
-    if ('error' in data) {
-      error.value = data.error
-    } else {
-      radioshowList.value = data.items || []
-    }
-  } catch (err) {
-    console.error('Error fetching radioshows:', err)
-    error.value = 'Kon radioshows niet laden: ' + (err instanceof Error ? err.message : String(err))
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchRadioshows()
+useHead({
+  title: 'Techtonic'
 })
 </script>
 
@@ -51,13 +41,8 @@ onMounted(() => {
       </h1>
     </div>
     
-    <!-- Loading state -->
-    <div v-if="loading" class="loading">
-      <p>Radioshows laden...</p>
-    </div>
-    
     <!-- Error state -->
-    <div v-else-if="error" class="error">
+    <div v-if="error" class="error">
       <p>{{ error }}</p>
     </div>
     

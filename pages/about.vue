@@ -1,7 +1,9 @@
 <script setup lang="ts">
+useHead({
+  title: 'About'
+})
 usePageSeo('About')
 </script>
-
 
 <template>
   <section class="section-about">

@@ -1,40 +1,36 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { getFirestore, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { ref, computed, onMounted } from 'vue'
 
-const latestRadioshow = ref(null);
-const latestAccurateSession = ref(null);
-
-// Helper functie voor het toevoegen van title attribuut
-const addTitleToIframe = (embedHtml, title) => {
-  return embedHtml.replace('<iframe', `<iframe title="${title}"`);
-};
-
-const fetchLatestContent = async () => {
-  try {
-    const db = getFirestore();
-
-    const accurateSessionQuery = query(collection(db, 'accurate-sessions'), orderBy('sessionDate', 'desc'), limit(1));
-
-    const [accurateSessionSnapshot, scData] = await Promise.all([
-      getDocs(accurateSessionQuery),
-      $fetch('/api/soundcloud')
-    ]);
-
-    accurateSessionSnapshot.forEach(doc => {
-      latestAccurateSession.value = doc.data();
-    });
-
-    if (!scData.error && scData.items && scData.items.length > 0) {
-      latestRadioshow.value = scData.items[0];
-    }
-
-  } catch (error) {
-    console.error('Error fetching spotlight content:', error);
+const { data: scData } = await useAsyncData('soundcloud-latest', () => $fetch('/api/soundcloud'))
+const latestRadioshow = computed(() => {
+  if (scData.value && 'items' in scData.value && scData.value.items.length > 0) {
+    return scData.value.items[0]
   }
-};
+  return null
+})
 
-onMounted(fetchLatestContent);
+const latestAccurateSession = ref(null)
+
+const addTitleToIframe = (embedHtml, title) => {
+  if (!embedHtml) return ''
+  return embedHtml.replace('<iframe', `<iframe title="${title}"`)
+}
+
+const fetchFirebaseData = async () => {
+  try {
+    const { getFirestore, collection, query, orderBy, limit, getDocs } = await import('firebase/firestore')
+    const db = getFirestore()
+    const accurateSessionQuery = query(collection(db, 'accurate-sessions'), orderBy('sessionDate', 'desc'), limit(1))
+    const snapshot = await getDocs(accurateSessionQuery)
+    snapshot.forEach(doc => {
+      latestAccurateSession.value = doc.data()
+    })
+  } catch (error) {
+    console.error('Error fetching firebase session:', error)
+  }
+}
+
+onMounted(fetchFirebaseData)
 </script>
 
 <template>
