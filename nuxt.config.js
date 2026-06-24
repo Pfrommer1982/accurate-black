@@ -1,4 +1,6 @@
 export default defineNuxtConfig({
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
+
   // Modules
   modules: [
     '@vueuse/motion/nuxt',
@@ -247,7 +249,23 @@ export default defineNuxtConfig({
     },
     prerender: {
       routes: await fetchDynamicRoutes()
-    }
+    },
+    routeRules: {
+      '/**': {
+        headers: {
+          'X-Frame-Options': 'SAMEORIGIN',
+          'X-Content-Type-Options': 'nosniff',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+          'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+        },
+      },
+      '/admin/**': {
+        headers: {
+          'X-Robots-Tag': 'noindex, nofollow',
+        },
+      },
+    },
   },
 
   // SEO Settings
