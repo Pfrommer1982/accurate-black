@@ -10,9 +10,6 @@ export default defineNuxtConfig({
     '@dargmuesli/nuxt-cookie-control',
     '@nuxtjs/robots',
 
-  
-    '@nuxt/scripts'
-
   ],
 
   // Image Module Config
