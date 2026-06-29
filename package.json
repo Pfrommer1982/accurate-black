@@ -16,7 +16,7 @@
     "@dargmuesli/nuxt-cookie-control": "^8.6.1",
     "@emailjs/browser": "^4.4.1",
     "@nuxt/image": "^1.10.0",
-    "@nuxt/ui": "^2.21.1",
+    "@nuxt/ui": "^4.9.0",
     "@nuxtjs/robots": "^5.2.8",
     "@vueuse/motion": "^2.2.6",
     "dropzone": "6.0.0-beta.2",
