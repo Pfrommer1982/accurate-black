@@ -69,10 +69,14 @@ a {
     margin-inline: calc(var(--page-margin) * -1);
   }
 
-  #site-footer .footer__social,
-  #site-footer .footer__social:nth-child(odd),
+  #site-footer .footer__social:nth-child(odd) {
+    padding-left: var(--page-margin);
+    padding-right: .75rem;
+  }
+
   #site-footer .footer__social:nth-child(even) {
-    padding-inline: var(--page-margin);
+    padding-left: .75rem;
+    padding-right: var(--page-margin);
   }
 }
 
