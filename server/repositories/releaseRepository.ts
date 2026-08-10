@@ -22,6 +22,13 @@ export const getPublicReleaseDocuments = async (): Promise<ReleaseDocument[]> =>
       query(collection(database, 'users'), orderBy('ACB', 'desc'), limit(MAX_PUBLIC_RELEASES)),
     )
     return snapshot.docs.map(document => ({ id: document.id, data: document.data() as unknown }))
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : 'unknown error'
+    console.error('[releases] Firestore read failed:', detail)
+    throw createError({
+      statusCode: 502,
+      statusMessage: `Firestore catalogue read failed: ${detail.slice(0, 160)}`,
+    })
   } finally {
     await terminate(database)
     await deleteApp(app)

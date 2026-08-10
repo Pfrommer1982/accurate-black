@@ -1,3 +1,14 @@
+const cleanEnv = (value) => {
+  let text = String(value ?? '').trim()
+  if (
+    (text.startsWith('"') && text.endsWith('"'))
+    || (text.startsWith("'") && text.endsWith("'"))
+  ) {
+    text = text.slice(1, -1).trim()
+  }
+  return text
+}
+
 export default defineNuxtConfig({
   devtools: { enabled: process.env.NODE_ENV !== 'production' },
 
@@ -252,16 +263,17 @@ export default defineNuxtConfig({
   },
 
   // Contact forms + public Firebase web config (set these in Vercel env for Production/Preview).
+  // Values may be pasted with wrapping quotes from .env; strip those so Firestore gets a real project id.
   runtimeConfig: {
-    contactInbox: process.env.CONTACT_INBOX || 'info.accurateblack@gmail.com',
+    contactInbox: cleanEnv(process.env.CONTACT_INBOX) || 'info.accurateblack@gmail.com',
     public: {
-      contactInbox: process.env.CONTACT_INBOX || 'info.accurateblack@gmail.com',
-      firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY || '',
-      firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || process.env.VITE_FIREBASE_AUTH_DOMAIN || '',
-      firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || '',
-      firebaseStorageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET || '',
-      firebaseMessagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-      firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID || '',
+      contactInbox: cleanEnv(process.env.CONTACT_INBOX) || 'info.accurateblack@gmail.com',
+      firebaseApiKey: cleanEnv(process.env.NUXT_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY),
+      firebaseAuthDomain: cleanEnv(process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || process.env.VITE_FIREBASE_AUTH_DOMAIN),
+      firebaseProjectId: cleanEnv(process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID),
+      firebaseStorageBucket: cleanEnv(process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET),
+      firebaseMessagingSenderId: cleanEnv(process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID),
+      firebaseAppId: cleanEnv(process.env.NUXT_PUBLIC_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID),
     },
   },
 
