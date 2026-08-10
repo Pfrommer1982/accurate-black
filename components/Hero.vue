@@ -76,6 +76,8 @@ onMounted(() => {
 
   window.addEventListener('scroll', scheduleFrame, { passive: true })
   window.addEventListener('resize', scheduleFrame, { passive: true })
+  window.visualViewport?.addEventListener('resize', scheduleFrame)
+  window.visualViewport?.addEventListener('scroll', scheduleFrame)
   document.addEventListener('visibilitychange', handleVisibility)
   motionQuery.addEventListener('change', scheduleFrame)
   scheduleFrame()
@@ -84,6 +86,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', scheduleFrame)
   window.removeEventListener('resize', scheduleFrame)
+  window.visualViewport?.removeEventListener('resize', scheduleFrame)
+  window.visualViewport?.removeEventListener('scroll', scheduleFrame)
   document.removeEventListener('visibilitychange', handleVisibility)
   motionQuery?.removeEventListener('change', scheduleFrame)
   observer?.disconnect()
@@ -205,8 +209,9 @@ onBeforeUnmount(() => {
 }
 
 @media (width < 768px) {
-  .hero { height: auto; min-height: 100svh; }
-  .hero__stage { position: relative; height: auto; min-height: 100svh; overflow: hidden; }
+  /* Keep a sticky runway on mobile so the hero scroll choreography still runs. */
+  .hero { height: 145svh; min-height: 145svh; }
+  .hero__stage { position: sticky; top: 0; height: 100svh; min-height: 100svh; overflow: hidden; }
   .hero__copy { grid-column: 1 / -1; grid-row: 2; align-self: start; max-width: none; padding-top: .75rem; transform: translate3d(0, var(--hero-mobile-title-y), 0); filter: none; }
   .hero__overline { margin-bottom: 1rem; font-size: .625rem; }
   .hero__artist { margin-bottom: .35rem; }

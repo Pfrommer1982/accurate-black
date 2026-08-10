@@ -7,14 +7,22 @@ export default defineNuxtPlugin((nuxtApp) => {
     window.scrollTo({ left: 0, top: 0, behavior: 'auto' })
   }
 
-  resetInitialPosition()
-  window.addEventListener('pageshow', (event) => {
-    // Back/forward with a hash should not be forced to the top.
-    if (event.persisted && window.location.hash) return
+  const forceTopUnlessHash = () => {
+    if (window.location.hash) return
     resetInitialPosition()
-  })
-  nuxtApp.hook('app:mounted', () => {
-    resetInitialPosition()
+    // iOS Safari / BFCache can restore scroll after the first paint.
     requestAnimationFrame(resetInitialPosition)
+    window.setTimeout(resetInitialPosition, 50)
+    window.setTimeout(resetInitialPosition, 220)
+  }
+
+  forceTopUnlessHash()
+
+  window.addEventListener('pageshow', () => {
+    forceTopUnlessHash()
+  })
+
+  nuxtApp.hook('app:mounted', () => {
+    forceTopUnlessHash()
   })
 })

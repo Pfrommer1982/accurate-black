@@ -57,7 +57,7 @@ useHead({
 <template>
   <article class="artist-detail">
     <aside class="artist-detail__stage" :aria-label="`${artist.name} portrait`">
-      <img v-if="visual" :src="visual" :alt="`${artist.name} artist image`" width="1200" height="1200">
+      <img v-if="visual" :src="withImageKitTransform(visual, { width: 1200, quality: 76 })" :alt="`${artist.name} artist image`" width="1200" height="1200">
       <p v-else>{{ artist.name }}</p>
     </aside>
     <div class="artist-detail__paper">
@@ -66,7 +66,7 @@ useHead({
       <dl><div><dt>ARTIST</dt><dd>{{ artist.name }}</dd></div><div><dt>RELEASES</dt><dd>{{ String(artist.releaseCount).padStart(2, '0') }}</dd></div><div><dt>LATEST</dt><dd>{{ artist.latestRelease.catalogNumber }}</dd></div></dl>
       <section><p class="artist-detail__label">[A] BIOGRAPHY</p><p>{{ artist.bio ?? 'Biography unavailable.' }}</p></section>
       <section><p class="artist-detail__label">[B] LINKS</p><nav v-if="artist.links.length"><a v-for="link in artist.links" :key="link.url" :href="link.url" target="_blank" rel="noopener noreferrer">{{ link.provider }} ↗</a></nav><p v-else class="artist-detail__quiet">No verified links available.</p></section>
-      <section class="artist-detail__releases"><p class="artist-detail__label">[C] RELEASES</p><ol><li v-for="release in artist.releases" :key="release.id"><NuxtLink :to="`/releases/${encodeURIComponent(release.catalogNumber)}`" :aria-label="`Open ${release.title} by ${release.artist}`"><img :src="release.artworkUrl" :alt="`Release artwork for ${release.title}`" width="300" height="300"><span>{{ release.catalogNumber }}<strong>{{ release.title }}</strong></span></NuxtLink></li></ol></section>
+      <section class="artist-detail__releases"><p class="artist-detail__label">[C] RELEASES</p><ol><li v-for="release in artist.releases" :key="release.id"><NuxtLink :to="`/releases/${encodeURIComponent(release.catalogNumber)}`" :aria-label="`Open ${release.title} by ${release.artist}`"><img :src="withImageKitTransform(release.artworkUrl, { width: 480, quality: 70 })" :alt="`Release artwork for ${release.title}`" width="300" height="300" loading="lazy" decoding="async"><span>{{ release.catalogNumber }}<strong>{{ release.title }}</strong></span></NuxtLink></li></ol></section>
     </div>
   </article>
 </template>

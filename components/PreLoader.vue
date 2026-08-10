@@ -8,9 +8,16 @@
 
   onMounted(() => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const seenBefore = window.sessionStorage.getItem('ab:preloader-seen') === '1';
+    const isNarrow = window.matchMedia('(width < 768px)').matches;
+    // First visit keeps presence; return visits / mobile exit faster so content arrives sooner.
+    const holdMs = seenBefore || isNarrow ? 500 : 1100;
+    const exitMs = reducedMotion ? 0 : (seenBefore || isNarrow ? 420 : 900);
 
     exitTimer = window.setTimeout(() => {
-      if (reducedMotion) {
+      window.sessionStorage.setItem('ab:preloader-seen', '1');
+
+      if (reducedMotion || exitMs === 0) {
         isLoading.value = false;
         return;
       }
@@ -18,8 +25,8 @@
       isExiting.value = true;
       removeTimer = window.setTimeout(() => {
         isLoading.value = false;
-      }, 1000);
-    }, 1400);
+      }, exitMs);
+    }, holdMs);
   });
 
   onBeforeUnmount(() => {
