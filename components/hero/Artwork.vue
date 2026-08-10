@@ -1,16 +1,22 @@
 <script setup lang="ts">
 import type { FeaturedRelease } from '~/types/release'
+import { withImageKitTransform } from '~/utils/imagekitUrl'
 
-defineProps<{
+const props = defineProps<{
   release: FeaturedRelease
 }>()
+
+const artworkSrc = computed(() => withImageKitTransform(props.release.artworkUrl, {
+  width: 900,
+  quality: 78,
+}))
 </script>
 
 <template>
   <figure class="hero-artwork">
     <div class="hero-artwork__aperture">
       <img
-        :src="release.artworkUrl"
+        :src="artworkSrc"
         :alt="`Release artwork for ${release.title} by ${release.artist}`"
         class="hero-artwork__image"
         width="600"

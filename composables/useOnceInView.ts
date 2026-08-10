@@ -1,37 +1,73 @@
 import type { Ref } from 'vue'
 
-export const useOnceInView = (target: Ref<HTMLElement | null>, rootMargin = '0px 0px -24% 0px'): {
+const shouldRevealImmediately = (element: HTMLElement): boolean => {
+  const rect = element.getBoundingClientRect()
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+  // In view, or already scrolled past (restored scroll / BFCache).
+  // Only keep waiting for blocks still clearly below the fold.
+  return rect.top < viewportHeight - 8
+}
+
+export const useOnceInView = (
+  target: Ref<HTMLElement | null>,
+  rootMargin = '0px 0px -12% 0px',
+): {
   isReady: Ref<boolean>
   isVisible: Ref<boolean>
 } => {
   const isReady = ref(false)
   const isVisible = ref(false)
   let observer: IntersectionObserver | null = null
+  let safetyTimer: ReturnType<typeof setTimeout> | null = null
+
+  const reveal = () => {
+    isVisible.value = true
+    if (safetyTimer) {
+      clearTimeout(safetyTimer)
+      safetyTimer = null
+    }
+    observer?.disconnect()
+    observer = null
+  }
 
   onMounted(() => {
-    isReady.value = true
+    const element = target.value
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (
+      !element
+      || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || !('IntersectionObserver' in window)
+    ) {
       isVisible.value = true
+      isReady.value = true
       return
     }
 
-    if (!target.value || !('IntersectionObserver' in window)) {
+    // Reveal immediately when already on/above screen, then enable reveal CSS.
+    if (shouldRevealImmediately(element)) {
       isVisible.value = true
+      isReady.value = true
       return
     }
 
     observer = new IntersectionObserver(([entry]) => {
       if (!entry?.isIntersecting) return
-      isVisible.value = true
-      observer?.disconnect()
-      observer = null
-    }, { rootMargin, threshold: .01 })
+      reveal()
+    }, { rootMargin, threshold: 0.01 })
 
-    observer.observe(target.value)
+    observer.observe(element)
+    isReady.value = true
+
+    // Never leave content permanently clipped if IO misses (iOS / restored scroll).
+    safetyTimer = setTimeout(() => {
+      if (!isVisible.value) reveal()
+    }, 900)
   })
 
-  onBeforeUnmount(() => observer?.disconnect())
+  onBeforeUnmount(() => {
+    if (safetyTimer) clearTimeout(safetyTimer)
+    observer?.disconnect()
+  })
 
   return { isReady, isVisible }
 }

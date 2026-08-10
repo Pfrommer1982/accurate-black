@@ -29,7 +29,7 @@ const updatePreviewWhenReady = async (release: FeaturedRelease) => {
 
   const request = ++previewRequest
   const image = new Image()
-  image.src = release.artworkUrl
+  image.src = withImageKitTransform(release.artworkUrl, { width: 900, quality: 74 })
 
   try {
     await image.decode()
@@ -116,7 +116,7 @@ onBeforeUnmount(() => {
           </span>
           <span class="catalogue-plate__artwork">
             <img
-              :src="release.artworkUrl"
+              :src="withImageKitTransform(release.artworkUrl, { width: 640, quality: 72 })"
               :alt="`Release artwork for ${release.title} by ${release.artist}`"
               width="600"
               height="600"

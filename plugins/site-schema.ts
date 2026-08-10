@@ -14,7 +14,7 @@ export default defineNuxtPlugin(() => {
       {
         key: 'site-graph-jsonld',
         type: 'application/ld+json',
-        children: JSON.stringify(siteGraphSchema()),
+        innerHTML: JSON.stringify(siteGraphSchema()),
       },
     ],
   })

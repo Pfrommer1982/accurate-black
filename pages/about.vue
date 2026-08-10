@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { aboutFaqSchema } from '~/utils/siteSeo'
+import { withImageKitTransform } from '~/utils/imagekitUrl'
 
 usePageSeo(
   'About Accurate Black',
@@ -12,7 +13,7 @@ useHead({
   script: [{
     key: 'about-faq-jsonld',
     type: 'application/ld+json',
-    children: JSON.stringify(aboutFaqSchema()),
+    innerHTML: JSON.stringify(aboutFaqSchema()),
   }],
 })
 
@@ -39,7 +40,10 @@ const bookableDjs = [
     name: 'Robbi Altidore',
     legalName: 'Robin Plompen',
     roles: ['Owner', 'Producer', 'DJ', 'Radio'],
-    image: 'https://ik.imagekit.io/pweehbu88/icons/Robbi%20Altidore.webp?updatedAt=1738326085511',
+    image: withImageKitTransform(
+      'https://ik.imagekit.io/pweehbu88/icons/Robbi%20Altidore.webp?updatedAt=1738326085511',
+      { width: 900, quality: 74 },
+    ),
     note: 'Techtonic / In Progress Radio',
   },
 ] as const
@@ -280,7 +284,8 @@ onBeforeUnmount(() => {
           alt="Robin Plompen, Robbi Altidore"
           width="1000"
           height="1000"
-          loading="lazy"
+          loading="eager"
+          fetchpriority="high"
           decoding="async"
           class="about-page__portrait-image"
         >

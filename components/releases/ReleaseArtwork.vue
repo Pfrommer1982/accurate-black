@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ReleaseSummary } from '~/types/release'
+import { withImageKitTransform } from '~/utils/imagekitUrl'
 
 const props = withDefaults(defineProps<{
   release: ReleaseSummary
@@ -14,6 +15,11 @@ const transitionName = computed(() => {
   const key = props.release.catalogNumber.toLowerCase().replace(/[^a-z0-9-]/g, '-')
   return `release-${key}-artwork`
 })
+
+const artworkSrc = computed(() => withImageKitTransform(
+  props.release.artworkUrl,
+  { width: props.compact ? 480 : 900, quality: props.compact ? 68 : 74 },
+))
 </script>
 
 <template>
@@ -23,7 +29,7 @@ const transitionName = computed(() => {
     :style="{ viewTransitionName: transitionName }"
   >
     <img
-      :src="release.artworkUrl"
+      :src="artworkSrc"
       :alt="`Release artwork for ${release.title} by ${release.artist}`"
       width="900"
       height="900"

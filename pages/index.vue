@@ -65,7 +65,8 @@ usePageSeo(
   --homepage-section-space: clamp(4.5rem, 7vw, 7.5rem);
 
   min-height: 100vh;
-  overflow: clip;
+  /* Avoid overflow:clip here: it breaks position:sticky for the hero stage. */
+  overflow-x: clip;
   background: var(--color-void);
 }
 

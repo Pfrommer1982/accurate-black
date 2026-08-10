@@ -22,7 +22,7 @@ const { isReady, isVisible } = useOnceInView(wall)
       v-for="(release, index) in releases"
       :key="release.id"
       :release="release"
-      :eager="index < 12"
+      :eager="index < 4"
       :reveal-order="Math.min(index, 11)"
     />
   </ol>
