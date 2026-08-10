@@ -1,358 +1,358 @@
-<script>
-import { ref, onMounted, computed } from 'vue';
-import { getFirestore, collection, getDocs, updateDoc, deleteDoc, query, orderBy, doc } from 'firebase/firestore';
-import { getFirebaseClientApp } from '~/utils/firebaseClient';
+<script setup lang="ts">
+import { getFirestore, collection, getDocs, updateDoc, deleteDoc, query, orderBy, doc } from 'firebase/firestore'
+import { getFirebaseClientApp } from '~/utils/firebaseClient'
 
-export default {
-    setup() {
-        const users = ref([]);
-        const isOpen = ref([]);
-        const editedUser = ref({});
-        const searchQuery = ref('');
-        const openIndex = ref(null); 
+type ReleaseTrack = { trackName?: string }
+type ReleaseRecord = {
+  id: string
+  ACB?: string
+  artist?: string
+  bio?: string
+  releaseName?: string
+  tracks?: ReleaseTrack[]
+  releaseTrailer?: string
+  description?: string
+  digDisLink?: string
+  socialLinks?: string[]
+  artistImageUrl?: string
+  imageUrl?: string
+  soundcloudUrl?: string
+  [key: string]: unknown
+}
 
-        const fetchUsers = async () => {
-            try {
-                const db = getFirestore(getFirebaseClientApp());
-                const usersCollection = collection(db, 'users');
-                const q = query(usersCollection, orderBy('ACB'));
-                const querySnapshot = await getDocs(q);
-                const fetchedUsers = [];
-                querySnapshot.forEach(doc => {
-                    fetchedUsers.push({ ...doc.data(), id: doc.id });
-                });
-                users.value = fetchedUsers;
-                isOpen.value = new Array(fetchedUsers.length).fill(false); 
-            } catch (error) {
-                console.error('Error getting users: ', error);
-            }
-        };
-
-        const toggleRow = (index) => {
-            const userIndex = users.value.findIndex(user => user.id === filteredUsers.value[index].id); 
-            if (isOpen.value[userIndex]) {
-                isOpen.value[userIndex] = false;
-                openIndex.value = null;
-            } else {
-                isOpen.value.fill(false);
-                isOpen.value[userIndex] = true;
-                openIndex.value = userIndex;
-                editedUser.value = { ...users.value[userIndex] };
-            }
-        };
-
-        const updateUser = async (index) => {
-            const userIndex = users.value.findIndex(user => user.id === filteredUsers.value[index].id);
-            try {
-                const db = getFirestore(getFirebaseClientApp());
-                const userDocRef = doc(db, 'users', users.value[userIndex].id);
-                await updateDoc(userDocRef, editedUser.value);
-                console.log('Release succesvol bijgewerkt');
-                isOpen.value[userIndex] = false;
-                showAlert('Release succesvol bijgewerkt');
-            } catch (error) {
-                console.error('Error updating user: ', error);
-            }
-        };
-
-        const showAlert = (message) => {
-            alert(message);
-        };
-
-        const deleteUser = async (index) => {
-            const userIndex = users.value.findIndex(user => user.id === filteredUsers.value[index].id);
-            try {
-                const confirmation = confirm('Weet je zeker dat je deze release wilt verwijderen?');
-                if (confirmation) {
-                    const db = getFirestore(getFirebaseClientApp());
-                    const userDocRef = doc(db, 'users', users.value[userIndex].id);
-                    await deleteDoc(userDocRef);
-
-                    users.value.splice(userIndex, 1);
-                    isOpen.value.splice(userIndex, 1);
-                }
-            } catch (error) {
-                console.error('Error removing user: ', error);
-            }
-        };
-
-        onMounted(fetchUsers);
-
-        const filteredUsers = computed(() => {
-            return users.value.filter(user => 
-                user.artist.toLowerCase().includes(searchQuery.value.toLowerCase())
-            );
-        });
-
-        return { users, isOpen, editedUser, searchQuery, filteredUsers, toggleRow, updateUser, deleteUser, openIndex };
-    },
-    computed: {
-        sortedUsers() {
-            return this.filteredUsers.sort((a, b) => {
-                if (a.ACB === 'ACB001') return 1;
-                return b.ACB.localeCompare(a.ACB);
-            });
-        }
-    }
-};
-
-
-</script>
-
-<script setup>
 definePageMeta({ middleware: 'auth' })
+
+const users = ref<ReleaseRecord[]>([])
+const openId = ref<string | null>(null)
+const editedUser = ref<ReleaseRecord>({} as ReleaseRecord)
+const searchQuery = ref('')
+const loading = ref(true)
+const statusMessage = ref('')
+const statusKind = ref<'success' | 'error'>('success')
+const savingId = ref<string | null>(null)
+
+const fetchUsers = async () => {
+  loading.value = true
+  try {
+    const db = getFirestore(getFirebaseClientApp())
+    const usersCollection = collection(db, 'users')
+    const q = query(usersCollection, orderBy('ACB'))
+    const querySnapshot = await getDocs(q)
+    const fetchedUsers: ReleaseRecord[] = []
+    querySnapshot.forEach((snapshot) => {
+      fetchedUsers.push({ ...snapshot.data(), id: snapshot.id } as ReleaseRecord)
+    })
+    users.value = fetchedUsers
+  } catch (error) {
+    console.error('Error getting users: ', error)
+    statusKind.value = 'error'
+    statusMessage.value = 'Could not load releases.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const sortedUsers = computed(() => {
+  const queryText = searchQuery.value.trim().toLowerCase()
+  const filtered = users.value.filter((user) => {
+    if (!queryText) return true
+    const artist = String(user.artist || '').toLowerCase()
+    const acb = String(user.ACB || '').toLowerCase()
+    const releaseName = String(user.releaseName || '').toLowerCase()
+    return artist.includes(queryText) || acb.includes(queryText) || releaseName.includes(queryText)
+  })
+
+  return [...filtered].sort((a, b) => {
+    if (a.ACB === 'ACB001') return 1
+    return String(b.ACB || '').localeCompare(String(a.ACB || ''))
+  })
+})
+
+const isOpen = (id: string) => openId.value === id
+
+const toggleRow = (user: ReleaseRecord) => {
+  if (openId.value === user.id) {
+    openId.value = null
+    editedUser.value = {} as ReleaseRecord
+    return
+  }
+  openId.value = user.id
+  editedUser.value = {
+    ...user,
+    tracks: Array.isArray(user.tracks) ? user.tracks.map(track => ({ ...track })) : [],
+    socialLinks: Array.isArray(user.socialLinks) ? [...user.socialLinks] : [''],
+  }
+}
+
+const addSocialLink = () => {
+  if (!Array.isArray(editedUser.value.socialLinks)) {
+    editedUser.value.socialLinks = ['']
+    return
+  }
+  editedUser.value.socialLinks.push('')
+}
+
+const removeSocialLink = () => {
+  if (!Array.isArray(editedUser.value.socialLinks)) return
+  if (editedUser.value.socialLinks.length > 1) editedUser.value.socialLinks.pop()
+}
+
+const updateUser = async (user: ReleaseRecord) => {
+  savingId.value = user.id
+  statusMessage.value = ''
+  try {
+    const db = getFirestore(getFirebaseClientApp())
+    const userDocRef = doc(db, 'users', user.id)
+    const { id: _id, ...payload } = editedUser.value
+    await updateDoc(userDocRef, payload)
+
+    const index = users.value.findIndex(item => item.id === user.id)
+    if (index >= 0) {
+      users.value[index] = { ...editedUser.value, id: user.id }
+    }
+
+    openId.value = null
+    statusKind.value = 'success'
+    statusMessage.value = 'Release updated.'
+  } catch (error) {
+    console.error('Error updating user: ', error)
+    statusKind.value = 'error'
+    statusMessage.value = 'Update failed.'
+  } finally {
+    savingId.value = null
+  }
+}
+
+const deleteUser = async (user: ReleaseRecord) => {
+  if (!confirm(`Delete ${user.ACB || 'this release'} permanently?`)) return
+
+  savingId.value = user.id
+  statusMessage.value = ''
+  try {
+    const db = getFirestore(getFirebaseClientApp())
+    const userDocRef = doc(db, 'users', user.id)
+    await deleteDoc(userDocRef)
+    users.value = users.value.filter(item => item.id !== user.id)
+    if (openId.value === user.id) openId.value = null
+    statusKind.value = 'success'
+    statusMessage.value = 'Release deleted.'
+  } catch (error) {
+    console.error('Error removing user: ', error)
+    statusKind.value = 'error'
+    statusMessage.value = 'Delete failed.'
+  } finally {
+    savingId.value = null
+  }
+}
+
+onMounted(fetchUsers)
 </script>
 
 <template>
-    <section class="section-overzicht">
+  <AdminShell
+    title="Overview"
+    index="03"
+    lede="Search, open, update or delete catalogue releases. Changes write straight to Firestore."
+  >
+    <section class="admin-panel" aria-labelledby="overview-title">
+      <div class="admin-panel__head">
+        <p class="admin-panel__label">Catalogue</p>
+        <h2 id="overview-title" class="admin-panel__title">Releases</h2>
+        <p class="admin-panel__copy">
+          Open a row to edit fields. Artwork URLs can be updated if Storage paths change.
+        </p>
+      </div>
 
-        <div v-once class="break-line top">
-            <div class="break-line-text">
-                <div class="man-nav">
-                    <div class="btn-more back">
-                        <NuxtLink to="/admin/releasesform" class="btn-more-link" v-scramble.hover>
-                            <p class="btn-more-p">RELEASE TOEVOEGEN</p>
-                        </NuxtLink>
-                    </div>
-                    <div class="btn-more back">
-                        <NuxtLink to="/admin/radioshow" class="btn-more-link" v-scramble.hover>
-                            <p class="btn-more-p">RADIOSHOW TOEVOEGEN</p>
-                        </NuxtLink>
-                    </div>
-                    <div class="btn-more back">
-                        <NuxtLink to="/admin/table" class="btn-more-link" v-scramble.hover>
-                            <p class="btn-more-p">OVERZICHT/DELETE</p>
-                        </NuxtLink>
-                    </div>
-                </div>
+      <div class="admin-toolbar">
+        <div class="admin-search">
+          <label for="release-search">Filter</label>
+          <input
+            id="release-search"
+            v-model="searchQuery"
+            class="admin-input"
+            type="search"
+            placeholder="Artist, ACB or release…"
+          >
+        </div>
+        <p class="admin-note">
+          {{ loading ? 'Loading…' : `${sortedUsers.length} release${sortedUsers.length === 1 ? '' : 's'}` }}
+        </p>
+      </div>
+
+      <p
+        v-if="statusMessage"
+        class="admin-feedback"
+        :class="statusKind === 'success' ? 'admin-feedback--success' : 'admin-feedback--error'"
+        role="status"
+      >
+        {{ statusMessage }}
+      </p>
+
+      <div v-if="!loading && sortedUsers.length === 0" class="admin-note">
+        No releases match this filter.
+      </div>
+
+      <div class="admin-list" aria-live="polite">
+        <article
+          v-for="user in sortedUsers"
+          :key="user.id"
+          class="admin-list__item"
+          :class="{ 'admin-list__item--open': isOpen(user.id) }"
+        >
+          <button
+            type="button"
+            class="admin-list__header"
+            :aria-expanded="isOpen(user.id)"
+            @click="toggleRow(user)"
+          >
+            <div class="admin-list__meta">
+              <p class="admin-list__code">{{ user.ACB || '—' }}</p>
+              <p class="admin-list__name">
+                {{ user.artist || 'Unknown artist' }}
+                <template v-if="user.releaseName"> — {{ user.releaseName }}</template>
+              </p>
             </div>
-        </div>
+            <span class="admin-btn admin-btn--ghost" style="pointer-events: none;">
+              {{ isOpen(user.id) ? 'Close' : 'Open' }}
+            </span>
+          </button>
 
-        <div class=" search-filter">
-            <p class="find"> &#128269; </p>
-            <input v-model="searchQuery" type="text" placeholder="Filter op artiest..." />
-        </div>
-
-        <div class="accordion">
-            <h2>Releases Overzicht, hier kun je de release verwijderen of updaten</h2>
-            <template v-for="(user, index) in sortedUsers" :key="user.id">
-                <div class="accordion-item">
-
-                    <div class="accordion-header" @click="toggleRow(index)">
-                        <span>{{ user.ACB }} - {{ user.artist }}</span>
-                        <button class="btn-more accordion-toggle-btn" v-scramble.hover>
-                            <p class="btn-more-p">{{ isOpen[users.findIndex(u => u.id === user.id)] ? 'Sluiten' : 'Openen' }}</p>
-                        </button>
-                    </div>
-
-                    <div class="accordion-content" :class="{ 'show': isOpen[users.findIndex(u => u.id === user.id)] }">
-
-                        <div class="section-general">
-                            <div class="acb">
-                                <label>ACB:</label>
-                                <input v-model="editedUser.ACB">
-
-                                <label>Artiest:</label>
-                                <input v-model="editedUser.artist">
-
-                                <label>bio:</label>
-                                <input v-model="editedUser.bio">
-                            </div>
-                        </div>
-
-                        <div class="section-release">
-                            <div class="release">
-                                <label>Release name:</label>
-                                <input v-model="editedUser.releaseName">
-                                <label>Release tracks:</label>
-                                <div v-for="(track, trackIndex) in editedUser.tracks" :key="trackIndex">
-                                    <input v-model="editedUser.tracks[trackIndex].trackName">
-                                </div>
-                                <label>Release Trailer Link:</label>
-                                <input v-model="editedUser.releaseTrailer" /> 
-                                <label>Release Description:</label>
-                                <textarea v-model="editedUser.description" />
-                            </div>
-                        </div>
-
-                        <div class="section-media-links">
-                            <div class="links">
-                                <label>digDisLink:</label>
-                                <input v-model="editedUser.digDisLink">
-
-                                <label>Social Links:</label>
-                                <div v-for="(link, linkIndex) in editedUser.socialLinks" :key="linkIndex">
-                                    <div>
-                                        <input v-model="editedUser.socialLinks[linkIndex]">
-                                    </div>
-                                </div>
-                                <button @click="addSocialLink" v-scramble.hover>Extra link toevoegen</button>
-                            </div>
-                        </div>
-
-                        <div class="images">
-                            <label>Artiest-image:</label>
-                            <input v-model="editedUser.artistImageUrl">
-                            <NuxtImg :src="editedUser.artistImageUrl" class="artist-image" />
-                        </div>
-                        <div class="images">
-                            <label>Release-image:</label>
-                            <input v-model="editedUser.imageUrl">
-                            <NuxtImg :src="editedUser.imageUrl" class="artist-image" />
-                        </div>
-
-                        <div class="section-action-buttons">
-                            <div class="btn-update">
-                                <button class="btn-update-p " @click="updateUser(index)" v-scramble.hover>Bijwerken</button>
-                            </div>
-                            <div class="btn-delete">
-                                <button class="btn-delete-p " @click="deleteUser(index)" v-scramble.hover>Verwijderen</button>
-                            </div>
-                        </div>
-                    </div>
+          <div v-if="isOpen(user.id)" class="admin-list__body">
+            <div class="admin-list__sections">
+              <div class="admin-stack">
+                <p class="admin-panel__label">Identity</p>
+                <div class="admin-field">
+                  <label>ACB</label>
+                  <input v-model="editedUser.ACB" type="text">
                 </div>
-            </template>
-        </div>
+                <div class="admin-field">
+                  <label>Artist</label>
+                  <input v-model="editedUser.artist" type="text">
+                </div>
+                <div class="admin-field">
+                  <label>Bio</label>
+                  <textarea v-model="editedUser.bio" />
+                </div>
+              </div>
+
+              <div class="admin-stack">
+                <p class="admin-panel__label">Release</p>
+                <div class="admin-field">
+                  <label>Release name</label>
+                  <input v-model="editedUser.releaseName" type="text">
+                </div>
+                <div class="admin-field">
+                  <label>Tracks</label>
+                  <div class="admin-stack">
+                    <input
+                      v-for="(track, trackIndex) in editedUser.tracks || []"
+                      :key="`track-${trackIndex}`"
+                      v-model="track.trackName"
+                      type="text"
+                      :placeholder="`Track ${trackIndex + 1}`"
+                    >
+                  </div>
+                </div>
+                <div class="admin-field">
+                  <label>Trailer link</label>
+                  <input v-model="editedUser.releaseTrailer" type="url">
+                </div>
+                <div class="admin-field">
+                  <label>Description</label>
+                  <textarea v-model="editedUser.description" />
+                </div>
+              </div>
+
+              <div class="admin-stack">
+                <p class="admin-panel__label">Links</p>
+                <div class="admin-field">
+                  <label>Dig Dis / smartlink</label>
+                  <input v-model="editedUser.digDisLink" type="url">
+                </div>
+                <div class="admin-field">
+                  <label>Spotify embed</label>
+                  <textarea v-model="editedUser.soundcloudUrl" />
+                </div>
+                <div class="admin-field">
+                  <label>Social links</label>
+                  <div class="admin-stack">
+                    <input
+                      v-for="(_link, linkIndex) in editedUser.socialLinks || []"
+                      :key="`social-${linkIndex}`"
+                      v-model="editedUser.socialLinks![linkIndex]"
+                      type="url"
+                    >
+                  </div>
+                  <div class="admin-actions" style="margin-top: .75rem;">
+                    <button
+                      type="button"
+                      class="admin-btn admin-btn--ghost"
+                      v-scramble.hover
+                      @click="addSocialLink"
+                    >
+                      Add social
+                    </button>
+                    <button
+                      v-if="(editedUser.socialLinks?.length || 0) > 1"
+                      type="button"
+                      class="admin-btn admin-btn--ghost"
+                      v-scramble.hover
+                      @click="removeSocialLink"
+                    >
+                      Remove last
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="admin-stack">
+                <p class="admin-panel__label">Images</p>
+                <div class="admin-field">
+                  <label>Artist image URL</label>
+                  <input v-model="editedUser.artistImageUrl" type="url">
+                  <NuxtImg
+                    v-if="editedUser.artistImageUrl"
+                    :src="editedUser.artistImageUrl"
+                    class="admin-thumb"
+                    alt=""
+                  />
+                </div>
+                <div class="admin-field">
+                  <label>Release image URL</label>
+                  <input v-model="editedUser.imageUrl" type="url">
+                  <NuxtImg
+                    v-if="editedUser.imageUrl"
+                    :src="editedUser.imageUrl"
+                    class="admin-thumb"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-actions">
+              <button
+                type="button"
+                class="admin-btn"
+                :disabled="savingId === user.id"
+                v-scramble.hover
+                @click="updateUser(user)"
+              >
+                {{ savingId === user.id ? 'Saving…' : 'Update' }}
+              </button>
+              <button
+                type="button"
+                class="admin-btn admin-btn--danger"
+                :disabled="savingId === user.id"
+                v-scramble.hover
+                @click="deleteUser(user)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
     </section>
+  </AdminShell>
 </template>
-
-
-
-<style lang="scss" scoped>
-
-
-.section-overzicht {
-    padding: 0 2rem;
-    color: var(--primary-grey-light2);
-}
-
-h2 {
-    color: var(--primary-grey-light1)
-}
-
-.section-general,
-.release,
-.links,
-.images {
-    display: flex;
-    flex-direction: column;
-    margin-right: 2rem;
-
-}
-
-.man-nav {
-    display: flex;
-    margin-right: 4rem;
-}
-
-.back {
-    margin-right: 2rem;
-}
-
-.acb {
-    display: flex;
-    flex-direction: column;
-}
-
-
-
-.section-action-buttons {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    flex-direction: column;
-}
-
-.btn-update,
-.btn-delete {
-    margin-bottom: 10px;
-
-}
-
-
-
-.accordion {
-    width: 100%;
-    margin-top: 10rem;
-}
-
-.accordion-item {
-
-    margin-bottom: 10px;
-    border-radius: 5px;
-
-}
-
-.accordion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--primary-grey-light1);
-}
-
-.accordion-content {
-    position: relative;
-    padding: 10px;
-    display: none;
-    background-color: rgba(39, 39, 39, 0.384);
-    margin: 4rem 0;
-    padding: 2rem 1rem;
-    color: var(--primary-grey-light1);
-    border: 1px solid var(--primary-grey-light1);
-
-
-}
-
-.accordion-content.show {
-    display: flex;
-    height: 30rem;
-    @include respond(phone){
-        flex-direction: column;
-        height: auto;
-    }
-}
-
-.action-buttons {
-    display: flex;
-    flex-direction: column;
-}
-
-.artist-image {
-    width: 100px;
-}
-
-label {
-    margin-bottom: 6px;
-}
-
-input {
-    border: 1px solid var(--primary-grey-light2);
-    margin-right: .5rem;
-    margin-bottom: 1rem;
-    width: 12rem;
-}
-
-.find {
-    padding: 0 1rem;
-    margin-top: 1rem;
-    transform: scale(2);
-}
-
-.search-filter {
-    display: flex;
-    justify-content: flex-end;
-    padding: 1rem;
-}
-
-.search-filter input {
-    padding: 0.5rem;
-    border: 1px solid var(--primary-grey-light1);
-    border-radius: 4px;
-    width: 200px;
-    font-size: 1rem;
-}
-
-</style>

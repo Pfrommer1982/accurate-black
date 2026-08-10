@@ -1,117 +1,7 @@
-<template>
-  <section class="section-releaseform">
-    <div v-once class="break-line top">
-      <div class="break-line-text">
-        <div class="man-nav">
-          <div class="btn-more back">
-            <NuxtLink to="/admin/releasesform" class="btn-more-link" v-scramble.hover>
-              <p class="btn-more-p">RELEASE TOEVOEGEN</p>
-            </NuxtLink>
-          </div>
-          <div class="btn-more back">
-            <NuxtLink to="/admin/radioshow" class="btn-more-link" v-scramble.hover>
-              <p class="btn-more-p">RADIOSHOW TOEVOEGEN</p>
-            </NuxtLink>
-          </div>
-          <div class="btn-more back">
-            <NuxtLink to="/admin/table" class="btn-more-link" v-scramble.hover>
-              <p class="btn-more-p">OVERZICHT/DELETE</p>
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="form-container">
-      <form @submit.prevent="submitForm">
-        <div class="row">
-          <p>* is required</p>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label for="ACB">ACB release *</label>
-              <input type="text" class="form-control" id="ACB" placeholder="ACB000" v-model="ACB" required />
-            </div>
-            <div class="form-group">
-              <label for="artist">Artist *</label>
-              <input type="text" class="form-control" id="artist" placeholder="Artist name" v-model="artist" required />
-            </div>
-            <div class="form-group form-control w-full max-w-xs">
-              <label for="artistImage">Artist Image Greyscale *</label>
-              <input type="file" id="artistImage" @change="handleArtistImageUpload" ref="artistImageInput" required />
-            </div>
-            <div class="form-group">
-              <label>Social Links</label>
-              <div v-for="(link, index) in socialLinks" :key="index">
-                <input type="text" class="form-control social" v-model="socialLinks[index]" placeholder="Social Link" />
-              </div>
-            </div>
-          </div>
-          <div class="action-buttons">
-            <button type="button" class="btn-update" @click="addSocialLink" v-if="socialLinks.length < 6" v-scramble.hover>
-              <p class="btn-update-p">Add Social</p>
-            </button>
-            <button type="button" class="btn-delete" @click="removeSocialLink(index)" v-scramble.hover>
-              <p class="btn-delete-p">Remove Social</p>
-            </button>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label for="releaseName">Release Name *</label>
-              <input type="text" class="form-control" id="releaseName" placeholder="Release Name" v-model="releaseName" required />
-            </div>
-            <label>Track Name *</label>
-            <div v-for="(track, index) in tracks" :key="index">
-              <div class="form-group">
-                <input type="text" class="form-control" :id="'trackName' + index" v-model="track.trackName" placeholder="Track Name" />
-              </div>
-            </div>
-            <div class="action-buttons">
-              <button type="button" class="btn-update" @click="addTrack" v-scramble.hover>
-                <p class="btn-update-p">Add Track</p>
-              </button>
-              <button type="button" class="btn-delete" @click="removeTrack(index)" v-scramble.hover>
-                <p class="btn-delete-p">Remove Track</p>
-              </button>
-            </div>
-            <label for="description">RELEASE Description:</label>
-            <textarea class="form-control" id="description" placeholder="Enter description" v-model="description"></textarea>
-            <div class="form-group">
-              <label for="releaseTrailer">Release Trailer Video Link:</label>
-              <input type="text" class="form-control" id="releaseTrailer" placeholder="Enter release trailer video link" v-model="releaseTrailer" />
-            </div>
-            <div class="form-group">
-              <label for="soundcloudUrl">spotify embedded dark grey compact *</label>
-              <input type="text" class="form-control" id="soundcloudUrl" placeholder="Hier plaats je de volledige embedded iframe code van spotify ( ziet er zo uit <iframe>heel veel data</iframe>)" v-model="soundcloudUrl" />
-            </div>
-            <div class="form-group">
-              <label for="digDisLink">dig dis smrtlnk link</label>
-              <input type="text" class="form-control" id="digDisLink" placeholder="Enter dig dis smrtlnk link" v-model="digDisLink" />
-            </div>
-            <div class="form-group form-control w-full max-w-xs">
-              <label for="image">Image Upload *</label>
-              <input type="file" id="image" @change="handleImageUpload" ref="imageInput" required />
-              <div class="dropzone" id="imageDropzone">
-                <div class="dz-message" data-dz-message></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="action-buttons">
-          <button type="submit" class="btn-update send" v-scramble.hover>
-            <p class="btn-update-p">Submit Data</p>
-          </button>
-          <button type="button" class="btn-delete" @click="clearForm" v-scramble.hover>
-            <p class="btn-delete-p">Clear Form</p>
-          </button>
-        </div>
-      </form>
-    </div>
-  </section>
-</template>
-
 <script>
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getFirebaseClientApp } from '~/utils/firebaseClient';
+import { getFirestore, collection, addDoc } from 'firebase/firestore'
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { getFirebaseClientApp } from '~/utils/firebaseClient'
 
 export default {
   data() {
@@ -127,64 +17,72 @@ export default {
       digDisLink: '',
       bio: '',
       description: '',
-      releaseTrailer: ''
-    };
+      releaseTrailer: '',
+      submitting: false,
+      formError: '',
+      formSuccess: '',
+    }
   },
   methods: {
     async submitForm() {
-      console.log('Form submit triggered');
-      if (confirm('Weet je zeker dat je het formulier wilt verzenden?')) {
-        try {
-          await this.uploadImagesToStorage();
-          await this.addUserToFirestore();
-          this.showSuccessMessage();
-          this.clearForm();
-        } catch (error) {
-          console.error('Fout bij het verzenden van het formulier:', error);
-        }
+      this.formError = ''
+      this.formSuccess = ''
+      if (!confirm('Submit this release to Firestore?')) return
+
+      this.submitting = true
+      try {
+        await this.uploadImagesToStorage()
+        await this.addUserToFirestore()
+        this.formSuccess = 'Release saved.'
+        this.clearForm()
+      } catch (error) {
+        console.error('Fout bij het verzenden van het formulier:', error)
+        this.formError = 'Submit failed. Check files, Firebase access, and required fields.'
+      } finally {
+        this.submitting = false
       }
     },
 
     addSocialLink() {
-      this.socialLinks.push('');
+      if (this.socialLinks.length < 6) this.socialLinks.push('')
     },
-    removeSocialLink(index) {
-      this.socialLinks.splice(index, 1);
+    removeSocialLink() {
+      if (this.socialLinks.length > 1) this.socialLinks.pop()
     },
 
     addTrack() {
-      this.tracks.push({ trackName: '' });
+      this.tracks.push({ trackName: '' })
     },
-    removeTrack(index) {
-      this.tracks.splice(index, 1);
+    removeTrack() {
+      if (this.tracks.length > 1) this.tracks.pop()
     },
 
     async uploadImagesToStorage() {
       try {
-        const storage = getStorage(getFirebaseClientApp());
+        const storage = getStorage(getFirebaseClientApp())
 
         if (this.artistImage) {
-          const artistImagePath = `artists/${Date.now()}_${this.artistImage.name}`;
-          const artistImageRef = storageRef(storage, artistImagePath);
-          await uploadBytes(artistImageRef, this.artistImage);
-          this.artistImageUrl = await getDownloadURL(artistImageRef);
+          const artistImagePath = `artists/${Date.now()}_${this.artistImage.name}`
+          const artistImageRef = storageRef(storage, artistImagePath)
+          await uploadBytes(artistImageRef, this.artistImage)
+          this.artistImageUrl = await getDownloadURL(artistImageRef)
         }
 
         if (this.image) {
-          const releaseImagePath = `releases/${Date.now()}_${this.image.name}`;
-          const releaseImageRef = storageRef(storage, releaseImagePath);
-          await uploadBytes(releaseImageRef, this.image);
-          this.imageUrl = await getDownloadURL(releaseImageRef);
+          const releaseImagePath = `releases/${Date.now()}_${this.image.name}`
+          const releaseImageRef = storageRef(storage, releaseImagePath)
+          await uploadBytes(releaseImageRef, this.image)
+          this.imageUrl = await getDownloadURL(releaseImageRef)
         }
       } catch (error) {
-        console.error('Error uploading images to storage: ', error);
-        throw error;
+        console.error('Error uploading images to storage: ', error)
+        throw error
       }
     },
 
     async addUserToFirestore() {
       try {
-        const db = getFirestore(getFirebaseClientApp());
+        const db = getFirestore(getFirebaseClientApp())
         const docRef = await addDoc(collection(db, 'users'), {
           ACB: this.ACB,
           artist: this.artist,
@@ -197,112 +95,281 @@ export default {
           digDisLink: this.digDisLink,
           bio: this.bio,
           description: this.description,
-          releaseTrailer: this.releaseTrailer
-        });
-        console.log('Document written with ID: ', docRef.id);
+          releaseTrailer: this.releaseTrailer,
+        })
+        console.log('Document written with ID: ', docRef.id)
       } catch (error) {
-        console.error('Error adding document: ', error);
-        throw error;
+        console.error('Error adding document: ', error)
+        throw error
       }
     },
 
     clearForm() {
-      this.ACB = '';
-      this.artist = '';
-      this.releaseName = '';
-      this.soundcloudUrl = '';
-      this.imageUrl = '';
-      this.artistImageUrl = '';
-      this.tracks = [{ trackName: '' }];
-      this.socialLinks = [''];
-      this.digDisLink = '';
-      this.bio = '';
-      this.description = '';
-      this.releaseTrailer = '';
+      this.ACB = ''
+      this.artist = ''
+      this.releaseName = ''
+      this.soundcloudUrl = ''
+      this.imageUrl = ''
+      this.artistImageUrl = ''
+      this.tracks = [{ trackName: '' }]
+      this.socialLinks = ['']
+      this.digDisLink = ''
+      this.bio = ''
+      this.description = ''
+      this.releaseTrailer = ''
+      this.image = undefined
+      this.artistImage = undefined
 
-      // Reset file inputs
-      this.$refs.artistImageInput.value = '';
-      this.$refs.imageInput.value = '';
+      if (this.$refs.artistImageInput) this.$refs.artistImageInput.value = ''
+      if (this.$refs.imageInput) this.$refs.imageInput.value = ''
     },
 
     handleImageUpload(event) {
-      this.image = event.target.files[0];
+      this.image = event.target.files[0]
     },
 
     handleArtistImageUpload(event) {
-      this.artistImage = event.target.files[0];
+      this.artistImage = event.target.files[0]
     },
-
-    showSuccessMessage() {
-      alert('Formulier succesvol verzonden!');
-    }
-  }
-};
-
-definePageMeta({
-  middleware: 'auth'
-});
+  },
+}
 </script>
 
-<style scoped lang="scss">
+<script setup>
+definePageMeta({
+  middleware: 'auth',
+})
+</script>
 
-.section-releaseform {
-  padding: 0 2rem;
-  margin-bottom: 10rem;
-}
+<template>
+  <AdminShell
+    title="Release"
+    index="01"
+    lede="Add a catalogue release with artwork, tracks, embed and store links. Required fields are marked."
+  >
+    <form class="admin-form" @submit.prevent="submitForm">
+        <section class="admin-panel" aria-labelledby="release-identity-title">
+          <div class="admin-panel__head">
+            <p class="admin-panel__label">01 / Identity</p>
+            <h2 id="release-identity-title" class="admin-panel__title">Catalogue & artist</h2>
+            <p class="admin-panel__copy">
+              Core release identity. Artist greyscale portrait is used on artist pages.
+            </p>
+          </div>
 
-.man-nav {
-  display: flex;
-  margin-right: 4rem;
-  position: relative;
-}
+          <div class="admin-grid">
+            <div class="admin-field">
+              <label for="ACB">ACB number *</label>
+              <input id="ACB" v-model="ACB" type="text" placeholder="ACB000" required>
+            </div>
 
-.back {
-  margin-right: 2rem;
-}
+            <div class="admin-field">
+              <label for="artist">Artist *</label>
+              <input id="artist" v-model="artist" type="text" placeholder="Artist name" required>
+            </div>
 
-.form-container {
-  position: relative;
-  width: 100%;
-  margin-top: 5rem;
-}
+            <div class="admin-field">
+              <label for="releaseName">Release name *</label>
+              <input id="releaseName" v-model="releaseName" type="text" placeholder="Release title" required>
+            </div>
 
-.styled-form {
-  max-width: 800px;
-  margin: 0 auto;
-}
+            <div class="admin-field">
+              <label for="artistImage">Artist image (greyscale) *</label>
+              <input
+                id="artistImage"
+                ref="artistImageInput"
+                type="file"
+                accept="image/*"
+                required
+                @change="handleArtistImageUpload"
+              >
+            </div>
 
-.form-group {
-  margin-bottom: 15px;
-}
+            <div class="admin-field admin-field--full">
+              <p class="admin-field__label">Social links</p>
+              <div class="admin-stack">
+                <input
+                  v-for="(_link, index) in socialLinks"
+                  :key="`social-${index}`"
+                  v-model="socialLinks[index]"
+                  type="url"
+                  placeholder="https://…"
+                >
+              </div>
+              <div class="admin-actions" style="margin-top: .75rem;">
+                <button
+                  v-if="socialLinks.length < 6"
+                  type="button"
+                  class="admin-btn admin-btn--ghost"
+                  v-scramble.hover
+                  @click="addSocialLink"
+                >
+                  Add social
+                </button>
+                <button
+                  v-if="socialLinks.length > 1"
+                  type="button"
+                  class="admin-btn admin-btn--ghost"
+                  v-scramble.hover
+                  @click="removeSocialLink"
+                >
+                  Remove last
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
 
-.social {
-  margin-top: 15px;
-}
+        <section class="admin-panel" aria-labelledby="release-media-title">
+          <div class="admin-panel__head">
+            <p class="admin-panel__label">02 / Media</p>
+            <h2 id="release-media-title" class="admin-panel__title">Tracks & embeds</h2>
+            <p class="admin-panel__copy">
+              Tracklist, Spotify dark compact embed, Dig Dis smartlink and artwork.
+            </p>
+          </div>
 
-label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: var(--primary-grey-light1);
-}
+          <div class="admin-grid">
+            <div class="admin-field admin-field--full">
+              <p class="admin-field__label">Track names *</p>
+              <div class="admin-stack">
+                <input
+                  v-for="(track, index) in tracks"
+                  :key="`track-${index}`"
+                  v-model="track.trackName"
+                  type="text"
+                  :placeholder="`Track ${index + 1}`"
+                  required
+                >
+              </div>
+              <div class="admin-actions" style="margin-top: .75rem;">
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--ghost"
+                  v-scramble.hover
+                  @click="addTrack"
+                >
+                  Add track
+                </button>
+                <button
+                  v-if="tracks.length > 1"
+                  type="button"
+                  class="admin-btn admin-btn--ghost"
+                  v-scramble.hover
+                  @click="removeTrack"
+                >
+                  Remove last
+                </button>
+              </div>
+            </div>
 
-.form-control {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid var(--primary-grey-light2);
-  border-radius: 4px;
-  color: white;
-  font: bolder;
-}
+            <div class="admin-field admin-field--full">
+              <label for="description">Release description</label>
+              <textarea
+                id="description"
+                v-model="description"
+                placeholder="Short release text"
+              />
+            </div>
 
-.action-buttons {
-  display: flex;
-}
+            <div class="admin-field admin-field--full">
+              <label for="soundcloudUrl">Spotify embed (dark grey compact) *</label>
+              <textarea
+                id="soundcloudUrl"
+                v-model="soundcloudUrl"
+                placeholder="<iframe …></iframe>"
+                required
+              />
+              <p class="admin-field__hint">
+                Paste the full Spotify iframe embed code.
+              </p>
+            </div>
 
-#artistImage,
-#image {
-  color: var(--primary-grey-light2);
+            <div class="admin-field">
+              <label for="releaseTrailer">Trailer video link</label>
+              <input
+                id="releaseTrailer"
+                v-model="releaseTrailer"
+                type="url"
+                placeholder="https://…"
+              >
+            </div>
+
+            <div class="admin-field">
+              <label for="digDisLink">Dig Dis / smartlink</label>
+              <input
+                id="digDisLink"
+                v-model="digDisLink"
+                type="url"
+                placeholder="https://…"
+              >
+            </div>
+
+            <div class="admin-field admin-field--full">
+              <label for="image">Release artwork *</label>
+              <input
+                id="image"
+                ref="imageInput"
+                type="file"
+                accept="image/*"
+                required
+                @change="handleImageUpload"
+              >
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" aria-labelledby="release-actions-title">
+          <div class="admin-panel__head">
+            <p class="admin-panel__label">03 / Publish</p>
+            <h2 id="release-actions-title" class="admin-panel__title">Save release</h2>
+            <p class="admin-panel__copy">
+              Uploads images to Firebase Storage, then writes the catalogue document.
+            </p>
+          </div>
+
+          <div class="admin-actions">
+            <button
+              type="submit"
+              class="admin-btn"
+              :disabled="submitting"
+              v-scramble.hover
+            >
+              {{ submitting ? 'Saving…' : 'Submit release' }}
+            </button>
+            <button
+              type="button"
+              class="admin-btn admin-btn--ghost"
+              :disabled="submitting"
+              v-scramble.hover
+              @click="clearForm"
+            >
+              Clear form
+            </button>
+          </div>
+
+          <p
+            v-if="formSuccess"
+            class="admin-feedback admin-feedback--success"
+            role="status"
+          >
+            {{ formSuccess }}
+          </p>
+          <p
+            v-if="formError"
+            class="admin-feedback admin-feedback--error"
+            role="alert"
+          >
+            {{ formError }}
+          </p>
+        </section>
+    </form>
+  </AdminShell>
+</template>
+
+<style scoped>
+.admin-form {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
 }
 </style>

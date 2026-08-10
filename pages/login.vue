@@ -1,97 +1,79 @@
-<template>
-  <div class="admin">
-    <div class="break-line top">
-      <p class="break-line-text" v-once>ADMIN</p>
-    </div>
-    <section v-once class="section-admin">
-      <form @submit.prevent="handleSubmit" class="form-admin">
-        <label for="email">Email:</label>
-        <input type="email" v-model="email" required>
-        <label for="password">Password:</label>
-        <input type="password" v-model="password" required>
-        <button type="submit" v-scramble.hover>Log in</button>
-        <div class="error" v-if="error">{{ error }}</div>
-      </form>
-    </section>
-  </div>
-</template>
+<script setup lang="ts">
+import useLogin from '~/composables/useLogin'
 
-<script>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import useLogin from '../composables/useLogin';
+const email = ref('')
+const password = ref('')
+const sending = ref(false)
+const { login, error } = useLogin()
+const router = useRouter()
 
-export default {
-  setup() {
-    useHead({
-      title: 'Login',
-      meta: [{ name: 'robots', content: 'noindex, nofollow' }],
-    })
-    useSeoMeta({
-      robots: 'noindex, nofollow',
-      title: 'Login',
-    })
-    const email = ref('');
-    const password = ref('');
-    const { login, error } = useLogin();
-    const router = useRouter();
-
-    const handleSubmit = async () => {
-      await login(email.value, password.value);
-
-      if (!error.value) {
-        router.push('/admin/releasesform');
-      }
-    };
-
-    return { email, password, handleSubmit, error };
-  },
-};
+const handleSubmit = async () => {
+  sending.value = true
+  try {
+    await login(email.value, password.value)
+    if (!error.value) {
+      await router.push('/admin/releasesform')
+    }
+  } finally {
+    sending.value = false
+  }
+}
 </script>
 
-<style scoped lang="scss">
+<template>
+  <AdminShell
+    title="Login"
+    index="00"
+    lede="Sign in to manage releases, broadcasts and catalogue records."
+    :show-nav="false"
+  >
+    <section class="admin-panel" aria-labelledby="login-title">
+      <div class="admin-panel__head">
+        <p class="admin-panel__label">Access</p>
+        <h2 id="login-title" class="admin-panel__title">Admin session</h2>
+        <p class="admin-panel__copy">
+          Use the Accurate Black Firebase account. Pages behind this gate are not indexed.
+        </p>
+      </div>
 
-.section-admin {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-.admin {
-  padding: 0 2rem;
-}
-.form-admin {
-  width: 30rem;
-  padding: 1.5rem;
-  border: 1px solid var(--primary-grey-light2);
-  border-radius: 6px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  transform: translateY(-10rem);
-}
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--primary-grey-light1);
-}
-input {
-  width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-}
-button {
-  background-color: #4caf50;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 1rem;
-}
-button:hover {
-  background-color: #45a049;
-}
-.error {
-  color: red;
-}
-</style>
+      <form class="admin-grid admin-grid--single" @submit.prevent="handleSubmit">
+        <div class="admin-field">
+          <label for="login-email">Email</label>
+          <input
+            id="login-email"
+            v-model="email"
+            type="email"
+            autocomplete="username"
+            required
+          >
+        </div>
+
+        <div class="admin-field">
+          <label for="login-password">Password</label>
+          <input
+            id="login-password"
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <div class="admin-actions">
+          <button
+            class="admin-btn"
+            type="submit"
+            :disabled="sending"
+            v-scramble.hover
+          >
+            {{ sending ? 'Signing in…' : 'Log in' }}
+          </button>
+        </div>
+
+        <p v-if="error" class="admin-feedback admin-feedback--error" role="alert">
+          {{ error }}
+        </p>
+      </form>
+    </section>
+  </AdminShell>
+</template>
