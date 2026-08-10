@@ -240,9 +240,19 @@ export default defineNuxtConfig({
       brotli: true
     },
     prerender: {
-      routes: await fetchDynamicRoutes(),
+      // Keep prerender limited and non-fatal so production deploys cannot get stuck
+      // on scrape/tslib edge cases. Pages still SSR on Vercel at request time.
+      routes: [
+        '/',
+        '/releases',
+        '/artists',
+        '/demo-submission',
+        '/about',
+        '/privacy-policy',
+      ],
       ignore: ['/_ipx/', '/artists/_payload'],
       crawlLinks: false,
+      failOnError: false,
     },
     routeRules: {
       '/**': {
@@ -282,34 +292,3 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   }
 });
-
-// Helper function for dynamic routes
-async function fetchDynamicRoutes() {
-  try {
-    const releasesResponse = await fetch('https://www.accurateblack.nl/releases');
-    const releasesHtml = await releasesResponse.text();
-    const releasesIds = Array.from(releasesHtml.matchAll(/\/releases\/(\d+)/g)).map((match) => match[1]);
-
-    const artistsResponse = await fetch('https://www.accurateblack.nl/artists');
-    const artistsHtml = await artistsResponse.text();
-    const artistIds = Array.from(artistsHtml.matchAll(/\/artists\/(\w+)/g)).map((match) => match[1]);
-
-    const releaseRoutes = releasesIds.map((id) => `/releases/${id}`);
-    const artistRoutes = artistIds.map((id) => `/artists/${id}`);
-
-    return [
-      '/',
-      '/releases',
-      ...releaseRoutes,
-      '/artists',
-      ...artistRoutes,
-      '/demo-submission',
-      '/about',
-      '/privacy-policy',
-      '/login',
-    ];
-  } catch (err) {
-    console.error('Error fetching routes:', err);
-    return ['/'];
-  }
-}
