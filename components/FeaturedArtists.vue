@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { getFirebaseClientApp } from '~/utils/firebaseClient';
 
 const tableData = ref([]);
 
@@ -18,7 +19,7 @@ const spotlightItems = computed(() => {
 });
 
 onMounted(async () => {
-  const db = getFirestore();
+  const db = getFirestore(getFirebaseClientApp());
   const usersCollection = collection(db, 'users');
   const q = query(usersCollection, orderBy('ACB', 'desc'));
   const querySnapshot = await getDocs(q);
@@ -29,7 +30,7 @@ onMounted(async () => {
 <template>
   <section class="section-featured">
     <div class="header">
-      <h1 class="h1">FEATURED ARTISTS</h1>
+      <h2 class="h1">FEATURED ARTISTS</h2>
       <NuxtLink to="/artists" class="btn-more-link" v-scramble.hover>
         <p class="btn-more-p">VIEW ALL ARTISTS</p>
       </NuxtLink>

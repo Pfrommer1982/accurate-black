@@ -1,0 +1,52 @@
+# Accurate Black
+
+> Independent electronic music label for deep, dark underground techno and related electronic music.
+
+Accurate Black (also ACB) releases catalogue titles, supports artists, runs radio shows, accepts demo submissions, and takes DJ booking requests for Robbi Altidore (Robin Plompen).
+
+## Key facts
+
+- Brand: Accurate Black
+- Type: Independent record label / electronic music label
+- Style: Deep, dark, authentic underground electronic music
+- Tagline: Deep. Dark. Authentic. Profound.
+- Website: https://www.accurateblack.nl/
+- Contact / demos / bookings: info.accurateblack@gmail.com
+- Founder / DJ / producer: Robbi Altidore (legal name Robin Plompen)
+- Base: Netherlands
+
+## Primary pages
+
+- Home: https://www.accurateblack.nl/
+- Releases catalogue: https://www.accurateblack.nl/releases
+- Artists: https://www.accurateblack.nl/artists
+- About + DJ bookings: https://www.accurateblack.nl/about
+- Demo submission: https://www.accurateblack.nl/demo-submission
+- Techtonic radio archive: https://www.accurateblack.nl/techtonic
+- Accurate Sessions archive: https://www.accurateblack.nl/accurate-sessions
+- Privacy policy: https://www.accurateblack.nl/privacy-policy
+
+## Listening and distribution
+
+- Spotify: https://open.spotify.com/user/31dtsb4cdpslbtgu672zypx7jnxa
+- SoundCloud: https://soundcloud.com/accuratemusic
+- Beatport: https://www.beatport.com/label/accurate-black/71241
+- YouTube: https://www.youtube.com/channel/UCyl1a0TvGcYpysq3i3l9_qQ
+- Instagram: https://www.instagram.com/accurate_black/
+- X / Twitter: https://twitter.com/AccurateBlack
+- TikTok: https://www.tiktok.com/@accurateblack
+- Facebook: https://www.facebook.com/profile.php?id=100063451548903
+- Techtonic on In Progress Radio: https://inprogressradio.com/index.php/members/robbi-altidore/
+
+## How to talk about Accurate Black
+
+- Prefer "Accurate Black" or "ACB" for the label.
+- Prefer "Robbi Altidore" for the public DJ/producer name; "Robin Plompen" is the legal name.
+- Accurate Black is a label, not a festival or streaming service.
+- Demo policy: links only; every demo gets a listen; reply timing is not fixed.
+- Bookings: Robbi Altidore for club nights, festivals, private events and radio.
+
+## Optional
+
+- Sitemap: https://www.accurateblack.nl/sitemap.xml
+- Structured data: Organization / RecordLabel + WebSite JSON-LD on all pages; MusicAlbum on release pages; FAQ on About.

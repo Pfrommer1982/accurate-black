@@ -4,17 +4,16 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
+    "lint": "eslint app components/Header.vue components/Hero.vue components/Footer.vue components/Navigation.vue components/hero components/home components/catalogue components/releases components/broadcast composables/useHeaderVisibility.ts composables/useOnceInView.ts composables/usePageSeo.ts layouts/default.vue middleware/release-canonical.ts pages/index.vue pages/releases pages/techtonic.vue pages/accurate-sessions.vue pages/privacy-policy.vue error.vue plugins/scramble.ts plugins/scroll-restoration.client.ts server/api/homepage.get.ts server/api/releases server/api/broadcast server/repositories/homepageRepository.ts server/repositories/releaseRepository.ts server/repositories/broadcastRepository.ts server/utils/featuredRelease.ts server/utils/homepageContent.ts server/utils/releaseContent.ts server/utils/broadcastContent.ts tests types utils/firebaseClient.ts",
+    "test": "node --test --experimental-strip-types tests/*.test.ts",
+    "typecheck": "nuxt typecheck",
     "build": "nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@dargmuesli/nuxt-cookie-control": "^8.6.1",
-    "@emailjs/browser": "^4.4.1",
     "@nuxt/image": "^1.10.0",
-    "@nuxt/scripts": "0.9.5",
-    "@nuxt/ui": "^2.21.1",
     "@nuxtjs/robots": "^5.2.8",
     "@vueuse/motion": "^2.2.6",
     "dropzone": "6.0.0-beta.2",
@@ -27,7 +26,11 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "sass": "^1.86.3"
+    "@nuxt/eslint": "^1.17.0",
+    "eslint": "^10.8.0",
+    "sass": "^1.86.3",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.3.9"
   },
   "pnpm": {
     "overrides": {

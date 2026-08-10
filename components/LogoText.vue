@@ -71,11 +71,16 @@
   margin-left: 0.1rem;
 }
 
+.black {
+  display: inline-flex;
+  align-items: center;
+}
+
 .black img {
   margin-left: 0.12rem;
   width: 2.6rem;
   height: 1.2rem;
-  transform: translateY(0.96rem);
+  transform: translateY(-0.2rem);
 }
 
 @keyframes slideInLetter {

@@ -1,154 +1,288 @@
 <script setup lang="ts">
-useHead({
-  title: 'Privacy Policy'
-})
-usePageSeo('Privacy Policy')
+usePageSeo(
+  'Privacy Policy',
+  'How Accurate Black handles contact data, site technical data and third-party players on accurateblack.nl.',
+  undefined,
+  { path: '/privacy-policy' },
+)
+
+const inbox = 'info.accurateblack@gmail.com'
+const updated = '10 August 2026'
+
+const sections = [
+  {
+    id: '01',
+    title: 'Who we are',
+    paragraphs: [
+      'Accurate Black is an independent electronic music label. This policy explains what data we process when you use www.accurateblack.nl.',
+      'Controller contact: info.accurateblack@gmail.com.',
+    ],
+  },
+  {
+    id: '02',
+    title: 'What we collect',
+    paragraphs: [
+      'We do not run advertising pixels or first-party analytics cookies on this website.',
+      'If you send a demo or booking request, we process the details you submit (name, email, message and related fields) so we can review and reply.',
+      'Our hosting and content systems may process standard technical request data such as IP address, browser type, pages requested and timestamps in server logs.',
+    ],
+  },
+  {
+    id: '03',
+    title: 'Cookies and local storage',
+    paragraphs: [
+      'This site does not use a cookie consent banner because we do not set non-essential marketing or analytics cookies ourselves.',
+      'Strictly technical storage may be used for basic site function (for example admin login state when you sign into the private admin area).',
+      'When you play SoundCloud, Spotify or YouTube content embedded or linked from the site, those providers may set their own cookies or similar technologies under their policies.',
+    ],
+  },
+  {
+    id: '04',
+    title: 'Third parties',
+    paragraphs: [
+      'Content and media may be delivered through Firebase, ImageKit, Google Fonts, SoundCloud, Spotify, YouTube and FormSubmit (form delivery).',
+      'We use these services to run the website, show catalogue media and deliver contact forms. Each provider processes data under its own terms where applicable.',
+    ],
+  },
+  {
+    id: '05',
+    title: 'How we use data',
+    paragraphs: [
+      'Contact and form data: to handle demos, bookings and support requests.',
+      'Technical logs: to keep the site secure and working.',
+      'We do not sell personal data.',
+    ],
+  },
+  {
+    id: '06',
+    title: 'Retention',
+    paragraphs: [
+      'Form messages are kept only as long as needed to handle the request and ordinary label administration, unless a longer period is required by law.',
+      'Server logs are kept for a limited operational period.',
+    ],
+  },
+  {
+    id: '07',
+    title: 'Your rights',
+    paragraphs: [
+      'Depending on your location, you may have rights to access, correct, delete or restrict processing of your personal data, and to object or complain to a supervisory authority.',
+      'To exercise a right, email info.accurateblack@gmail.com with the subject Privacy Request.',
+    ],
+  },
+  {
+    id: '08',
+    title: 'Changes',
+    paragraphs: [
+      'We may update this policy when the site or our practices change. The date at the top of this page shows the latest revision.',
+    ],
+  },
+] as const
 </script>
+
 <template>
-  <section class="section-privacy">
-    <div class="privacy-policy">
-      <div v-once class="break-line top">
-        <p class="break-line-text">PRIVACY POLICY</p>
-
-        <div class="btn-big prv">
-          <a href="/" class="btn-big-link" v-scramble.hover>
-            <p class="btn-big-p"> BACK HOME</p>
-          </a>
-        </div>
+  <article class="privacy-page">
+    <header class="privacy-page__masthead">
+      <div class="privacy-page__utility">
+        <p>09 / LEGAL</p>
+        <p>PRIVACY</p>
+        <p>UPDATED / {{ updated.toUpperCase() }}</p>
       </div>
 
-      <div class="main-text">
+      <h1 class="privacy-page__title">PRIVACY POLICY</h1>
 
-        <h1>Privacy Policy</h1>
-        <p>This privacy policy outlines how we collect, use, and share personal information when you visit or interact
-          with our website. We take your privacy seriously and strive to protect your personal data in accordance with
-          applicable data protection laws.</p>
-
-        <h2>Information We Collect</h2>
-        <p>When you visit our website, we may automatically collect certain information about your device, including
-          information about your web browser, IP address, time zone, and some of the cookies installed on your device.
-          Additionally, we collect information about the individual web pages or products you view, which websites or
-          search terms referred you to our site, and information about how you interact with our website. We refer to
-          this automatically collected information as "Device Information."</p>
-        <br />
-        <p>We collect Device Information using the following technologies:</p>
-
-        <ul>
-          <li>"Cookies" are data files placed on your device or computer that often include an anonymous unique
-            identifier. For more information about cookies and how to disable them, visit this page.</li>
-          <li>"Log files" track actions occurring on the website and collect data including your IP address, browser
-            type, internet service provider, referring/exit pages, and date/time stamps.</li>
-          <li>"Web beacons," "tags," and "pixels" are electronic files used to record information about how you browse
-            the website.</li>
-        </ul>
-
-        <h2>How We Use Your Information</h2>
-        <p>We use the information we collect, including personal information, that we collect about you for the
-          following purposes:</p>
-
-        <ul>
-          <li>To communicate with you;</li>
-          <li>To analyze and improve our website;</li>
-          <li>To display relevant content and advertisements;</li>
-          <li>To prevent and detect fraud and other illegal activities.</li>
-        </ul>
-
-        <h2>Sharing Your Personal Information</h2>
-        <p>We share your personal information with third parties to help us achieve the purposes described above. For
-          example, with:</p>
-
-        <ul>
-          <li>Service providers to assist us with managing our website;</li>
-          <li>Advertising networks to deliver relevant ads to you.</li>
-        </ul>
-        <p>We may also share your information to comply with applicable laws and regulations, to respond to a subpoena,
-          search warrant, or other lawful request for information we receive, or to otherwise protect our rights.</p>
-
-        <h2>Data Retention</h2>
-        <p>We retain your personal information only for as long as necessary to fulfill the purposes for which we
-          collected it, including for the purposes of satisfying any legal, accounting, or reporting requirements.</p>
-
-        <h2>Your Rights</h2>
-        <p>You have the right to access personal information we hold about you and to ask that your personal information
-          be corrected, updated, or deleted. If you would like to exercise this right, please contact us through the
-          contact information below.</p>
-
-        <h2>Changes to This Privacy Policy</h2>
-        <p>We may update this privacy policy from time to time in order to reflect, for example, changes to our
-          practices or for other operational, legal, or regulatory reasons.</p>
-
-        <div class="contact">
-          <h2>Contact Us</h2>
-          <p>For more information about our privacy practices, if you have questions, or if you would like to make a
-            complaint, please contact us by email at <a class="mail"
-              href="mailto:info@accurateblack.com?subject=Privacy Policy">info@accurateblack.com</a> </p>
-
-        </div>
+      <div class="privacy-page__context">
+        <p class="privacy-page__kicker">ACCURATE BLACK / DATA NOTICE</p>
+        <p class="privacy-page__description">
+          Plain-language notice for visitors, demo submissions and booking requests.
+          No advertising trackers on this site.
+        </p>
+        <a
+          class="privacy-page__external"
+          :href="`mailto:${inbox}?subject=Privacy%20Request`"
+        >
+          {{ inbox }} <span aria-hidden="true">↗</span>
+        </a>
       </div>
-    </div>
-  </section>
+    </header>
+
+    <section
+      v-for="section in sections"
+      :key="section.id"
+      class="privacy-page__section"
+      :aria-labelledby="`privacy-${section.id}`"
+    >
+      <aside class="privacy-page__rail">
+        <p class="privacy-page__rail-label">{{ section.id }} / SECTION</p>
+        <h2 :id="`privacy-${section.id}`">{{ section.title }}</h2>
+      </aside>
+      <div class="privacy-page__copy">
+        <p
+          v-for="(paragraph, index) in section.paragraphs"
+          :key="`${section.id}-${index}`"
+        >
+          {{ paragraph }}
+        </p>
+      </div>
+    </section>
+
+    <section class="privacy-page__footer-rail" aria-label="Privacy actions">
+      <p class="privacy-page__rail-label">END / ACTIONS</p>
+      <div class="privacy-page__actions">
+        <NuxtLink
+          v-scramble.hover
+          class="privacy-page__action"
+          to="/"
+        >
+          BACK HOME
+        </NuxtLink>
+        <a
+          v-scramble.hover
+          class="privacy-page__action"
+          :href="`mailto:${inbox}?subject=Privacy%20Request`"
+        >
+          EMAIL PRIVACY
+        </a>
+      </div>
+    </section>
+  </article>
 </template>
 
-
-
-<style scoped lang="scss">
-
-
-.section-privacy {
-  padding: 0 2rem;
-
+<style scoped>
+.privacy-page {
+  min-height: 100vh;
+  padding-top: var(--header-height);
+  overflow-x: clip;
+  background: var(--color-void);
+  color: var(--color-paper);
 }
 
-.prv {
-  position: absolute;
-  top: 6rem;
-  right: 1rem;
+.privacy-page__masthead,
+.privacy-page__section,
+.privacy-page__footer-rail {
+  border-bottom: 1px solid var(--color-hairline);
 }
 
-.privacy-policy {
-  color: var(--primary-grey-light2);
-  margin: 0 auto;
-
+.privacy-page__masthead {
+  padding: clamp(2rem, 5vw, 4.5rem) var(--page-margin) clamp(2.5rem, 5vw, 4rem);
 }
 
-.privacy-policy h1,
-.privacy-policy h2 {
-  margin-top: 20px;
-  color: white;
+.privacy-page__utility {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: .625rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
-.privacy-policy ul {
-  list-style-type: none;
-  padding-left: 20px;
+.privacy-page__utility p { margin: 0; }
+.privacy-page__utility p:nth-child(2) { text-align: center; }
+.privacy-page__utility p:last-child { text-align: right; }
+
+.privacy-page__title {
+  margin: 0 0 1.75rem;
+  max-width: 12ch;
+  font-size: clamp(2.6rem, 9vw, 6rem);
+  font-weight: 400;
+  letter-spacing: -.05em;
+  line-height: .92;
 }
 
-.privacy-policy ul li {
-  margin-bottom: 10px;
+.privacy-page__context {
+  display: grid;
+  gap: .85rem;
+  max-width: 38rem;
 }
 
-.contact {
-  margin-bottom: 4rem;
+.privacy-page__kicker,
+.privacy-page__rail-label {
+  margin: 0;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: .625rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
-a {
-  text-decoration: none;
-  color: var(--primary-grey-light1);
+.privacy-page__description {
+  margin: 0;
+  color: var(--color-ash);
+  font-size: .95rem;
+  line-height: 1.5;
 }
 
-.mail {
-  &:hover {
-    color: white;
-  }
+.privacy-page__external {
+  justify-self: start;
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  letter-spacing: .06em;
+  text-decoration: underline;
+  text-underline-offset: .25rem;
 }
 
-.main-text {
-  margin-top: 6rem;
-  padding: 0 2rem;
-  border: 1px solid white;
+.privacy-page__section {
+  display: grid;
+  grid-template-columns: minmax(12rem, 2fr) minmax(0, 5fr);
+}
 
-  @include respond(phone) {
-    margin-top: 4rem;
+.privacy-page__rail,
+.privacy-page__copy,
+.privacy-page__footer-rail {
+  min-width: 0;
+  padding: clamp(1.5rem, 3vw, 2.75rem) var(--page-margin);
+}
 
-  }
+.privacy-page__rail {
+  border-right: 1px solid var(--color-hairline);
+}
+
+.privacy-page__rail h2 {
+  margin: .75rem 0 0;
+  font-size: clamp(1.25rem, 2.4vw, 1.85rem);
+  font-weight: 400;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.privacy-page__copy {
+  display: grid;
+  gap: 1rem;
+  max-width: 46rem;
+}
+
+.privacy-page__copy p {
+  margin: 0;
+  color: var(--color-ash);
+  font-size: .95rem;
+  line-height: 1.55;
+}
+
+.privacy-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.75rem;
+  margin-top: 1rem;
+}
+
+.privacy-page__action {
+  color: var(--color-paper);
+  font-size: .8rem;
+  letter-spacing: .08em;
+  text-decoration: underline;
+  text-underline-offset: .3rem;
+  text-transform: uppercase;
+}
+
+@media (width < 960px) {
+  .privacy-page__utility { grid-template-columns: 1fr auto; }
+  .privacy-page__utility p:nth-child(2) { text-align: right; }
+  .privacy-page__utility p:last-child { grid-column: 1 / -1; text-align: left; }
+  .privacy-page__section { grid-template-columns: minmax(0, 1fr); }
+  .privacy-page__rail { border-right: 0; border-bottom: 1px solid var(--color-hairline); }
 }
 </style>

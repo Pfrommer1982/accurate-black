@@ -90,6 +90,7 @@
 
 <script>
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirebaseClientApp } from '~/utils/firebaseClient';
 
 export default {
   data() {
@@ -110,7 +111,7 @@ export default {
           return;
         }
 
-        const firestore = getFirestore();
+        const firestore = getFirestore(getFirebaseClientApp());
 
         await addDoc(collection(firestore, 'radioshow'), {
           embeddedLink: this.embeddedLink,
@@ -136,7 +137,7 @@ export default {
           return;
         }
 
-        const firestore = getFirestore();
+        const firestore = getFirestore(getFirebaseClientApp());
 
         await addDoc(collection(firestore, 'accurate-sessions'), {
           sessionLink: this.sessionLink,

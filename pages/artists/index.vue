@@ -1,203 +1,57 @@
-<script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+<script setup lang="ts">
+import type { ArtistIndexResponse } from '~/types/release'
 
-useHead({ title: 'Artists' })
-const artists = ref([]);
-let ctx;
-
-const fetchArtists = async () => {
-  try {
-    const db = getFirestore();
-    const querySnapshot = await getDocs(collection(db, 'users'));
-    const artistsMap = {};
-
-    querySnapshot.forEach(doc => {
-      const data = doc.data();
-      const artistId = data.artist;
-      if (!artistsMap[artistId]) {
-        artistsMap[artistId] = {
-          artist: data.artist,
-          artistImageUrl: data.artistImageUrl,
-          acbValues: []
-        };
-      }
-      artistsMap[artistId].acbValues.push(data.ACB);
-    });
-
-    artists.value = Object.values(artistsMap);
-
-    nextTick(async () => {
-      if (import.meta.client) {
-        const { gsap } = await import('gsap')
-        const { ScrollTrigger } = await import('gsap/ScrollTrigger')
-        gsap.registerPlugin(ScrollTrigger)
-
-        ctx = gsap.context(() => {
-          gsap.set('.artist-card', { y: 50, opacity: 0 });
-
-          ScrollTrigger.batch('.artist-card', {
-            onEnter: elements => {
-              gsap.to(elements, {
-                y: 0,
-                opacity: 1,
-                stagger: 0.15,
-                duration: 0.8,
-                ease: "power2.out"
-              });
-            },
-            start: "top 85%",
-            once: true
-          });
-        });
-      }
-    });
-
-  } catch (error) {
-    console.error('Error fetching artists:', error);
-  }
-};
-
-onMounted(fetchArtists);
-
-const handleImageError = (artist) => {
-  artist.artistImageUrl = "https://www.accurateblack.nl/public/img/artistprofiledummy.png";
-};
-
-onUnmounted(() => {
-  if (ctx) ctx.revert();
-});
+const { data, pending, error } = await useFetch<ArtistIndexResponse>('/api/artists', {
+  key: 'artist-index', default: () => ({ artists: [] }),
+})
+const artists = computed(() => data.value?.artists ?? [])
+usePageSeo(
+  'Artists',
+  'Explore the artists releasing on Accurate Black.',
+  () => artists.value[0]?.imageUrl ?? artists.value[0]?.latestRelease.artworkUrl,
+  { path: '/artists' },
+)
 </script>
 
 <template>
-  <section class="section-artist">
-    <div class="break-line top">
-      <p class="break-line-text" v-once>ACCURATE BLACK ARTISTS</p>
-    </div>
-
-    <div class="grid-container">
-      <NuxtLink
-        v-for="(artist, index) in artists"
-        :key="index"
-        :to="`/artists/${artist.artist}`"
-        class="artist-card"
-      >
-        <NuxtImg
-          :src="artist.artistImageUrl"
-          alt="Artist Image"
-          class="artist-image"
-          @error="handleImageError(artist)"
-          loading="lazy"
-          width="450"
-          height="450"
-        />
-        <div class="artist-overlay">
-          <p class="artist-name" v-scramble.hover>{{ artist.artist }}</p>
-          <span class="artist-cta">VIEW PROFILE</span>
-        </div>
-      </NuxtLink>
-    </div>
-  </section>
+  <article class="artist-index" aria-labelledby="artist-index-title">
+    <header class="artist-index__head">
+      <div class="artist-index__rail"><span>[01] / ARTIST ARCHIVE</span><span>{{ artists.length }} ARTISTS</span></div>
+      <h1 id="artist-index-title">ARTIST<br><span>INDEX</span></h1>
+      <p>ACCURATE BLACK / ARTISTS</p>
+    </header>
+    <p v-if="pending" class="artist-index__state" role="status">Resolving artist archive…</p>
+    <p v-else-if="error" class="artist-index__state" role="alert">The artist archive is temporarily unavailable.</p>
+    <ol v-else-if="artists.length" class="artist-wall">
+      <li v-for="artist in artists" :key="artist.id">
+        <NuxtLink :id="`artist-${artist.id}`" :to="`/artists/${encodeURIComponent(artist.name)}`" :aria-label="`Open artist page for ${artist.name}`">
+          <span class="artist-wall__image"><img :src="artist.imageUrl ?? artist.latestRelease.artworkUrl" :alt="`${artist.name} artist image`" width="900" height="900" loading="lazy" decoding="async"></span>
+          <span class="artist-wall__copy"><strong>{{ artist.name }}</strong><small>{{ String(artist.releaseCount).padStart(2, '0') }} RELEASES / {{ artist.latestRelease.catalogNumber }}</small></span>
+        </NuxtLink>
+      </li>
+    </ol>
+    <p v-else class="artist-index__state">No artists are available right now.</p>
+  </article>
 </template>
 
-<style lang="scss" scoped>
-.section-artist {
-  padding: 0 2rem 4rem;
-
-  @include respond(phone) {
-    padding: 0 1rem 2rem;
-  }
-}
-
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-  gap: 2px;
-  margin-top: 2rem;
-
-  @include respond(tab-port) {
-    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  }
-
-  @include respond(phone) {
-    grid-template-columns: repeat(2, 1fr);
-    margin-top: 1rem;
-  }
-}
-
-.artist-card {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  text-decoration: none;
-  background-color: #111;
-  aspect-ratio: 1 / 1;
-
-  &:hover .artist-image {
-    filter: grayscale(0) brightness(0.55);
-    transform: scale(1.04);
-  }
-
-  &:hover .artist-overlay {
-    opacity: 1;
-  }
-
-  &:hover .artist-name {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  &:hover .artist-cta {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.artist-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: grayscale(1) brightness(0.65);
-  transition: filter 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-  display: block;
-}
-
-.artist-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 1.2rem 1.4rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.artist-name {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: 0 0 0.3rem;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.35s ease 0.05s, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) 0.05s;
-
-  @include respond(phone) {
-    font-size: 1rem;
-  }
-}
-
-.artist-cta {
-  font-size: 0.7rem;
-  font-weight: 400;
-  color: var(--primary-grey-light2);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.35s ease 0.1s, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) 0.1s;
-}
+<style scoped>
+.artist-index { min-height: 100vh; padding-top: var(--header-height); background: var(--color-void); color: var(--color-paper); }
+.artist-index__head { padding: clamp(2rem, 4vw, 4rem) var(--page-margin) 2rem; background: var(--color-paper); color: var(--color-void); }
+.artist-index__rail { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .8rem; border-bottom: 1px solid currentColor; font-family: var(--font-mono); font-size: .65rem; letter-spacing: .08em; }
+.artist-index h1 { margin: clamp(2rem, 5vw, 5rem) 0 0; font-size: clamp(4.5rem, 14vw, 13rem); font-weight: 700; line-height: .7; letter-spacing: -.09em; }
+.artist-index h1 span { color: #777570; }
+.artist-index__head > p { margin: 1rem 0 0; font-family: var(--font-mono); font-size: .65rem; letter-spacing: .08em; }
+.artist-index__state { margin: 0; padding: 4rem var(--page-margin); font-family: var(--font-mono); font-size: .75rem; letter-spacing: .08em; }
+.artist-wall { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 1px 0 0; background: var(--color-hairline); list-style: none; }
+.artist-wall li { min-width: 0; background: var(--color-void); }
+.artist-wall a { position: relative; display: block; aspect-ratio: 1; color: var(--color-paper); text-decoration: none; }
+.artist-wall__image { display: grid; place-items: center; width: 100%; height: 100%; background: var(--color-carbon); }
+.artist-wall img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.artist-wall__copy { position: absolute; right: 0; bottom: 0; left: 0; display: grid; gap: .35rem; padding: .9rem; background: linear-gradient(transparent, rgb(0 0 0 / 90%)); transform: translateY(15%); transition: transform 220ms var(--ease-standard); }
+.artist-wall strong { font-size: clamp(1rem, 1.8vw, 1.65rem); line-height: .9; letter-spacing: -.04em; overflow-wrap: anywhere; }
+.artist-wall small { font-family: var(--font-mono); font-size: .55rem; letter-spacing: .06em; }
+.artist-wall a:hover .artist-wall__copy, .artist-wall a:focus-visible .artist-wall__copy { transform: translateY(0); }
+.artist-wall a:focus-visible { z-index: 1; outline: 3px solid var(--color-paper); outline-offset: -3px; }
+@media (width < 900px) { .artist-wall { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (width < 520px) { .artist-index__rail { align-items: flex-start; flex-direction: column; } .artist-index h1 { font-size: clamp(4rem, 22vw, 6.5rem); } .artist-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } .artist-wall__copy { padding: .6rem; transform: none; } .artist-wall strong { font-size: 1rem; } }
 </style>

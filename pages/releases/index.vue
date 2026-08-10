@@ -1,444 +1,48 @@
-<script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore'
+<script setup lang="ts">
+import ReleaseIndexHeader from '~/components/releases/ReleaseIndexHeader.vue'
+import ReleaseWall from '~/components/releases/ReleaseWall.vue'
+import type { ReleaseCatalogueResponse } from '~/types/release'
 
-useHead({
-  title: 'Releases'
+const { data, pending, error } = await useFetch<ReleaseCatalogueResponse>('/api/releases', {
+  key: 'release-catalogue',
+  default: () => ({ releases: [] }),
 })
 
-usePageSeo('Releases')
-// Rest van de setup code blijft hetzelfde
-const showData = ref(false)
-const spotlightItem = ref({})
-const tableData = ref([])
-let ctx;
+const releases = computed(() => data.value?.releases ?? [])
 
-const getHighestPropertyValue = (property) => {
-  return tableData.value.length > 0 ? tableData.value[0][property] || (property === 'ACB' ? null : '') : null
-}
-
-const sortedTableData = ref([])
-
-onMounted(async () => {
-  const db = getFirestore()
-  const usersCollection = collection(db, 'users')
-  const q = query(usersCollection, orderBy('ACB', 'desc')) 
-  const querySnapshot = await getDocs(q)
-  tableData.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  
-  sortedTableData.value = tableData.value.slice().sort((a, b) => {
-    if (a.ACB === b.ACB) {
-      return a.releaseName.localeCompare(b.releaseName)
-    } else {
-      return b.ACB - a.ACB
-    }
-  })
-
-  spotlightItem.value = sortedTableData.value.length > 0 ? sortedTableData.value[0] : {};
-
-  showData.value = true
-
-  nextTick(async () => {
-    if (import.meta.client) {
-      const { gsap } = await import('gsap')
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger')
-      gsap.registerPlugin(ScrollTrigger)
-
-      ctx = gsap.context(() => {
-        // Initial setup for the items
-        gsap.set('.release-item', { y: 50, opacity: 0 });
-
-        ScrollTrigger.batch('.release-item', {
-          onEnter: elements => {
-            gsap.to(elements, {
-              y: 0,
-              opacity: 1,
-              stagger: 0.15,
-              duration: 0.8,
-              ease: "power2.out"
-            });
-          },
-          start: "top 85%",
-          once: true
-        });
-      });
-    }
-  });
-})
-
-onUnmounted(() => {
-  if (ctx) ctx.revert();
-});
+usePageSeo(
+  'Releases',
+  'Explore the Accurate Black catalogue of underground electronic music releases.',
+  () => releases.value[0]?.artworkUrl,
+  { path: '/releases' },
+)
 </script>
 
 <template>
-  <main class="section-releases">
-    <article>
-      <header>
-        <h1 class="sr-only">Latest Techno Releases - Accurate Black Label</h1>
-        <div class="break-line top">
-          <p class="break-line-text" v-once>OUR LATEST RELEASE!</p>
-        </div>
-      </header>
-      
-      <section v-if="spotlightItem.releaseName" aria-label="Featured Release">
-        <div class="spotlight-container fade-in" v-motion-slide-visible-top>
-          <div class="spotlight-left">
-            <div class="spotlight-text">
-              <h2 class="spotlight-text header">~ OUT NOW ~</h2>
-              <p class="spotlight-text acb">{{ getHighestPropertyValue('ACB') }}</p>
-              <h3 class="spotlight-text title">{{ spotlightItem.releaseName }}</h3>
-              <p class="spotlight-text artist">{{ spotlightItem.artist }}</p>
-              <div class="btn-more">
-                <NuxtLink :to="`/releases/${spotlightItem.ACB}`" class="btn-more-link" v-scramble.hover>
-                  <span class="btn-more-p">CHECK OUT & LISTEN</span>
-                </NuxtLink>
-              </div>
-              <div class="lights"></div>
-            </div>
-          </div>
-
-          <div class="spotlight-right">
-            <img 
-              v-lazy="getHighestPropertyValue('imageUrl')" 
-              :alt="`${spotlightItem.releaseName} by ${spotlightItem.artist}`" 
-              class="spotlight-image" 
-              loading="lazy" 
-              width="200" 
-              height="200"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section aria-label="All Releases">
-        <div class="break-line bottom">
-          <h2 class="break-line-text-bottom" v-once>ALL RELEASES</h2>
-        </div>
-
-        <div v-if="showData" class="grid-container fade-in">
-          <article v-for="(item) in sortedTableData.slice(1)" :key="item.ACB" class="release-item">
-            <div class="data-releases">
-              <div>
-                <img 
-                  v-lazy="item.imageUrl" 
-                  :alt="`${item.releaseName} by ${item.artist}`" 
-                  class="grid-image" 
-                  @click="openModal(item)" 
-                  loading="lazy"
-                  width="200" 
-                  height="200"
-                />
-              </div>
-              <div class="text-box">
-                <p class="p-acb">{{ item.ACB }}</p>
-                <h3 class="p-track">{{ item.releaseName }}</h3>
-                <p class="p-artist">{{ item.artist }}</p>
-                <div class="btn-more">
-                  <NuxtLink :to="`/releases/${item.ACB}`" class="btn-more-link" v-scramble.hover>
-                    <span class="btn-more-p">CHECK OUT & LISTEN</span>
-                  </NuxtLink>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-    </article>
-  </main>
+  <article class="release-index">
+    <ReleaseIndexHeader :releases="releases" eyebrow="[02] / CATALOGUE" />
+    <div v-if="pending" class="release-index__state" role="status">Resolving public archive…</div>
+    <div v-else-if="error" class="release-index__state" role="alert">The release archive is temporarily unavailable.</div>
+    <ReleaseWall v-else-if="releases.length" :releases="releases" />
+    <div v-else class="release-index__state">No releases are available right now.</div>
+  </article>
 </template>
 
-
-
-<style scoped lang="scss">
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-
-
-.section-releases {
-  padding: 0 2rem;
-  height: auto;
+<style scoped>
+.release-index {
   min-height: 100vh;
-  box-sizing: border-box;
-  animation-name: fadeInOpacity;
-      animation-duration: .4s;
-      animation-timing-function: ease-out;
-
-  @include respond(phone) {
-    padding: 0 1em;
-  }
+  padding-top: var(--header-height);
+  overflow: clip;
+  background: var(--color-void);
 }
 
-
-
-
-.spotlight-container {
-  display: flex;
-  width: 100%;
-  min-height: 90vh;
-
-  animation-name: fadeInOpacity;
-      animation-duration: .1s;
-      animation-timing-function: ease-out;
-
-  @include respond(tab-port) {
-    flex-direction: column;
-  }
-}
-
-.spotlight-left,
-.spotlight-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.spotlight-text {
-  padding: 0 1rem;
-  justify-content: center;
-  width: 100%;
-  text-align: center;
-  color: var(--primary-grey-light2);
-  text-transform: uppercase;
-
-  @include respond(tab-port) {
-    justify-content: center;
-    width: 100%;
-    text-align: center;
-  }
-
-
-  &.header {
-    color: var(--primary-grey-light1);
-    font-size: 3rem;
-    font-weight: 700;
-    background-color: transparent;
-    margin-bottom: 2rem;
-
-    @include respond(tab-port) {
-      font-size: 2rem;
-      margin-bottom: -1rem;
-    }
-    @include respond(phone){
-      font-size: 1.6rem;
-      margin-top: 1rem;
-      margin-bottom: -2rem;    
-  }
-  }
-  
-  &.acb {
-    color: var(--primary-grey-light2);
-    font-size: 4rem;
-    font-weight: 100;
-    letter-spacing: 2.5rem;
-    padding-left: 1rem;
-    display: flex;
-    justify-content: center;
-
-    background-color: transparent;
-
-    @include respond(tab-land) {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      margin-top: 2rem;
-      justify-content: center;
-      padding-left: 2rem;
-      letter-spacing: 1.5rem;
-      text-align: center
-    }
-    @include respond(phone){
-      font-size: 1.6rem;
-     
-      
-  }
-  }
-
-  &.title {
-    color: var(--primary-grey-light2);
-    font-size: 3rem;
-    font-weight: 500;
-    margin-bottom: 1rem;
-    background-color: transparent;    
-
-    @include respond(tab-land) {
-      font-size: 2rem;
-    }
-    @include respond(phone){
-      font-size: 1.6rem;
-      margin-top: -1rem;        
-  }
-  }
-
-  &.artist {
-    color: var(--primary-grey-light1);
-    font-size: 3rem;
-    font-weight: 700;
-    background-color: transparent;
-    margin-bottom: 5rem;
-
-    @include respond(tab-port) {
-      font-size: 2rem;
-      margin-bottom: 3rem;
-    }
-    @include respond(phone){
-      font-size: 1.6rem;
-      margin-top: -1rem;
-      margin-bottom: 1rem;      
-  }
-  }
-}
-
-.spotlight-image {
-  width: 30rem;
-  height: 30rem;
-  max-width: 750px;
-  display: flex;
-  justify-content: center;
-  transform: perspective(150rem) rotateY(-15deg);
-  margin: 0 auto 2rem auto;
-
-  &:hover {
-    animation-name: glitch1;
-    animation-duration: 2s;
-    animation-timing-function: ease-out;
-  }
-
-  -webkit-box-reflect: below 5px -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    from(transparent),
-    color-stop(65%, transparent),
-    to(rgba(250, 250, 250, 0.5))
-  );
-
-
-@include respond(tab-port) {
-  width: 18rem;
-  height: 18rem;
-  max-width: 750px;
-  display: flex;
-  justify-content: center;
-  transform: perspective(150rem) rotateY(-15deg);
-
-}
-
-}
-
-.grid-container {
-  grid-column-gap: 2rem;
-  grid-row-gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, .5fr));
-  display: grid;
-  width: 100%;
-  justify-content: center;
-  margin-bottom: 2rem;
-
-  text-transform: uppercase;
-
-  animation-name: fadeInOpacity;
-      animation-duration: 1s;
-      animation-timing-function: ease-out;
-
-  @include respond(tab-land) {
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-  }
-
-  @include respond(tab-port) {
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-
-  }
-
-  @include respond(phone) {
-    grid-template-columns: repeat(2, 1fr);
-    grid-column-gap: .6rem;
-    grid-row-gap: .5rem;
-    margin-top: 2rem;
-  
-  
-  }
-}
-
-.grid-image {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  border-radius: 3px 3px 0 0;
-  }
-
-.data-releases {
-  color: var(--primary-grey-light1);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--primay-grey-dark-opacity);
-  border-radius: 3px;
-  overflow: hidden;
-  width: 100%;
-  background-color: rgb(17, 17, 17);
-
-  &:hover {
-    animation-name: glitch1;
-    animation-duration: 2s;
-    animation-timing-function: ease-out;
-  }
-}
-
-.text-box {
-  display: flex;
-  flex-direction: column;
-  margin-top: 1rem;
-  padding: 0 1rem;
-  @include respond(phone){
-  height: 12rem;
-  }
-  
-}
-
-.p-acb {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: auto;
-  @include respond(phone){
-    margin-bottom: 1rem;
-  }
-}
-
-.p-track,
-.p-artist {
-  font-size: 1.5rem;
-  @include respond(tab-port){
-    font-size: 1.1rem;
-  }
-  @include respond(phone){
-    font-size: .8rem;
-    width: 100%;
-  }
-}
-
-.p-artist {
-  padding-bottom: 3rem;
-  color: var(--primary-grey-light2);
-}
-
-.social-icons {
-  display: flex;
-  justify-content: center;
-}
-
-.icon {
-  color: var(--primary-grey-light2);
-  margin-left: 1rem;
-
-  &:hover {
-    color: var(--primary-grey-light1);
-  }
+.release-index__state {
+  min-height: 16rem;
+  padding: 2rem var(--page-margin);
+  border-top: 1px solid var(--color-hairline);
+  color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  letter-spacing: .07em;
 }
 </style>

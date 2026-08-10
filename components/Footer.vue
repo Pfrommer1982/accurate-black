@@ -1,279 +1,304 @@
+<script setup lang="ts">
+interface FooterLink {
+  label: string
+  to: string
+}
+
+interface SocialLink {
+  label: string
+  href: string
+  icon: string
+}
+
+const year = new Date().getFullYear()
+
+const navigation: FooterLink[] = [
+  { label: 'HOME', to: '/' },
+  { label: 'RELEASES', to: '/releases' },
+  { label: 'ARTISTS', to: '/artists' },
+  { label: 'ACCURATE SESSIONS', to: '/accurate-sessions' },
+  { label: 'TECHTONIC', to: '/techtonic' },
+  { label: 'DEMO SUBMISSION', to: '/demo-submission' },
+  { label: 'ABOUT US', to: '/about' },
+]
+
+const socials: SocialLink[] = [
+  { label: 'Spotify', href: 'https://open.spotify.com/user/31dtsb4cdpslbtgu672zypx7jnxa?si=265ee0fc0f23402a', icon: 'https://ik.imagekit.io/pweehbu88/icons/spotify.svg?updatedAt=1738326108910' },
+  { label: 'SoundCloud', href: 'https://soundcloud.com/accuratemusic', icon: 'https://ik.imagekit.io/pweehbu88/icons/soundcloud.svg?updatedAt=1738326109033' },
+  { label: 'YouTube', href: 'https://www.youtube.com/channel/UCyl1a0TvGcYpysq3i3l9_qQ', icon: 'https://ik.imagekit.io/pweehbu88/icons/youtube.svg?updatedAt=1738326109085' },
+  { label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=100063451548903', icon: 'https://ik.imagekit.io/pweehbu88/icons/facebook.svg?updatedAt=1738326109074' },
+  { label: 'Instagram', href: 'https://www.instagram.com/accurate_black/', icon: 'https://ik.imagekit.io/pweehbu88/icons/instagram.svg?updatedAt=1738326109056' },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@accurateblack', icon: 'https://ik.imagekit.io/pweehbu88/icons/tiktok.svg?updatedAt=1738326109056' },
+  { label: 'X', href: 'https://twitter.com/AccurateBlack', icon: 'https://ik.imagekit.io/pweehbu88/icons/x.svg?updatedAt=1738326109023' },
+  { label: 'Beatport', href: 'https://www.beatport.com/label/accurate-black/71241', icon: 'https://ik.imagekit.io/pweehbu88/icons/beatport.svg' },
+]
+</script>
+
 <template>
-  <footer class="footer">
-    <div class="footer-content">
-      <nav class="navigation" aria-label="Footer Navigation">
-        <ul class="nav-links">
-          <li>
-            <NuxtLink class="link" v-scramble.hover to="/">HOME</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink class="link" v-scramble.hover to="/releases">RELEASES</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink class="link" v-scramble.hover to="/artists">ARTISTS</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink class="link" v-scramble.hover to="/accurate-sessions">ACCURATE SESSIONS</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink class="link" v-scramble.hover to="/techtonic">TECHTONIC</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink class="link" v-scramble.hover to="/demo-submission">DEMO SUBMISSION</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink class="link" v-scramble.hover to="/about">ABOUT US</NuxtLink>
+  <footer id="site-footer" class="footer">
+    <div class="footer__heading">
+      <p class="footer__index">END / FRAME</p>
+      <p class="footer__descriptor">INDEPENDENT ELECTRONIC MUSIC LABEL</p>
+    </div>
+
+    <div class="footer__body">
+      <nav class="footer__navigation" aria-label="Footer navigation">
+        <ul>
+          <li v-for="(item, index) in navigation" :key="item.to">
+            <NuxtLink v-scramble.hover :to="item.to" class="footer__route">
+              <span class="footer__route-index">{{ String(index + 1).padStart(2, '0') }}</span>
+              <span>{{ item.label }}</span>
+            </NuxtLink>
           </li>
         </ul>
       </nav>
-      <div class="icons">
-        <div class="icon-wrapper">
-          <a href="https://open.spotify.com/user/31dtsb4cdpslbtgu672zypx7jnxa?si=265ee0fc0f23402a" target="_blank"
-            rel="noopener" aria-label="Spotify">
-            <div class="icon-bg">
-              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/spotify.svg?updatedAt=1738326108910" class="btn-socials" alt="" loading="lazy"
-              width="24" height="24" fetchpriority="low"/>
-            </div>
-          </a>
-          <a href="https://soundcloud.com/accuratemusic" target="_blank" rel="noopener" aria-label="SoundCloud">
-            <div class="icon-bg">
-              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/soundcloud.svg?updatedAt=1738326109033" class="btn-socials" alt="" loading="lazy"
-              width="24" height="24" fetchpriority="low"/>
-            </div>
-          </a>
-          <a href="https://www.youtube.com/channel/UCyl1a0TvGcYpysq3i3l9_qQ" target="_blank" rel="noopener" aria-label="YouTube">
-            <div class="icon-bg">
-              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/youtube.svg?updatedAt=1738326109085" class="btn-socials" alt="" loading="lazy"
-              width="24" height="24" fetchpriority="low"/>
-            </div>
-          </a>
-          <a href="https://www.facebook.com/profile.php?id=100063451548903" target="_blank" rel="noopener" aria-label="Facebook">
-            <div class="icon-bg">
-              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/facebook.svg?updatedAt=1738326109074" class="btn-socials" alt="" loading="lazy"
-              width="24" height="24" fetchpriority="low"/>
-            </div>
-          </a>
-          <a href="https://www.instagram.com/accurate_black/" target="_blank" rel="noopener" aria-label="Instagram">
-            <div class="icon-bg">
-              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/instagram.svg?updatedAt=1738326109056" class="btn-socials" alt="" loading="lazy"
-              width="24" height="24" fetchpriority="low"/>
-            </div>
-          </a>
-          <a href="https://www.tiktok.com/@accurateblack" target="_blank" rel="noopener" aria-label="TikTok">
-            <div class="icon-bg">
-              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/tiktok.svg?updatedAt=1738326109056" class="btn-socials" alt="" loading="lazy"
-              width="24" height="24" fetchpriority="low"/>
-            </div>
-          </a>
-          <a href="https://twitter.com/AccurateBlack" target="_blank" rel="noopener" aria-label="X">
-            <div class="icon-bg">
-              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/x.svg?updatedAt=1738326109023" class="btn-socials" alt="" loading="lazy"
-              width="24" height="24" fetchpriority="low"/>
-            </div>
-          </a>
-          <a href="https://www.beatport.com/label/accurate-black/71241" target="_blank" rel="noopener" aria-label="Beatport">
-            <div class="icon-bg">
-              <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/beatport.svg" class="btn-socials" alt="" loading="lazy"
-              width="24" height="24" fetchpriority="low"/>
-            </div>
-          </a>
-        </div>
+
+      <div class="footer__socials" aria-label="Accurate Black on social media">
+        <a
+          v-for="social in socials"
+          :key="social.href"
+          :href="social.href"
+          class="footer__social"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img :src="social.icon" alt="" width="24" height="24" loading="lazy" decoding="async">
+          <span>{{ social.label }}</span>
+        </a>
       </div>
-      <div class="logo-container">
-        <div class="left-section">
-          <a href="https://www.linkedin.com/in/christoph-pfrommer/" target="_blank" rel="noopener" aria-label="Christoph Pfrommer">
-            <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/CPWD-logo.png?updatedAt=1738326085392" alt="Christoph Pfrommer Website Development" class="left1" loading="lazy"
-            width="64" height="64" fetchpriority="low" />
-          </a>
-        </div>
-        <NuxtImg src="https://ik.imagekit.io/pweehbu88/icons/Accurate-menu.webp?updatedAt=1738326085492" alt="Accurate Black Logo" class="big-logo" loading="lazy" 
-        width="480" height="96" fetchpriority="low"/>
-        <client-only>
-          <LogoText class="logo-text" />
-        </client-only>
-        <div class="right-section">
-          <p class="right1">
-            <NuxtLink to="/privacy-policy">Privacy policy</NuxtLink>
-          </p>
-          <p class="right">&copy; copyright {{ year }}</p>
-        </div>
+    </div>
+
+    <div class="footer__brand">
+      <img
+        src="https://ik.imagekit.io/pweehbu88/icons/Accurate-menu.webp?updatedAt=1738326085492"
+        alt="Accurate Black"
+        class="footer__brand-art"
+        width="480"
+        height="96"
+        loading="lazy"
+        decoding="async"
+      >
+      <img
+        src="https://ik.imagekit.io/pweehbu88/icons/Accurate-menu.webp?updatedAt=1738326085492"
+        alt="Accurate Black"
+        class="footer__mobile-wordmark"
+        width="480"
+        height="96"
+        loading="lazy"
+        decoding="async"
+      >
+    </div>
+
+    <div class="footer__legal">
+      <a
+        href="https://www.linkedin.com/in/christoph-pfrommer/"
+        class="footer__maker"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          src="https://ik.imagekit.io/pweehbu88/icons/CPWD-logo.png?updatedAt=1738326085392"
+          alt="Christoph Pfrommer Website Development"
+          width="64"
+          height="64"
+          loading="lazy"
+          decoding="async"
+        >
+      </a>
+      <div class="footer__legal-copy">
+        <NuxtLink to="/privacy-policy">Privacy policy</NuxtLink>
+        <p>&copy; copyright {{ year }}</p>
       </div>
     </div>
   </footer>
 </template>
 
-<script setup>
-const year = new Date().getFullYear();
-</script>
-
-<style lang="scss" scoped>
+<style scoped>
 .footer {
+  position: relative;
+  padding: 2rem var(--page-margin) 1.5rem;
+  border-top: 1px solid var(--color-hairline);
+  background: var(--color-void);
+  color: var(--color-paper);
+}
+
+.footer__heading {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-hairline);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: .6875rem;
+  letter-spacing: .08em;
+}
+
+.footer__heading p,
+.footer__legal p { margin: 0; }
+
+.footer__body {
+  display: grid;
+  grid-template-columns: minmax(18rem, 1.1fr) minmax(21rem, .9fr);
+  gap: clamp(3rem, 8vw, 8rem);
+  padding: 4.5rem 0 5.5rem;
+}
+
+.footer__navigation ul {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-hairline);
+  list-style: none;
+}
+
+.footer__navigation li { border-bottom: 1px solid var(--color-hairline); }
+
+.footer__route {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
   align-items: center;
-  text-align: center;
-  border-top: 1px solid var(--primary-grey-dark-opacity);
-  background-color: black;
-  color: #fff;
-  padding-top: 1rem;
-  min-height: 20vh;
- 
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+  min-height: 3.5rem;
+  color: var(--color-ash);
+  font-size: clamp(1rem, 1.6vw, 1.4rem);
+  letter-spacing: -.015em;
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
 
-    .navigation {
-      width: 100%;
-      margin: 0 auto;
+.footer__route::after {
+  justify-self: end;
+  width: 1.5rem;
+  height: 1px;
+  background: var(--color-hairline);
+  content: '';
+  transition: width var(--duration-utility) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
+}
 
-      .nav-links {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 1rem;
-        padding: 0;
-        list-style: none;
-        color: var(--primary-grey-light1);
+.footer__route:hover,
+.footer__route:focus-visible { color: var(--color-paper); }
+.footer__route:hover::after,
+.footer__route:focus-visible::after { width: 3rem; background: var(--color-signal); }
+.footer__route:focus-visible { outline: 2px solid var(--color-paper); outline-offset: -2px; }
 
-        @include respond(phone) {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 0.5rem;
-        }
-      }
+.footer__route-index {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: .6875rem;
+  letter-spacing: .08em;
+}
 
-      .link {
-        &:hover {
-          color: white;
-          transform: scale(1.1);
-          transition: 0.3s all;
-        }
-      }
-    }
+.footer__socials {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  border-top: 1px solid var(--color-hairline);
+}
 
-    .icons {
-      margin: 1rem 0;
+.footer__social {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  align-items: center;
+  min-height: 3.5rem;
+  border-bottom: 1px solid var(--color-hairline);
+  color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: .6875rem;
+  letter-spacing: .05em;
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
+}
 
-      .icon-wrapper {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        border-top: 1px solid var(--primary-grey-dark-opacity);
-        padding-top: 1rem;
+.footer__social:nth-child(odd) { padding-right: 1rem; }
+.footer__social:nth-child(even) { padding-left: 1rem; border-left: 1px solid var(--color-hairline); }
 
-        .icon-bg {
-          background-color: var(--primary-grey-light2);
-          border-radius: 60%;
-          width: 2.5rem;
-          height: 2.5rem;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          transition: background-color 0.3s;
-          margin: 0 0.5rem;
-          
+.footer__social img {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+  opacity: .62;
+  filter: grayscale(1);
+  transition: opacity var(--duration-fast) var(--ease-standard), filter var(--duration-fast) var(--ease-standard);
+}
 
-          &:hover {
-            background-color: #ffffffcd;
+.footer__social:hover,
+.footer__social:focus-visible { background: rgb(255 255 255 / 2%); color: var(--color-paper); }
+.footer__social:hover img,
+.footer__social:focus-visible img { opacity: 1; filter: grayscale(0); }
+.footer__social:focus-visible { outline: 2px solid var(--color-paper); outline-offset: -2px; }
 
-            .btn-socials {
-              color: var(--primary-grey-dark);
-              filter: invert(0);
-            }
-          }
-        }
+.footer__brand {
+  display: grid;
+  place-items: center;
+  min-height: clamp(9rem, 18vw, 15rem);
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+}
 
-        .btn-socials {
-          width: 24px;
-          height: 24px;
-          display: inline-block;
-        
-          &:hover{
-            filter: invert(0);
-          }
-        }
-      }
-    }
+.footer__brand-art {
+  display: block;
+  width: min(52vw, 40rem);
+  height: auto;
+  object-fit: contain;
+}
 
-    .logo-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      border-top: 1px solid var(--primary-grey-dark-opacity);
+.footer__mobile-wordmark { display: none; }
 
-      .left-section,
-      .right-section {
-        position: absolute;
-        bottom: 1rem;
-        display: flex;
-        flex-direction: column;
-        font-size: 0.875rem;
-        color: var(--primary-grey-light1);
-      }
+.footer__legal {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-top: 1.5rem;
+}
 
-      .left-section {
-        left: 1rem;
-        margin-bottom: 0.1rem;
+.footer__maker {
+  display: inline-grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  opacity: .65;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
 
-        @include respond(phone) {
-          transform: scale(0.8);
-          margin-bottom: -0.7rem;
-        }
+.footer__maker:hover,
+.footer__maker:focus-visible { opacity: 1; }
+.footer__maker:focus-visible { outline: 2px solid var(--color-paper); outline-offset: .25rem; }
 
-        &:hover {
-          opacity: 1;
-          transform: scale(1.05);
-          transition: 0.3s all;
-        }
+.footer__maker img { display: block; width: 100%; height: 100%; object-fit: contain; }
 
-        .left1 {
-          width: 4rem;
-          height: 4rem;
-          margin-left: 0.6rem;
-          margin-bottom: -.8rem;
-        }
-      }
+.footer__legal-copy {
+  display: grid;
+  justify-items: end;
+  gap: .5rem;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: .6875rem;
+  letter-spacing: .04em;
+}
 
-      .right-section {
-        right: 1rem;
+.footer__legal-copy a { color: inherit; text-underline-offset: .25rem; }
+.footer__legal-copy a:hover,
+.footer__legal-copy a:focus-visible { color: var(--color-paper); }
 
-        @include respond(phone) {
-          font-size: 0.7rem;
-        }
+@media (width < 768px) {
+  .footer { padding-inline: var(--page-margin); }
+  .footer__heading { align-items: start; flex-direction: column; gap: .5rem; }
+  .footer__body { grid-template-columns: 1fr; gap: 4rem; padding-block: 3.5rem 4.5rem; }
+  .footer__socials { grid-template-columns: 1fr; }
+  .footer__social:nth-child(odd),
+  .footer__social:nth-child(even) { padding: 0; border-left: 0; }
+  .footer__brand { min-height: 10rem; }
+  .footer__brand-art { display: none; }
+  .footer__mobile-wordmark { display: block; width: min(100%, 17rem); height: auto; object-fit: contain; }
+  .footer__legal { align-items: center; }
+}
 
-        .right1, .right {
-          line-height: 1;
-     
-          &:hover {
-            color: white;
-            transition: 0.3s all;
-          }
-        }
-      }
-
-      .big-logo {
-        max-width: 30rem;
-        height: 6rem;
-        width: 100%;
-        margin: 0 auto;
-
-        @include respond(phone) {
-          display: none;
-        }
-      }
-
-      .logo-text {
-        display: none;
-
-        @include respond(phone) {
-          display: flex;
-        }
-      }
-    }
-  }
+@media (prefers-reduced-motion: reduce) {
+  .footer__route,
+  .footer__route::after,
+  .footer__social,
+  .footer__social img,
+  .footer__maker { transition: none; }
 }
 </style>

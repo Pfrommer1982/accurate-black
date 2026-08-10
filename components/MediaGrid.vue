@@ -20,17 +20,23 @@ onMounted(async () => {
 
     <div v-if="ytLoading" class="loader">Loading YouTube Videos...</div>
     <div v-else-if="youtubeVideos.length" class="video-grid">
-      <a v-for="video in youtubeVideos" :key="video.id.videoId" class="video-card"
-        :href="`https://www.youtube.com/watch?v=${video.id.videoId}`" target="_blank"
-        v-motion-slide-visible-once-bottom>
+      <a
+        v-for="video in youtubeVideos"
+        :key="video.id"
+        v-motion-slide-visible-once-bottom
+        class="video-card"
+        :href="video.watchUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <div class="video-wrapper">
-          <NuxtImg :src="video.snippet.thumbnails.high.url" alt="YouTube Thumbnail" class="thumbnail" loading="lazy" />
+          <img :src="video.thumbnailUrl" :alt="`Thumbnail for ${video.title}`" class="thumbnail" loading="lazy">
           <div class="play-icon">
             <Icon name="bi:play-fill" />
           </div>
         </div>
         <div class="video-info">
-          <h3 class="video-title">{{ video.snippet.title }}</h3>
+          <h3 class="video-title">{{ video.title }}</h3>
         </div>
       </a>
     </div>
@@ -89,7 +95,7 @@ onMounted(async () => {
 .thumbnail {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .play-icon {

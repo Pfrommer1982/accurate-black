@@ -1,0 +1,86 @@
+:root {
+  color-scheme: dark;
+  --color-void: #080808;
+  --color-carbon: #121212;
+  --color-paper: #f1efe9;
+  --color-ash: #a8a59f;
+  --color-muted: #74716c;
+  --color-hairline: #2b2a27;
+  --color-error: #d87575;
+  --color-success: #91a78e;
+  --color-signal: #9aa49d;
+  --color-header: rgb(8 8 8 / 94%);
+  --font-sans: "Suisse International", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "Suisse Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --page-margin: clamp(2.5rem, 3.33vw, 4rem);
+  --page-rail: 2rem;
+  --grid-gutter: 1.5rem;
+  --header-height: 4.5rem;
+  --header-height-compact: 3.75rem;
+  --header-logo-expanded: 11.75rem;
+  --header-logo-compact: 7rem;
+  --header-target: 3rem;
+  --duration-direct: 80ms;
+  --duration-fast: 160ms;
+  --duration-utility: 240ms;
+  --duration-reveal: 480ms;
+  --duration-hero: 620ms;
+  --duration-exit: 280ms;
+  --duration-logo-compress: 340ms;
+  --ease-direct: linear;
+  --ease-standard: cubic-bezier(.2, 0, 0, 1);
+  --ease-reveal: cubic-bezier(.22, 1, .36, 1);
+  --ease-exit: cubic-bezier(.4, 0, 1, 1);
+  --z-hero: 1;
+  --z-header: 100;
+  --z-navigation: 90;
+  --archive-title-size: clamp(4.5rem, 8.4vw, 9rem);
+  --archive-title-weight: 400;
+  --archive-title-line-height: .76;
+  --archive-title-letter-spacing: -.065em;
+  --archive-range-size: .43em;
+
+  // Legacy aliases remain available to untouched pages during this sprint.
+  --spacing-sm: 1rem;
+  --spacing-md: 2rem;
+  --spacing-lg: 4rem;
+  --spacing-xl: 6rem;
+  --primary-grey: var(--color-ash);
+  --primary-grey-light1: #bbb;
+  --primary-grey-light2: #888;
+  --primary-grey-dark: #333;
+  --primary-grey-dark-opacity: rgb(128 128 128 / 15.4%);
+  --almost-black: #0b0b0b;
+}
+
+@media (width < 1280px) {
+  :root {
+    --page-margin: 2rem;
+    --header-height: 4.25rem;
+    --header-logo-expanded: 10.875rem;
+    --header-logo-compact: 6.75rem;
+  }
+}
+
+@media (width < 768px) {
+  :root {
+    --page-margin: 1.25rem;
+    --page-rail: 0;
+    --grid-gutter: 1rem;
+    --header-height: 4rem;
+    --header-height-compact: 3.75rem;
+    --header-logo-expanded: 9.25rem;
+    --header-logo-compact: 6.125rem;
+    --header-target: 2.75rem;
+    --archive-title-size: clamp(2.5rem, 12.4vw, 5.5rem);
+    --archive-title-line-height: .8;
+    --archive-title-letter-spacing: -.055em;
+  }
+}
+
+@media (width < 390px) {
+  :root {
+    --page-margin: 1rem;
+    --grid-gutter: .75rem;
+  }
+}

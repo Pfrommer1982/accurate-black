@@ -1,70 +1,108 @@
-<script setup>
-import { ref, onMounted, computed } from 'vue';
-import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
+<script setup lang="ts">
+import Hero from '~/components/Hero.vue'
+import HomeLabelThesis from '~/components/home/LabelThesis.vue'
+import HomePortalBanner from '~/components/home/PortalBanner.vue'
+import HomeTransmissionArchive from '~/components/home/TransmissionArchive.vue'
+import ReleaseIndexHeader from '~/components/releases/ReleaseIndexHeader.vue'
+import ReleaseWall from '~/components/releases/ReleaseWall.vue'
+import type { ReleaseCatalogueResponse } from '~/types/release'
+import type { VideoCatalogueResponse } from '~/types/video'
 
-usePageSeo('Home')
+const { data, pending, error } = await useFetch<ReleaseCatalogueResponse>('/api/releases', {
+  key: 'release-catalogue',
+  default: () => ({ releases: [] }),
+})
 
-const tableData = ref([]);
+const releases = computed(() => data.value?.releases ?? [])
+const featuredRelease = computed(() => releases.value[0] ?? null)
 
-const sortedTableData = computed(() => {
-  return tableData.value.sort((a, b) => {
-    if (a.ACB === b.ACB) {
-      return a.releaseName.localeCompare(b.releaseName);
-    } else {
-      return b.ACB - a.ACB;
-    }
-  });
-});
+const { data: videoData, pending: videosPending, error: videosError } = await useFetch<VideoCatalogueResponse>('/api/videos', {
+  key: 'video-catalogue',
+  default: () => ({ videos: [] }),
+})
 
-const spotlightItems = computed(() => {
-  return sortedTableData.value.slice(0, 4);
-});
+const videos = computed(() => videoData.value?.videos ?? [])
 
-const fetchTableData = async () => {
-  const db = getFirestore();
-  const usersCollection = collection(db, 'users');
-  const q = query(usersCollection, orderBy('ACB', 'desc'));
-  const querySnapshot = await getDocs(q);
-  tableData.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
-
-onMounted(fetchTableData);
+usePageSeo(
+  'Independent Electronic Music Label',
+  'Accurate Black is an independent label for deep, dark underground techno. Explore the catalogue, artists, radio archives, demos and DJ bookings.',
+  () => releases.value[0]?.artworkUrl,
+  { path: '/' },
+)
 </script>
 
 <template>
-  <main class="main-homepage">
-    <h1 class="sr-only">Accurate Black - Electronic Music Label</h1>
-    <Hero :spotlightItems="spotlightItems" />
-    <IntroBlock />
-    <FeaturedArtists class="featuredArtist"/>
-    <SpotlightShow />
-    <MediaGrid />
-  </main>
+  <div class="homepage">
+    <Hero :release="featuredRelease" />
+
+    <HomePortalBanner :release="featuredRelease" />
+
+    <HomeLabelThesis />
+
+    <section id="releases" class="homepage__releases" aria-labelledby="homepage-releases-title">
+      <ReleaseIndexHeader
+        :releases="releases"
+        eyebrow="[03] / CATALOGUE"
+        level="h2"
+        title-id="homepage-releases-title"
+      />
+      <div v-if="pending" class="homepage__state" role="status">Resolving public archive…</div>
+      <div v-else-if="error" class="homepage__state" role="alert">The release archive is temporarily unavailable.</div>
+      <ReleaseWall v-else-if="releases.length" :releases="releases" />
+      <div v-else class="homepage__state">No releases are available right now.</div>
+    </section>
+
+    <HomeTransmissionArchive
+      :videos="videos"
+      :pending="videosPending"
+      :error="Boolean(videosError)"
+    />
+  </div>
 </template>
 
-<style lang="scss" scoped>
-.main-homepage {
-  display: flex;
-  flex-direction: column;
-  background-color: #000;
-  width: 100%;
+<style scoped>
+.homepage {
+  --homepage-section-space: clamp(4.5rem, 7vw, 7.5rem);
+
+  min-height: 100vh;
+  overflow: clip;
+  background: var(--color-void);
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
+.homepage :deep(.thesis) {
+  min-height: auto;
+  padding-block: var(--homepage-section-space);
+  transform: translate3d(0, var(--hero-thesis-y, 0px), 0);
+  will-change: transform;
 }
 
-.featuredArtist {
-  @include respond(phone) {
-    flex-direction: column;
-    margin-top: 0rem;
+.homepage__releases {
+  padding-top: clamp(2.75rem, 4.5vw, 4.75rem);
+  scroll-margin-top: var(--header-height);
+  background: var(--color-void);
+}
+
+.homepage__state {
+  min-height: 16rem;
+  padding: 2rem var(--page-margin);
+  border-top: 1px solid var(--color-hairline);
+  color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  letter-spacing: .07em;
+}
+
+@media (width < 768px) {
+  .homepage {
+    --homepage-section-space: clamp(4.5rem, 16vw, 6rem);
   }
+
+  .homepage__releases {
+    padding-top: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homepage :deep(.thesis) { transform: none; }
 }
 </style>

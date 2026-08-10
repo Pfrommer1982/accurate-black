@@ -19,7 +19,8 @@ const addTitleToIframe = (embedHtml, title) => {
 const fetchFirebaseData = async () => {
   try {
     const { getFirestore, collection, query, orderBy, limit, getDocs } = await import('firebase/firestore')
-    const db = getFirestore()
+    const { getFirebaseClientApp } = await import('~/utils/firebaseClient')
+    const db = getFirestore(getFirebaseClientApp())
     const accurateSessionQuery = query(collection(db, 'accurate-sessions'), orderBy('sessionDate', 'desc'), limit(1))
     const snapshot = await getDocs(accurateSessionQuery)
     snapshot.forEach(doc => {
@@ -35,11 +36,11 @@ onMounted(fetchFirebaseData)
 
 <template>
   <section class="section-content">
-    <h1>ACCURATE BLACK PRESENTS:</h1>
+    <h2>ACCURATE BLACK PRESENTS:</h2>
     <div class="header">
-      <h1 class="h1 inprogress">ROBBI ALTIDORE - TECHTONIC <a
+      <h2 class="h1 inprogress">ROBBI ALTIDORE - TECHTONIC <a
           href="https://inprogressradio.com/index.php/members/robbi-altidore/" target="_blank">@INPROGRESSRADIO.COM</a>
-      </h1>
+      </h2>
       <NuxtLink to="/techtonic" class="btn-more-link check-out" v-scramble.hover>
         <p class="btn-more-p">TECHTONIC SHOWS</p>
       </NuxtLink>
@@ -60,7 +61,7 @@ onMounted(fetchFirebaseData)
 
     <div>ACCURATE BLACK PRESENTS:</div>
     <div class="header">
-      <h1 class="h1">ACCURATE SESSIONS</h1>
+      <h2 class="h1">ACCURATE SESSIONS</h2>
       <NuxtLink to="/accurate-sessions" class="btn-more-link check-out" v-scramble.hover>
         <p class="btn-more-p">ACCURATE SESSIONS</p>
       </NuxtLink>

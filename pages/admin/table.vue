@@ -1,9 +1,9 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import { getFirestore, collection, getDocs, updateDoc, deleteDoc, query, orderBy, doc } from 'firebase/firestore';
+import { getFirebaseClientApp } from '~/utils/firebaseClient';
 
 export default {
-    middleware: 'auth',
     setup() {
         const users = ref([]);
         const isOpen = ref([]);
@@ -13,7 +13,7 @@ export default {
 
         const fetchUsers = async () => {
             try {
-                const db = getFirestore();
+                const db = getFirestore(getFirebaseClientApp());
                 const usersCollection = collection(db, 'users');
                 const q = query(usersCollection, orderBy('ACB'));
                 const querySnapshot = await getDocs(q);
@@ -44,7 +44,7 @@ export default {
         const updateUser = async (index) => {
             const userIndex = users.value.findIndex(user => user.id === filteredUsers.value[index].id);
             try {
-                const db = getFirestore();
+                const db = getFirestore(getFirebaseClientApp());
                 const userDocRef = doc(db, 'users', users.value[userIndex].id);
                 await updateDoc(userDocRef, editedUser.value);
                 console.log('Release succesvol bijgewerkt');
@@ -64,7 +64,7 @@ export default {
             try {
                 const confirmation = confirm('Weet je zeker dat je deze release wilt verwijderen?');
                 if (confirmation) {
-                    const db = getFirestore();
+                    const db = getFirestore(getFirebaseClientApp());
                     const userDocRef = doc(db, 'users', users.value[userIndex].id);
                     await deleteDoc(userDocRef);
 
@@ -97,6 +97,10 @@ export default {
 };
 
 
+</script>
+
+<script setup>
+definePageMeta({ middleware: 'auth' })
 </script>
 
 <template>

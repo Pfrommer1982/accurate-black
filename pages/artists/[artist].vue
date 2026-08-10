@@ -1,485 +1,82 @@
-<script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+<script setup lang="ts">
+import type { ArtistDetailResponse } from '~/types/release'
 
-const route = useRoute();
+const route = useRoute()
+const rawName = String(route.params.artist ?? '')
+const { data, error } = await useFetch<ArtistDetailResponse>(`/api/artists/${encodeURIComponent(rawName)}`, { key: `artist-${rawName}` })
+if (error.value || !data.value?.artist) throw createError({ statusCode: 404, statusMessage: 'Artist not found' })
+const artist = computed(() => data.value!.artist)
+const visual = computed(() => artist.value.imageUrl ?? artist.value.latestRelease.artworkUrl)
+usePageSeo(
+  () => `${artist.value.name} | Artists`,
+  () => artist.value.bio ?? `${artist.value.name} releases on Accurate Black, an independent electronic music label.`,
+  visual,
+  {
+    path: () => `/artists/${encodeURIComponent(artist.value.name)}`,
+    type: 'profile',
+  },
+)
 
-const artist = ref('');
-const bio = ref('');
-const imageUrl = ref('');
-const artistImageUrl = ref('');
-const socialLinks = ref([]);
-const imageUrls = ref([]);
-const acbIdentifiers = ref([]);
-const soundcloudUrls = ref({});
-const lastThreeSoundcloudUrls = ref([]);
-const currentSoundcloudUrl = ref('');
-const showFullBio = ref(false);
-
-const pageTitle = ref('Artist');
-usePageSeo(pageTitle);
-
-let ctx = null;
-
-const fetchArtistData = async () => {
-    try {
-        const artistName = route.params.artist;
-        const db = getFirestore();
-        const q = query(collection(db, 'users'), where('artist', '==', artistName));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-            const reversedDocs = querySnapshot.docs.reverse();
-            reversedDocs.forEach(doc => {
-                const data = doc.data();
-                artist.value = data.artist;
-                pageTitle.value = data.artist;
-                bio.value = data.bio;
-                socialLinks.value = data.socialLinks || [];
-                artistImageUrl.value = data.artistImageUrl;
-                acbIdentifiers.value.push(data.ACB);
-                imageUrls.value.push(data.imageUrl);
-                soundcloudUrls.value[data.ACB] = data.soundcloudUrl;
-            });
-
-            acbIdentifiers.value.sort((a, b) => b - a);
-
-            lastThreeSoundcloudUrls.value = acbIdentifiers.value
-                .map(acb => soundcloudUrls.value[acb])
-                .slice(0, 3);
-
-            if (imageUrls.value.length > 0) {
-                imageUrl.value = imageUrls.value[0];
-                const acbIdentifier = acbIdentifiers.value[0];
-                currentSoundcloudUrl.value = soundcloudUrls.value[acbIdentifier];
-            }
-        } else {
-            console.error('Artist not found');
-        }
-    } catch (error) {
-        console.error('Error fetching artist:', error);
-    }
-};
-
-const getSocialLink = (platform) => {
-    const link = socialLinks.value.find((link) => link.includes(platform));
-    return link ? link : '#';
-};
-
-const changeHeaderImage = (newImageUrl, index) => {
-    imageUrl.value = newImageUrl;
-    const acbIdentifier = acbIdentifiers.value[index];
-    currentSoundcloudUrl.value = soundcloudUrls.value[acbIdentifier];
-};
-
-const changeSoundcloudUrl = (index) => {
-    currentSoundcloudUrl.value = lastThreeSoundcloudUrls.value[index];
-};
-
-onMounted(async () => {
-    await fetchArtistData();
-
-    nextTick(async () => {
-        if (import.meta.client) {
-            const { gsap } = await import('gsap');
-            const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-            gsap.registerPlugin(ScrollTrigger);
-            
-            ctx = gsap.context(() => {
-                gsap.set('.card-list-item', { y: 50, opacity: 0 });
-
-                ScrollTrigger.batch('.card-list-item', {
-                    onEnter: elements => {
-                        gsap.to(elements, {
-                            y: 0,
-                            opacity: 1,
-                            stagger: 0.15,
-                            duration: 0.8,
-                            ease: "power2.out"
-                        });
-                    },
-                    start: "top 85%",
-                    once: true
-                });
-            });
-        }
-    });
-});
-
-onUnmounted(() => {
-    if (ctx) ctx.revert();
-});
+useHead({
+  script: [{
+    key: 'artist-jsonld',
+    type: 'application/ld+json',
+    children: computed(() => JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'MusicGroup',
+      name: artist.value.name,
+      description: artist.value.bio || `${artist.value.name} on Accurate Black.`,
+      url: `https://www.accurateblack.nl/artists/${encodeURIComponent(artist.value.name)}`,
+      image: visual.value || undefined,
+      album: artist.value.releases.map(release => ({
+        '@type': 'MusicAlbum',
+        name: release.title,
+        url: `https://www.accurateblack.nl/releases/${encodeURIComponent(release.catalogNumber)}`,
+        image: release.artworkUrl,
+        catalogNumber: release.catalogNumber,
+      })),
+      sameAs: artist.value.links.map(link => link.url),
+      memberOf: {
+        '@type': 'RecordLabel',
+        name: 'Accurate Black',
+        url: 'https://www.accurateblack.nl/',
+      },
+    })),
+  }],
+})
 </script>
 
 <template>
-
-    <section class="section-artist-profile">
-        <div class="break-line top">
-            <p class="break-line-text">{{ artist }}</p>
-        </div>
-
-        <div class="header-container">
-            <NuxtImg :src="imageUrl" alt="" class="header-image" loading="lazy" width="1500" height="1500" />
-        </div>
-    </section>
-
-    <section class="body-top">
-        <div class="left">
-            <NuxtImg :src="artistImageUrl" :alt="artist" class="body-image" loading="lazy" width="200" height="200" />
-            <h3 class="biography">BIOGRAPHY</h3>
-            <p class="bio" v-if="bio">{{ bio }}</p>
-            <p v-else class="bio no">No biography yet...</p>
-        </div>
-
-        <div class="right">
-            <h3 class="follow">FOLLOW {{ artist }} ON:</h3>
-            <div class="socials">
-                <a v-for="(link, index) in socialLinks" :key="index" :href="link" target="_blank" aria-label='social'
-                    v-scramble.hover>
-                    <div class="icon-bg" v-if="link.includes('spotify')">
-                        <Icon name="simple-icons:spotify" class="btn-socials" loading="lazy" />
-                    </div>
-                    <div class="icon-bg" v-if="link.includes('soundcloud')">
-                        <Icon name="simple-icons:soundcloud" class="btn-socials" />
-                    </div>
-                    <div class="icon-bg" v-if="link.includes('youtube')">
-                        <Icon name="simple-icons:youtube" class="btn-socials" />
-                    </div>
-                    <div class="icon-bg" v-if="link.includes('facebook')">
-                        <Icon name="simple-icons:facebook" class="btn-socials" />
-                    </div>
-                    <div class="icon-bg" v-if="link.includes('instagram')">
-                        <Icon name="simple-icons:instagram" class="btn-socials" />
-                    </div>
-                    <div class="icon-bg" v-if="link.includes('tiktok')">
-                        <Icon name="simple-icons:tiktok" class="btn-socials" />
-                    </div>
-                    <div class="icon-bg" v-if="link.includes('twitter')">
-                        <Icon name="simple-icons:twitter" class="btn-socials" />
-                    </div>
-                </a>
-            </div>
-
-            <div class="soundcloud-list">
-                <div v-for="(url, index) in lastThreeSoundcloudUrls" :key="index" @click="changeSoundcloudUrl(index)"
-                    role="button" tabindex="0" :aria-label="'Play soundcloud track ' + (index + 1)">
-                    <div class="soundcloud-item" v-html="url"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="body-bottom">
-        <div class="card">
-            <span class="card-heading">ALL {{ artist }} RELEASES </span>
-            <div class="card-list">
-                <div v-for="(image, index) in imageUrls" :key="index">
-                    <NuxtImg :src="image" alt="" class="card-list-item" @click="changeHeaderImage(image, index)"
-                        :aria-label="'Change header image to release ' + (index + 1)" loading="lazy" width="200"
-                        height="200" />
-                </div>
-            </div>
-        </div>
-    </section>
+  <article class="artist-detail">
+    <aside class="artist-detail__stage" :aria-label="`${artist.name} portrait`">
+      <img v-if="visual" :src="visual" :alt="`${artist.name} artist image`" width="1200" height="1200">
+      <p v-else>{{ artist.name }}</p>
+    </aside>
+    <div class="artist-detail__paper">
+      <NuxtLink :to="`/artists#artist-${artist.id}`" class="artist-detail__close" aria-label="Close artist and return to index"><i /><i /></NuxtLink>
+      <header><p>[ ARTIST ]</p><h1>{{ artist.name }}</h1></header>
+      <dl><div><dt>ARTIST</dt><dd>{{ artist.name }}</dd></div><div><dt>RELEASES</dt><dd>{{ String(artist.releaseCount).padStart(2, '0') }}</dd></div><div><dt>LATEST</dt><dd>{{ artist.latestRelease.catalogNumber }}</dd></div></dl>
+      <section><p class="artist-detail__label">[A] BIOGRAPHY</p><p>{{ artist.bio ?? 'Biography unavailable.' }}</p></section>
+      <section><p class="artist-detail__label">[B] LINKS</p><nav v-if="artist.links.length"><a v-for="link in artist.links" :key="link.url" :href="link.url" target="_blank" rel="noopener noreferrer">{{ link.provider }} ↗</a></nav><p v-else class="artist-detail__quiet">No verified links available.</p></section>
+      <section class="artist-detail__releases"><p class="artist-detail__label">[C] RELEASES</p><ol><li v-for="release in artist.releases" :key="release.id"><NuxtLink :to="`/releases/${encodeURIComponent(release.catalogNumber)}`" :aria-label="`Open ${release.title} by ${release.artist}`"><img :src="release.artworkUrl" :alt="`Release artwork for ${release.title}`" width="300" height="300"><span>{{ release.catalogNumber }}<strong>{{ release.title }}</strong></span></NuxtLink></li></ol></section>
+    </div>
+  </article>
 </template>
 
-<style scoped lang="scss">
-.section-artist-profile {
-    padding: 0 2rem;
-    overflow: hidden;
-
-    @include respond(phone) {
-        padding: 0 1rem;
-    }
-}
-
-.header-container {
-    display: flex;
-
-    @include respond(tab-port) {
-        flex-direction: column;
-    }
-}
-
-.back {
-    position: absolute;
-    top: 6rem;
-    left: 1rem;
-
-}
-
-.header-image {
-    position: absolute;
-    display: flex;
-    margin: 0 auto;
-    top: 0;
-    left: 0;
-    max-height: 100vh;
-    width: 100%;
-    object-fit: cover;
-    object-position: center;
-    z-index: -1;
-
-    -webkit-animation: zoomEffect 35s infinite;
-    animation: zoomEffect 35s infinite;
-    -webkit-animation-timing-function: linear;
-    animation-timing-function: linear;
-    -webkit-animation-direction: alternate;
-    animation-direction: alternate;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-
-    @include respond(phone) {
-        height: 100%;
-        -webkit-animation: none;
-        animation: none;
-    }
-}
-
-@-webkit-keyframes zoomEffect {
-    0% {
-        -webkit-transform: scale(1) translateX(0);
-        transform: scale(1) translateX(0);
-    }
-
-    100% {
-        -webkit-transform: scale(1.2) translateX(-360px) translateY(-80px);
-        transform: scale(1.2) translateX(-360px) translateY(-80px);
-    }
-}
-
-@keyframes zoomEffect {
-    0% {
-        -webkit-transform: scale(1) translateX(0) translateY(0);
-        transform: scale(1) translateX(0) translateY(0);
-    }
-
-    100% {
-        -webkit-transform: scale(1.2);
-        transform: scale(1.2);
-    }
-}
-
-.body-top {
-    display: flex;
-    margin-top: 10rem;
-    justify-content: center;
-    align-items: center;
-
-    @include respond(tab-port) {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    @include respond(phone) {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 0 1rem;
-    }
-
-    .right,
-    .left {
-        flex: 1;
-        background-color: #ffffffcd;
-        margin: 2rem;
-        padding: 1rem;
-        max-width: 32rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        border-radius: 3px;
-
-        @include respond(tab-land) {
-            width: 100%;
-            margin: 0rem 0;
-        }
-
-        @include respond(tab-port) {
-            width: 100%;
-            margin: 0rem 0;
-        }
-
-        @include respond(phone) {
-            width: 100%;
-        }
-
-        .body-image {
-            width: 30rem;
-            height: 30rem;
-            box-shadow: 5px 10px 75px rgba(0, 0, 0, .4);
-            border: 14px solid white;
-            transform: translateY(-10rem);
-
-            @include respond(phone) {
-                width: 16rem;
-                height: 16rem;
-                border: 7px solid white;
-            }
-        }
-
-        .biography {
-            color: var(--primary-grey-dark);
-            font-size: 2rem;
-            letter-spacing: 2rem;
-            text-align: center;
-            transform: translateY(-8rem);
-            padding-left: 1.5rem;
-
-            @include respond(tab-land) {
-                padding-left: 1rem;
-            }
-
-            @include respond(phone) {
-                font-size: 1.5rem;
-                letter-spacing: 1.5rem;
-                transform: translateY(-8rem);
-            }
-        }
-
-        .bio {
-            color: black;
-            padding: 0 3rem;
-            transform: translateY(-6rem);
-
-            @include respond(phone) {
-                padding: 0 .5rem;
-                transform: translateY(-6rem);
-            }
-        }
-    }
-
-    .no {
-        color: var(--primary-grey-light1);
-        font-style: italic;
-    }
-
-    .follow {
-        color: var(--primary-grey-dark);
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        width: 100%;
-        text-align: center;
-
-        @include respond(phone) {
-            font-size: 1.5rem;
-            border-top: 1px solid var(--primary-grey-dark);
-            padding-top: 1rem;
-        }
-    }
-
-    .socials {
-        display: flex;
-        width: 100%;
-        justify-content: space-around;
-
-        @include respond(phone) {
-            padding: 0 1.5rem;
-        }
-    }
-
-    .icon-bg {
-        background-color: var(--primary-grey-dark);
-        border-radius: 60%;
-        width: 2.5rem;
-        height: 2.5rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: background-color 0.3s;
-
-        &:hover {
-            background-color: #ffffffcd;
-
-            .btn-socials {
-                color: var(--primary-grey-dark);
-            }
-        }
-    }
-
-    .btn-socials {
-        width: 24px;
-        height: 24px;
-        display: inline-block;
-
-        color: white;
-        transition: color 0.3s;
-    }
-
-    .embedded,
-    .soundcloud-list {
-        width: 100%;
-        padding: 1rem;
-
-        @include respond(phone) {
-            padding: 0.5rem;
-        }
-    }
-
-    .soundcloud-item {
-        padding: 1rem 0;
-    }
-}
-
-.body-bottom {
-    width: 100%;
-    background-color: #0000009f;
-
-    .card-heading {
-        font-size: 2rem;
-        color: white;
-        text-transform: uppercase;
-        display: flex;
-        align-items: center;
-        justify-content: start;
-
-        padding: 2rem 2rem 0rem 2rem;
-        width: 100%;
-
-        @include respond(phone) {
-            border-top: 1px solid var(--primary-grey-dark);
-            padding-top: 1rem;
-        }
-    }
-
-    .card-list {
-        width: 100%;
-        display: grid;
-        justify-content: center;
-        align-items: center;
-        grid-gap: 2rem;
-        padding: 2rem;
-
-        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-
-        @include respond(tab-land) {
-            grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-        }
-
-        @include respond(tab-port) {
-            grid-template-columns: repeat(2, 1fr);
-            grid-gap: 1rem;
-        }
-
-        @include respond(phone) {
-            grid-template-columns: repeat(2, 1fr);
-            grid-gap: 1rem;
-        }
-    }
-
-    .card-list-item {
-        width: 100%;
-        height: auto;
-        border-radius: 5px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.392);
-        cursor: pointer;
-
-        &:hover {
-            transform: translateY(-5px);
-            transition: all 0.3s ease-in-out;
-        }
-    }
-}
+<style scoped>
+.artist-detail { display: grid; grid-template-columns: minmax(0, 58fr) minmax(28rem, 42fr); min-height: calc(100svh - var(--header-height)); background: var(--color-void); }
+.artist-detail__stage { position: sticky; top: var(--header-height-compact); display: grid; place-items: center; min-height: calc(100svh - var(--header-height-compact)); padding: clamp(2rem, 4vw, 4rem); color: var(--color-paper); }
+.artist-detail__stage img { display: block; width: min(100%, calc(100svh - var(--header-height-compact) - 5rem)); max-height: calc(100svh - var(--header-height-compact) - 5rem); object-fit: contain; }
+.artist-detail__stage p { margin: 0; font-size: clamp(4rem, 10vw, 10rem); font-weight: 700; line-height: .75; text-align: center; overflow-wrap: anywhere; }
+.artist-detail__paper { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: calc(100svh - var(--header-height)); padding: clamp(1.5rem, 2.5vw, 3rem); background: var(--color-paper); color: var(--color-void); }
+.artist-detail__close { position: fixed; top: calc((var(--header-height) - 2.375rem) / 2); right: calc(var(--page-margin) + var(--header-target) + .625rem); z-index: calc(var(--z-header) + 1); display: grid; place-items: center; width: 2.375rem; height: 2.375rem; border: 1px solid var(--color-void); background: var(--color-void); color: var(--color-paper); }
+.artist-detail__close i { position: absolute; width: .95rem; height: 1px; background: currentColor; } .artist-detail__close i:first-child { transform: rotate(45deg); } .artist-detail__close i:last-child { transform: rotate(-45deg); }
+.artist-detail header { padding-right: 3.5rem; } .artist-detail header > p, .artist-detail__label, .artist-detail dt { margin: 0 0 .7rem; color: #777570; font-family: var(--font-mono); font-size: .625rem; letter-spacing: .08em; }
+.artist-detail h1 { margin: 0 0 2rem; font-size: clamp(3.5rem, 6vw, 7rem); font-weight: 700; line-height: .76; letter-spacing: -.08em; overflow-wrap: anywhere; word-break: normal; hyphens: none; }
+.artist-detail dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; padding: .9rem 0; border-block: 1px solid var(--color-void); } .artist-detail dl div { min-width: 0; } .artist-detail dd { margin: 0; font-family: var(--font-mono); font-size: .7rem; font-weight: 700; overflow-wrap: anywhere; }
+.artist-detail section { margin-top: 2rem; } .artist-detail section > p:last-child { margin: 0; font-size: 1rem; line-height: 1.5; text-transform: none; } .artist-detail__quiet { color: #777570; font-family: var(--font-mono); font-size: .7rem !important; letter-spacing: .06em; text-transform: uppercase !important; }
+.artist-detail nav { display: flex; flex-wrap: wrap; gap: .5rem; } .artist-detail nav a { min-height: 2.2rem; padding: .55rem .75rem; border: 1px solid var(--color-void); color: inherit; font-family: var(--font-mono); font-size: .625rem; letter-spacing: .07em; text-decoration: none; } .artist-detail nav a:hover, .artist-detail nav a:focus-visible { background: var(--color-void); color: var(--color-paper); }
+.artist-detail__releases { margin-top: auto !important; padding-top: 3rem; } .artist-detail__releases ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; } .artist-detail__releases li { min-width: 0; border: 1px solid var(--color-void); } .artist-detail__releases a { display: grid; gap: .5rem; height: 100%; padding-bottom: .45rem; color: inherit; font-family: var(--font-mono); font-size: .55rem; text-decoration: none; } .artist-detail__releases a:hover, .artist-detail__releases a:focus-visible { background: #e7e5df; } .artist-detail__releases a:focus-visible { outline: 2px solid var(--color-void); outline-offset: 2px; } .artist-detail__releases img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--color-carbon); } .artist-detail__releases span { padding-inline: .45rem; } .artist-detail__releases strong { display: block; margin-top: .2rem; font-family: inherit; font-size: .6rem; overflow-wrap: anywhere; }
+@media (width < 768px) { .artist-detail { display: block; } .artist-detail__stage { position: relative; top: auto; min-height: min(100svh, 100vw); padding: 1rem; } .artist-detail__stage img { width: min(100%, calc(100svh - var(--header-height) - 2rem)); max-height: calc(100svh - var(--header-height) - 2rem); } .artist-detail__paper { min-height: 100svh; padding: 1.25rem 1rem; } .artist-detail h1 { font-size: clamp(3.1rem, 15vw, 5.5rem); } .artist-detail dl { grid-template-columns: 1fr 1fr; gap: 1rem; } .artist-detail dl div:last-child { grid-column: 1 / -1; } }
+@media (width < 360px) { .artist-detail h1 { font-size: 3.25rem; } .artist-detail__releases ol { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>

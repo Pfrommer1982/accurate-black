@@ -1,0 +1,46 @@
+@supports (view-transition-name: none) {
+  .site-header {
+    view-transition-name: accurate-black-header;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 560ms;
+    animation-timing-function: var(--ease-reveal);
+  }
+
+  ::view-transition-group(root) {
+    animation-duration: 420ms;
+    animation-timing-function: var(--ease-reveal);
+  }
+
+  ::view-transition-group(accurate-black-header) {
+    z-index: var(--z-header);
+    animation-duration: 320ms;
+    animation-timing-function: var(--ease-standard);
+  }
+
+  ::view-transition-old(root) {
+    animation: catalogue-page-out 220ms var(--ease-exit) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: catalogue-page-in 480ms var(--ease-reveal) both;
+  }
+}
+
+@keyframes catalogue-page-out {
+  to { opacity: .18; }
+}
+
+@keyframes catalogue-page-in {
+  from { opacity: .18; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+  }
+}
