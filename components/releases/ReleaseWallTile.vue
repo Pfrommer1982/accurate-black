@@ -2,11 +2,13 @@
 import ReleaseArtwork from '~/components/releases/ReleaseArtwork.vue'
 import type { ReleaseSummary } from '~/types/release'
 
-defineProps<{
+const props = defineProps<{
   release: ReleaseSummary
   eager?: boolean
   revealOrder?: number
 }>()
+
+const { prefetchRelease } = useReleasePrefetch()
 </script>
 
 <template>
@@ -16,6 +18,8 @@ defineProps<{
       :to="`/releases/${encodeURIComponent(release.catalogNumber)}`"
       class="release-wall-tile__link"
       :aria-label="`Open ${release.catalogNumber}: ${release.title} by ${release.artist}`"
+      @pointerenter="prefetchRelease(props.release.catalogNumber)"
+      @focus="prefetchRelease(props.release.catalogNumber)"
     >
       <ReleaseArtwork :release="release" :eager="eager" />
       <span class="release-wall-tile__overlay" aria-hidden="true">

@@ -4,6 +4,7 @@ import CatalogueRow from '~/components/catalogue/CatalogueRow.vue'
 import type { FeaturedRelease } from '~/types/release'
 
 const props = defineProps<{ releases: FeaturedRelease[] }>()
+const { prefetchRelease } = useReleasePrefetch()
 
 const section = ref<HTMLElement | null>(null)
 const { isReady, isVisible } = useOnceInView(section, '10% 0px -5%')
@@ -105,6 +106,8 @@ onBeforeUnmount(() => {
           :to="`/releases/${encodeURIComponent(release.catalogNumber)}`"
           class="catalogue-plate__link"
           :aria-label="`Open ${release.catalogNumber} — ${release.title} by ${release.artist}`"
+          @pointerenter="prefetchRelease(release.catalogNumber)"
+          @focus="prefetchRelease(release.catalogNumber)"
         >
           <span class="catalogue-plate__meta">
             <span>{{ release.catalogNumber }}</span>

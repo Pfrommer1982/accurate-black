@@ -91,19 +91,20 @@ const socials: SocialLink[] = [
 
     <div class="footer__legal">
       <a
-        href="https://www.linkedin.com/in/christoph-pfrommer/"
+        href="https://cpwd.nl"
         class="footer__maker"
         target="_blank"
         rel="noopener noreferrer"
       >
         <img
-          src="https://ik.imagekit.io/pweehbu88/icons/CPWD-logo.png?updatedAt=1738326085392"
-          alt="Christoph Pfrommer Website Development"
-          width="64"
-          height="64"
+          src="/cpwd-logo.png"
+          alt="CPWD"
+          width="96"
+          height="96"
           loading="lazy"
           decoding="async"
         >
+        <span>Website build by cpwd.nl</span>
       </a>
       <div class="footer__legal-copy">
         <NuxtLink to="/privacy-policy">Privacy policy</NuxtLink>
@@ -253,19 +254,30 @@ const socials: SocialLink[] = [
 }
 
 .footer__maker {
-  display: inline-grid;
-  place-items: center;
-  width: 4rem;
-  height: 4rem;
-  opacity: .65;
-  transition: opacity var(--duration-fast) var(--ease-standard);
+  display: inline-flex;
+  align-items: center;
+  gap: .9rem;
+  max-width: min(100%, 22rem);
+  color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  letter-spacing: .04em;
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .footer__maker:hover,
-.footer__maker:focus-visible { opacity: 1; }
+.footer__maker:focus-visible { color: var(--color-paper); }
 .footer__maker:focus-visible { outline: 2px solid var(--color-paper); outline-offset: .25rem; }
 
-.footer__maker img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.footer__maker img {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+  background: transparent;
+  flex: 0 0 auto;
+}
 
 .footer__legal-copy {
   display: grid;

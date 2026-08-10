@@ -21,8 +21,27 @@ if (error.value || !data.value?.release) {
   })
 }
 
-const release = computed(() => data.value!.release)
 const relatedReleases = computed(() => data.value?.relatedReleases ?? [])
+const tracks = ref(data.value!.release.tracks)
+const release = computed(() => ({
+  ...data.value!.release,
+  tracks: tracks.value,
+}))
+
+// Spotify preview enrichment is deferred so the page can open immediately.
+const { data: enriched } = await useFetch<ReleaseDetailResponse>(
+  `/api/releases/${encodeURIComponent(catalogNumber)}`,
+  {
+    key: `release-${catalogNumber}-enriched`,
+    query: { enrich: '1' },
+    lazy: true,
+    server: false,
+  },
+)
+
+watch(enriched, (payload) => {
+  if (payload?.release?.tracks?.length) tracks.value = payload.release.tracks
+}, { immediate: true })
 const canonicalUrl = computed(() => `https://www.accurateblack.nl/releases/${encodeURIComponent(release.value.catalogNumber)}`)
 const seoDescription = computed(() => release.value.description
   || `${release.value.title} by ${release.value.artist}, released by Accurate Black.`)
