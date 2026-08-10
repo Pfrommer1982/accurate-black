@@ -41,6 +41,7 @@ const destinations = computed(() => [
         class="portal-banner__link"
         :class="{ 'portal-banner__link--featured': destination.featured }"
         :style="{ '--item-index': itemIndex }"
+        @click="destination.to.startsWith('/releases/') ? rememberReleaseReturn('/#releases') : undefined"
       >
         <span class="portal-banner__number">{{ destination.index }}</span>
         <span class="portal-banner__content">

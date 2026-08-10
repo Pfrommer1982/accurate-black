@@ -4,7 +4,13 @@ defineProps<{ release: FeaturedRelease }>()
 </script>
 
 <template>
-  <NuxtLink v-scramble.hover="{ duration: 220, intent: 70 }" :to="`/releases/${release.catalogNumber}`" class="hero-cta" :aria-label="`Open ${release.title} by ${release.artist}`">
+  <NuxtLink
+    v-scramble.hover="{ duration: 220, intent: 70 }"
+    :to="`/releases/${release.catalogNumber}`"
+    class="hero-cta"
+    :aria-label="`Open ${release.title} by ${release.artist}`"
+    @click="rememberReleaseReturn('/#releases')"
+  >
     <span>OPEN RELEASE</span><span aria-hidden="true">↗</span>
   </NuxtLink>
 </template>

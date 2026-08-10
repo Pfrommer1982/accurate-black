@@ -10,6 +10,12 @@ const props = defineProps<{
 
 const catalogueNumber = computed(() => props.release.catalogNumber.match(/\d+/)?.[0]?.padStart(2, '0')
   ?? props.release.catalogNumber)
+
+// Prefer returning to the catalogue section the visitor came from (homepage #releases or /releases).
+const closeTo = ref('/#releases')
+onMounted(() => {
+  closeTo.value = peekReleaseReturn('/#releases')
+})
 </script>
 
 <template>
@@ -22,9 +28,9 @@ const catalogueNumber = computed(() => props.release.catalogNumber.match(/\d+/)?
 
     <div class="release-split__paper">
       <NuxtLink
-        :to="`/#release-${release.catalogNumber}`"
+        :to="closeTo"
         class="release-split__close"
-        aria-label="Close release and return to index"
+        aria-label="Close release and return to catalogue"
       >
         <span aria-hidden="true" />
         <span aria-hidden="true" />
@@ -36,6 +42,7 @@ const catalogueNumber = computed(() => props.release.catalogNumber.match(/\d+/)?
           class="release-split__artist"
           :class="{ 'release-split__artist--with-image': release.artistImageUrl }"
           :aria-label="`Open artist page for ${release.artist}`"
+          @click="rememberReleaseReturn('/#releases')"
         >
           <span v-if="release.artistImageUrl" class="release-split__artist-image"><img :src="release.artistImageUrl" alt="" width="48" height="48"></span>
           <span>{{ release.artist }}</span>

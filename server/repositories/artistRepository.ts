@@ -47,10 +47,25 @@ const makeSummary = (records: ArtistRecord[]): ArtistSummary => {
   return { id: artistId(first.summary.artist), name: first.summary.artist, imageUrl, releaseCount: sorted.length, latestRelease: first.summary }
 }
 export const getArtistIndex = async (): Promise<ArtistSummary[]> => [...grouped(await getPublicReleaseDocuments()).values()].map(makeSummary).sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }))
+
+const recordsForRequest = (documents: ReleaseDocument[], requested: string): ArtistRecord[] | null => {
+  const groups = grouped(documents)
+  const byName = groups.get(artistKey(requested))
+  if (byName?.length) return byName
+
+  const requestedId = artistId(requested)
+  for (const records of groups.values()) {
+    if (!records.length) continue
+    if (artistId(records[0]!.summary.artist) === requestedId) return records
+  }
+  return null
+}
+
 export const getArtistDetail = async (requestedName: string): Promise<ArtistDetail | null> => {
-  const records = grouped(await getPublicReleaseDocuments()).get(artistKey(requestedName))
+  const records = recordsForRequest(await getPublicReleaseDocuments(), requestedName)
   if (!records?.length) return null
-  const sorted = ordered(records); const summary = makeSummary(sorted)
+  const sorted = ordered(records)
+  const summary = makeSummary(sorted)
   const bio = sorted.map(record => stringValue(record.data, 'bio')).find((value): value is string => Boolean(value)) ?? null
   const links = sorted.flatMap(record => linksFrom(record.data)).filter((link, index, all) => all.findIndex(candidate => candidate.url === link.url) === index)
   return { ...summary, bio, links, releases: sorted.map(record => record.summary) }
