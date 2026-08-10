@@ -11,8 +11,12 @@ import { enrichSpotifyReleaseTracks } from '~/server/utils/spotifyTrackEnrichmen
 import type { ReleaseDetailResponse, ReleaseSummary } from '~/types/release'
 
 const MAX_PUBLIC_RELEASES = 160
+const DOCUMENT_CACHE_TTL_MS = 120_000
 
-export const getPublicReleaseDocuments = async (): Promise<ReleaseDocument[]> => {
+let documentCache: { expiresAt: number, documents: ReleaseDocument[] } | null = null
+let documentCachePromise: Promise<ReleaseDocument[]> | null = null
+
+const fetchPublicReleaseDocuments = async (): Promise<ReleaseDocument[]> => {
   const config = getServerFirebaseConfig()
   const app = initializeApp(config, `release-content-${crypto.randomUUID()}`)
   const database = getFirestore(app)
@@ -35,18 +39,43 @@ export const getPublicReleaseDocuments = async (): Promise<ReleaseDocument[]> =>
   }
 }
 
+export const getPublicReleaseDocuments = async (): Promise<ReleaseDocument[]> => {
+  const now = Date.now()
+  if (documentCache && documentCache.expiresAt > now) return documentCache.documents
+
+  if (!documentCachePromise) {
+    documentCachePromise = fetchPublicReleaseDocuments()
+      .then((documents) => {
+        documentCache = { documents, expiresAt: Date.now() + DOCUMENT_CACHE_TTL_MS }
+        return documents
+      })
+      .finally(() => {
+        documentCachePromise = null
+      })
+  }
+
+  return documentCachePromise
+}
+
 export const getReleaseCatalogue = async (): Promise<ReleaseSummary[]> => {
   return mapReleaseCatalogue(await getPublicReleaseDocuments())
 }
 
-export const getReleaseDetail = async (catalogNumber: string): Promise<ReleaseDetailResponse | null> => {
+export const getReleaseDetail = async (
+  catalogNumber: string,
+  options: { enrichTracks?: boolean } = {},
+): Promise<ReleaseDetailResponse | null> => {
   const documents = await getPublicReleaseDocuments()
   const mappedRelease = findReleaseDetail(documents, catalogNumber)
   if (!mappedRelease) return null
 
+  const tracks = options.enrichTracks
+    ? await enrichSpotifyReleaseTracks(mappedRelease.tracks, mappedRelease.player)
+    : mappedRelease.tracks
+
   const release = {
     ...mappedRelease,
-    tracks: await enrichSpotifyReleaseTracks(mappedRelease.tracks, mappedRelease.player),
+    tracks,
   }
 
   const normalizedArtist = release.artist.trim().toLocaleLowerCase('en')

@@ -32,7 +32,15 @@ const items: NavigationItem[] = [
     </ol>
     <div class="navigation__footer">
       <span>INDEPENDENT ELECTRONIC MUSIC LABEL</span>
-      <a href="https://www.linkedin.com/in/christoph-pfrommer/" target="_blank" rel="noopener noreferrer">WEBSITE BY CHRISTOPH PFROMMER</a>
+      <a
+        href="https://cpwd.nl"
+        class="navigation__credit"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src="/cpwd-logo.png" alt="" width="56" height="56" loading="lazy" decoding="async">
+        <span>Website build by cpwd.nl</span>
+      </a>
     </div>
   </nav>
 </template>
@@ -75,9 +83,23 @@ const items: NavigationItem[] = [
 .navigation__link--admin { opacity: .55; }
 .navigation__index { color: var(--color-muted); font-family: var(--font-mono); font-size: .6875rem; letter-spacing: .08em; }
 .navigation__footer { padding-top: .75rem; border-top: 1px solid var(--color-hairline); }
-.navigation__footer a { color: inherit; text-decoration: none; }
-.navigation__footer a:hover,
-.navigation__footer a:focus-visible { color: var(--color-paper); }
+.navigation__credit {
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  color: var(--color-ash);
+  text-decoration: none;
+}
+.navigation__credit img {
+  display: block;
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
+  background: transparent;
+  flex: 0 0 auto;
+}
+.navigation__credit:hover,
+.navigation__credit:focus-visible { color: var(--color-paper); }
 
 @media (width < 768px) {
   .navigation { padding-top: calc(var(--header-height) + 1rem); }

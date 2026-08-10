@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FeaturedRelease } from '~/types/release'
 
-defineProps<{
+const props = defineProps<{
   release: FeaturedRelease
   active: boolean
   sectionVisible: boolean
@@ -12,6 +12,18 @@ const emit = defineEmits<{
   pointerLeave: []
   focus: []
 }>()
+
+const { prefetchRelease } = useReleasePrefetch()
+
+const onPointerIntent = () => {
+  prefetchRelease(props.release.catalogNumber)
+  emit('pointerIntent')
+}
+
+const onFocus = () => {
+  prefetchRelease(props.release.catalogNumber)
+  emit('focus')
+}
 </script>
 
 <template>
@@ -20,9 +32,9 @@ const emit = defineEmits<{
       :to="`/releases/${encodeURIComponent(release.catalogNumber)}`"
       class="catalogue-row__link"
       :aria-label="`Open ${release.catalogNumber} — ${release.title} by ${release.artist}`"
-      @mouseenter="emit('pointerIntent')"
+      @mouseenter="onPointerIntent"
       @mouseleave="emit('pointerLeave')"
-      @focus="emit('focus')"
+      @focus="onFocus"
     >
       <span
         v-scramble.once="{ duration: 320, trigger: active && sectionVisible }"
