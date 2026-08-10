@@ -4,6 +4,7 @@ import { getServerFirebaseConfig } from '~/server/utils/firebaseConfig'
 import {
   findReleaseDetail,
   mapReleaseCatalogue,
+  normaliseCatalogueNumber,
   type ReleaseDocument,
 } from '~/server/utils/releaseContent'
 import { enrichSpotifyReleaseTracks } from '~/server/utils/spotifyTrackEnrichment'
