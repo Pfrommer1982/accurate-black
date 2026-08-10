@@ -1,9 +1,9 @@
 import { deleteApp, initializeApp } from 'firebase/app'
 import { collection, getDocs, getFirestore, limit, orderBy, query, terminate } from 'firebase/firestore'
+import { getServerFirebaseConfig } from '~/server/utils/firebaseConfig'
 import {
   findReleaseDetail,
   mapReleaseCatalogue,
-  normaliseCatalogueNumber,
   type ReleaseDocument,
 } from '~/server/utils/releaseContent'
 import { enrichSpotifyReleaseTracks } from '~/server/utils/spotifyTrackEnrichment'
@@ -11,19 +11,8 @@ import type { ReleaseDetailResponse, ReleaseSummary } from '~/types/release'
 
 const MAX_PUBLIC_RELEASES = 160
 
-const firebaseConfig = () => ({
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.VITE_FIREBASE_APP_ID,
-})
-
 export const getPublicReleaseDocuments = async (): Promise<ReleaseDocument[]> => {
-  const config = firebaseConfig()
-  if (!config.apiKey || !config.projectId) throw new Error('Release content source is not configured')
-
+  const config = getServerFirebaseConfig()
   const app = initializeApp(config, `release-content-${crypto.randomUUID()}`)
   const database = getFirestore(app)
 

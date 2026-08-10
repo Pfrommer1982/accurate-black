@@ -251,11 +251,17 @@ export default defineNuxtConfig({
     },
   },
 
-  // Contact forms (demo + bookings). Override with CONTACT_INBOX env when ready for production.
+  // Contact forms + public Firebase web config (set these in Vercel env for Production/Preview).
   runtimeConfig: {
     contactInbox: process.env.CONTACT_INBOX || 'info.accurateblack@gmail.com',
     public: {
       contactInbox: process.env.CONTACT_INBOX || 'info.accurateblack@gmail.com',
+      firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY || '',
+      firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || process.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+      firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || '',
+      firebaseStorageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+      firebaseMessagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+      firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID || '',
     },
   },
 
