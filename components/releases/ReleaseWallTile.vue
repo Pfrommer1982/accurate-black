@@ -8,7 +8,13 @@ const props = defineProps<{
   revealOrder?: number
 }>()
 
+const route = useRoute()
 const { prefetchRelease } = useReleasePrefetch()
+
+const markReturn = () => {
+  rememberReleaseReturn(route.path === '/' ? '/#releases' : '/releases')
+  prefetchRelease(props.release.catalogNumber)
+}
 </script>
 
 <template>
@@ -18,8 +24,9 @@ const { prefetchRelease } = useReleasePrefetch()
       :to="`/releases/${encodeURIComponent(release.catalogNumber)}`"
       class="release-wall-tile__link"
       :aria-label="`Open ${release.catalogNumber}: ${release.title} by ${release.artist}`"
-      @pointerenter="prefetchRelease(props.release.catalogNumber)"
-      @focus="prefetchRelease(props.release.catalogNumber)"
+      @pointerenter="markReturn"
+      @focus="markReturn"
+      @click="markReturn"
     >
       <ReleaseArtwork :release="release" :eager="eager" />
       <span class="release-wall-tile__overlay" aria-hidden="true">

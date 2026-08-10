@@ -24,7 +24,7 @@ usePageSeo(
     <p v-else-if="error" class="artist-index__state" role="alert">The artist archive is temporarily unavailable.</p>
     <ol v-else-if="artists.length" class="artist-wall">
       <li v-for="artist in artists" :key="artist.id">
-        <NuxtLink :id="`artist-${artist.id}`" :to="`/artists/${encodeURIComponent(artist.name)}`" :aria-label="`Open artist page for ${artist.name}`">
+        <NuxtLink :id="`artist-${artist.id}`" :to="`/artists/${artist.id}`" :aria-label="`Open artist page for ${artist.name}`">
           <span class="artist-wall__image"><img :src="artist.imageUrl ?? artist.latestRelease.artworkUrl" :alt="`${artist.name} artist image`" width="900" height="900" loading="lazy" decoding="async"></span>
           <span class="artist-wall__copy"><strong>{{ artist.name }}</strong><small>{{ String(artist.releaseCount).padStart(2, '0') }} RELEASES / {{ artist.latestRelease.catalogNumber }}</small></span>
         </NuxtLink>

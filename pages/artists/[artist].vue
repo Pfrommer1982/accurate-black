@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import type { ArtistDetailResponse } from '~/types/release'
 
+definePageMeta({
+  validate: (route) => {
+    const value = String(route.params.artist ?? '').trim()
+    // Prevent Nuxt payload/data routes from being captured as artist names.
+    return Boolean(value) && !value.startsWith('_') && !value.includes('.')
+  },
+})
+
 const route = useRoute()
 const rawName = String(route.params.artist ?? '')
 const { data, error } = await useFetch<ArtistDetailResponse>(`/api/artists/${encodeURIComponent(rawName)}`, { key: `artist-${rawName}` })
@@ -12,7 +20,7 @@ usePageSeo(
   () => artist.value.bio ?? `${artist.value.name} releases on Accurate Black, an independent electronic music label.`,
   visual,
   {
-    path: () => `/artists/${encodeURIComponent(artist.value.name)}`,
+    path: () => `/artists/${encodeURIComponent(artist.value.id)}`,
     type: 'profile',
   },
 )
@@ -26,7 +34,7 @@ useHead({
       '@type': 'MusicGroup',
       name: artist.value.name,
       description: artist.value.bio || `${artist.value.name} on Accurate Black.`,
-      url: `https://www.accurateblack.nl/artists/${encodeURIComponent(artist.value.name)}`,
+      url: `https://www.accurateblack.nl/artists/${encodeURIComponent(artist.value.id)}`,
       image: visual.value || undefined,
       album: artist.value.releases.map(release => ({
         '@type': 'MusicAlbum',

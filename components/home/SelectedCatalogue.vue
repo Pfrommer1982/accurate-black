@@ -106,8 +106,9 @@ onBeforeUnmount(() => {
           :to="`/releases/${encodeURIComponent(release.catalogNumber)}`"
           class="catalogue-plate__link"
           :aria-label="`Open ${release.catalogNumber} — ${release.title} by ${release.artist}`"
-          @pointerenter="prefetchRelease(release.catalogNumber)"
-          @focus="prefetchRelease(release.catalogNumber)"
+          @pointerenter="rememberReleaseReturn('/#releases'); prefetchRelease(release.catalogNumber)"
+          @focus="rememberReleaseReturn('/#releases'); prefetchRelease(release.catalogNumber)"
+          @click="rememberReleaseReturn('/#releases')"
         >
           <span class="catalogue-plate__meta">
             <span>{{ release.catalogNumber }}</span>

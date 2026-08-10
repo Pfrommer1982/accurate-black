@@ -245,12 +245,11 @@ export default defineNuxtConfig({
       routes: [
         '/',
         '/releases',
-        '/artists',
         '/demo-submission',
         '/about',
         '/privacy-policy',
       ],
-      ignore: ['/_ipx/', '/artists/_payload'],
+      ignore: ['/_ipx/', '/artists/_payload', '/artists/_payload.json'],
       crawlLinks: false,
       failOnError: false,
     },
@@ -264,6 +263,9 @@ export default defineNuxtConfig({
           'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
         },
       },
+      // Always SSR artists so Nuxt payload routes are never captured by /artists/[artist].
+      '/artists': { prerender: false },
+      '/artists/**': { prerender: false },
       '/admin/**': {
         headers: {
           'X-Robots-Tag': 'noindex, nofollow',

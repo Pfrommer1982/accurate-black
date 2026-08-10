@@ -15,13 +15,18 @@ const emit = defineEmits<{
 
 const { prefetchRelease } = useReleasePrefetch()
 
-const onPointerIntent = () => {
+const markReturn = () => {
+  rememberReleaseReturn('/#releases')
   prefetchRelease(props.release.catalogNumber)
+}
+
+const onPointerIntent = () => {
+  markReturn()
   emit('pointerIntent')
 }
 
 const onFocus = () => {
-  prefetchRelease(props.release.catalogNumber)
+  markReturn()
   emit('focus')
 }
 </script>
@@ -35,6 +40,7 @@ const onFocus = () => {
       @mouseenter="onPointerIntent"
       @mouseleave="emit('pointerLeave')"
       @focus="onFocus"
+      @click="markReturn"
     >
       <span
         v-scramble.once="{ duration: 320, trigger: active && sectionVisible }"
