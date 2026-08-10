@@ -3,19 +3,17 @@ export default defineNuxtConfig({
 
   // Modules
   modules: [
+    '@nuxt/eslint',
     '@vueuse/motion/nuxt',
-    '@nuxt/ui',
     '@nuxt/image',
     'nuxt-icon',
-    '@dargmuesli/nuxt-cookie-control',
     '@nuxtjs/robots',
-
   ],
 
   // Image Module Config
   image: {
     provider: 'ipx',
-    preload: true,
+    preload: false,
     quality: 80,
     format: ['webp', 'avif'],
     screens: {
@@ -24,7 +22,7 @@ export default defineNuxtConfig({
       lg: 1024,
     },
     densities: [1, 2],
-    domains: ['www.accurateblack.nl'],
+    domains: ['www.accurateblack.nl', 'ik.imagekit.io'],
   },
 
   // CSS
@@ -35,18 +33,7 @@ export default defineNuxtConfig({
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `
-          @use 'assets/style/scss/abstracts/_mixins' as *;
-
-            @use "@/assets/style/scss/abstracts/_variables.scss";
-            @use "@/assets/style/scss/base/_animations.scss";
-            @use "@/assets/style/scss/base/_base.scss";
-            @use "@/assets/style/scss/base/_typography.scss";
-            @use "@/assets/style/scss/base/_utilities.scss";
-            @use "@/assets/style/scss/components/_breakline.scss";
-            @use "@/assets/style/scss/components/_button-big.scss";
-            @use "@/assets/style/scss/components/_button-small.scss";
-          `,
+          additionalData: `@use 'assets/style/scss/abstracts/_mixins' as *;`,
         },
       },
     },
@@ -59,27 +46,40 @@ export default defineNuxtConfig({
     viewTransition: true,
   },
 
-  // Robots
+  // Robots (classic search + AI crawlers)
   robots: {
-    UserAgent: '*',
-    Disallow: '/admin/',
-    Allow: '/',
+    groups: [
+      {
+        userAgent: ['*'],
+        allow: ['/'],
+        disallow: ['/admin', '/login'],
+      },
+      {
+        userAgent: [
+          'GPTBot',
+          'ChatGPT-User',
+          'OAI-SearchBot',
+          'Google-Extended',
+          'PerplexityBot',
+          'ClaudeBot',
+          'Anthropic-AI',
+          'Applebot-Extended',
+          'Bytespider',
+          'CCBot',
+        ],
+        allow: ['/', '/llms.txt', '/sitemap.xml'],
+        disallow: ['/admin', '/login'],
+      },
+    ],
+    sitemap: 'https://www.accurateblack.nl/sitemap.xml',
   },
 
   // Site URL (SEO)
   site: {
     url: 'https://www.accurateblack.nl',
     name: 'Accurate Black',
-    description: 'Deep. Dark. Authentic. Profound. We delve into the depths of electronic music. This is where the beats are felt, not just heard. We are Accurate Black.',
+    description: 'Accurate Black is an independent electronic music label for deep, dark underground techno and related electronic music.',
     defaultLocale: 'en',
-  },
-
-  // Sitemap & Generate Routes Helper
-  sitemap: {
-    hostname: 'https://www.accurateblack.nl',
-    gzip: true,
-    routes: async () => await fetchDynamicRoutes(),
-    exclude: ['/admin/**'],
   },
 
   // Build Config (Removed legacy Nuxt 2 Webpack build options)
@@ -145,22 +145,21 @@ export default defineNuxtConfig({
           href: 'https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap',
           onload: "this.onload=null;this.rel='stylesheet'",
         },
-        { rel: 'canonical', href: 'https://www.accurateblack.nl' },
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       ],
       meta: [
         {
           name: 'description',
-          content: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
+          content: 'Accurate Black is an independent electronic music label for deep, dark underground techno. Explore releases, artists, radio archives, demos and DJ bookings.',
         },
         {
           name: 'keywords',
-          content: 'techno music, electronic music label, dark techno, underground music, techno artists, music releases, demo submission',
+          content: 'Accurate Black, electronic music label, dark techno, underground techno, Robbi Altidore, Techtonic, Accurate Sessions, demo submission, DJ bookings',
         },
         {
           name: 'robots',
-          content: 'index, follow',
+          content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
         },
         {
           name: 'viewport',
@@ -168,23 +167,27 @@ export default defineNuxtConfig({
         },
         {
           property: 'og:title',
-          content: 'Electronic Music Label | Accurate Black - Deep Dark Techno',
+          content: 'Accurate Black | Independent Electronic Music Label',
         },
         {
           property: 'og:description',
-          content: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
+          content: 'Deep. Dark. Authentic. Profound. Independent electronic music label for underground techno, catalogue releases, radio and bookings.',
         },
         {
           property: 'og:image',
-          content: 'https://www.accurateblack.nl/public/img/accurate-black.png',
+          content: 'https://ik.imagekit.io/pweehbu88/icons/Accurate-menu.webp?updatedAt=1738326085492',
         },
         {
           property: 'og:url',
-          content: 'https://www.accurateblack.nl',
+          content: 'https://www.accurateblack.nl/',
         },
         {
           property: 'og:type',
           content: 'website',
+        },
+        {
+          property: 'og:site_name',
+          content: 'Accurate Black',
         },
         {
           name: 'twitter:card',
@@ -192,48 +195,29 @@ export default defineNuxtConfig({
         },
         {
           name: 'twitter:title',
-          content: 'Electronic Music Label | Accurate Black - Deep Dark Techno',
+          content: 'Accurate Black | Independent Electronic Music Label',
         },
         {
           name: 'twitter:description',
-          content: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
+          content: 'Deep. Dark. Authentic. Profound. Independent electronic music label for underground techno, catalogue releases, radio and bookings.',
         },
         {
           name: 'twitter:image',
-          content: 'https://www.accurateblack.nl/public/img/accurate-black.png',
-        },
-      ],
-      script: [
-        {
-          type: 'application/ld+json',
-          innerHTML: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Accurate Black",
-            "description": "Deep. Dark. Authentic. Profound. We delve into the depths of electronic music. This is where the beats are felt, not just heard. We are Accurate Black.",
-            "url": "https://www.accurateblack.nl",
-            "logo": "https://www.accurateblack.nl/public/img/accurate-black.png",
-            "image": "https://www.accurateblack.nl/public/img/accurate-black.png",
-            "sameAs": [
-              "https://facebook.com/accurateblack",
-              "https://twitter.com/accurateblack",
-              "https://instagram.com/accurateblack"
-            ],
-            "contactPoint": {
-              "@type": "ContactPoint",
-              "contactType": "customer service",
-              "email": "info.accurateblack@gmail.com"
-            }
-          }),
+          content: 'https://ik.imagekit.io/pweehbu88/icons/Accurate-menu.webp?updatedAt=1738326085492',
         },
       ],
     },
   },
 
+  routeRules: {
+    '/techtonic': { prerender: false },
+    '/accurate-sessions': { prerender: false },
+    '/login': { robots: 'noindex, nofollow' },
+    '/admin/**': { robots: 'noindex, nofollow' },
+  },
+
   // Plugins
   plugins: [
-    '~/plugins/firebase.client.js',
-    '~/plugins/auth.client.js',
     '~/plugins/directives.js',
   ],
 
@@ -245,7 +229,9 @@ export default defineNuxtConfig({
       brotli: true
     },
     prerender: {
-      routes: await fetchDynamicRoutes()
+      routes: await fetchDynamicRoutes(),
+      ignore: ['/_ipx/', '/artists/_payload'],
+      crawlLinks: false,
     },
     routeRules: {
       '/**': {
@@ -265,24 +251,12 @@ export default defineNuxtConfig({
     },
   },
 
-  // SEO Settings
-  seo: {
-    title: 'Accurate Black - Electronic Music Label',
-    description: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
-    og: {
-      title: 'Electronic Music Label | Accurate Black - Deep Dark Techno',
-      description: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
-      image: 'https://www.accurateblack.nl/public/img/accurate-black.png',
-      url: 'https://www.accurateblack.nl',
+  // Contact forms (demo + bookings). Override with CONTACT_INBOX env when ready for production.
+  runtimeConfig: {
+    contactInbox: process.env.CONTACT_INBOX || 'info.accurateblack@gmail.com',
+    public: {
+      contactInbox: process.env.CONTACT_INBOX || 'info.accurateblack@gmail.com',
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: 'Electronic Music Label | Accurate Black - Deep Dark Techno',
-      description: 'Discover cutting-edge techno & electronic music at Accurate Black label. Stream exclusive releases, connect with underground artists, and submit your demos.',
-      image: 'https://www.accurateblack.nl/public/img/accurate-black.png',
-    },
-    canonical: 'https://www.accurateblack.nl',
-    robots: 'index, follow',
   },
 
   compatibilityDate: '2025-01-31',
@@ -311,8 +285,6 @@ async function fetchDynamicRoutes() {
       ...releaseRoutes,
       '/artists',
       ...artistRoutes,
-      '/techtonic',
-      '/accurate-sessions',
       '/demo-submission',
       '/about',
       '/privacy-policy',

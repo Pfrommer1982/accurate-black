@@ -1,31 +1,103 @@
 @use "@/assets/style/scss/abstracts/_mixins" as *;
+@use "@/assets/style/scss/abstracts/_design-tokens";
+@use "@/assets/style/scss/base/_animations";
+@use "@/assets/style/scss/base/_base";
+@use "@/assets/style/scss/base/_typography";
+@use "@/assets/style/scss/base/_utilities";
+@use "@/assets/style/scss/base/_view-transitions";
+@use "@/assets/style/scss/components/_breakline";
+@use "@/assets/style/scss/components/_button-big";
+@use "@/assets/style/scss/components/_button-small";
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-:root {
-    --spacing-sm: 1rem;
-    --spacing-md: 2rem;
-    --spacing-lg: 4rem;
-    --spacing-xl: 6rem;
-    --primary-grey: #aaaaaa;
-    --primary-grey-light1: #bbbbbb;
-    --primary-grey-light2: #888888;
-    --primary-grey-dark: #333333;
-    --primary-grey-dark-opacity: rgba(128, 128, 128, 0.154);
-  
-    --almost-black: rgb(11, 11, 11);
+html {
+  background: var(--color-void);
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 20rem;
+  margin: 0;
+  background: var(--color-void);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-paper);
+  outline-offset: .25rem;
+}
+
+#site-footer .footer__social img {
+  opacity: .72;
+  filter: grayscale(1) brightness(0) invert(1);
+}
+
+#site-footer .footer__social:hover img,
+#site-footer .footer__social:focus-visible img {
+  opacity: 1;
+  filter: grayscale(1) brightness(0) invert(1);
+}
+
+/* Footer is intentionally component-owned; keep its social rail aligned through
+   the shared page gutter without changing the protected component. */
+#site-footer .footer__social {
+  padding-inline: min(1.5rem, var(--page-margin));
+}
+
+#site-footer .footer__social:nth-child(odd),
+#site-footer .footer__social:nth-child(even) {
+  padding-inline: min(1.5rem, var(--page-margin));
+}
+
+@media (width < 768px) {
+  #site-footer .footer__socials {
+    margin-inline: calc(var(--page-margin) * -1);
   }
-  
-  
+
+  #site-footer .footer__social,
+  #site-footer .footer__social:nth-child(odd),
+  #site-footer .footer__social:nth-child(even) {
+    padding-inline: var(--page-margin);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
-    box-sizing: border-box;
-    margin: 0;  
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
   }
-  
-  html {
-    background-color: #000000;
-    font-family: Oswald, sans-serif;
-    scroll-behavior: smooth;
-  }
-  
+}

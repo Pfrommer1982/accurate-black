@@ -1,14 +1,13 @@
 import { ref } from 'vue';
-import { useNuxtApp } from '#app';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirebaseClientApp } from '~/utils/firebaseClient';
 
 export default function useLogin() {
   const error = ref(null);
-  const { $auth } = useNuxtApp();
-
   const login = async (email, password) => {
     try {
-      const userCredential = await signInWithEmailAndPassword($auth, email, password);
+      const auth = getAuth(getFirebaseClientApp());
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       error.value = null;
       return userCredential.user;
     } catch (err) {

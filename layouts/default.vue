@@ -1,32 +1,20 @@
 <template>
   <div id="app">
     <PreLoader />
-    <LazyNavbar />
-
-    <main>
+    <Header />
+    <main id="main-content">
       <slot />
     </main>
     <LazyFooter />
-    <CookieConsent />
   </div>
 </template>
 
-<script setup>
-</script>
-
-<style lang="scss" scoped>
-
-
-html, body {
-  height: 100%;
-  margin: 0;
-}
+<style scoped>
 
 #app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow: hidden;
 }
 
 main {

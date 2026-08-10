@@ -1,29 +1,25 @@
-import { onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { getFirebaseClientApp } from '~/utils/firebaseClient'
 
 export default defineNuxtRouteMiddleware(async () => {
-  if (import.meta.server) {
-    return;
-  }
+  if (import.meta.server) return
 
-  const { $auth } = useNuxtApp();
-
-  if (!$auth) {
-    return navigateTo('/login');
-  }
+  const auth = getAuth(getFirebaseClientApp())
+  if (auth.currentUser) return
 
   const user = await new Promise((resolve) => {
-    if ($auth.currentUser) {
-      resolve($auth.currentUser);
-      return;
-    }
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (currentUser) => {
+        unsubscribe()
+        resolve(currentUser)
+      },
+      () => {
+        unsubscribe()
+        resolve(null)
+      },
+    )
+  })
 
-    const unsubscribe = onAuthStateChanged($auth, (authUser) => {
-      unsubscribe();
-      resolve(authUser);
-    });
-  });
-
-  if (!user) {
-    return navigateTo('/login');
-  }
-});
+  if (!user) return navigateTo('/login')
+})

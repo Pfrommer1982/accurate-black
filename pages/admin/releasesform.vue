@@ -111,6 +111,7 @@
 <script>
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getFirebaseClientApp } from '~/utils/firebaseClient';
 
 export default {
   data() {
@@ -160,7 +161,7 @@ export default {
 
     async uploadImagesToStorage() {
       try {
-        const storage = getStorage();
+        const storage = getStorage(getFirebaseClientApp());
 
         if (this.artistImage) {
           const artistImagePath = `artists/${Date.now()}_${this.artistImage.name}`;
@@ -183,7 +184,7 @@ export default {
 
     async addUserToFirestore() {
       try {
-        const db = getFirestore();
+        const db = getFirestore(getFirebaseClientApp());
         const docRef = await addDoc(collection(db, 'users'), {
           ACB: this.ACB,
           artist: this.artist,

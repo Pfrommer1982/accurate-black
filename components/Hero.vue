@@ -1,599 +1,224 @@
-<script setup>
-import { ref, onMounted, computed, onBeforeUnmount, watch } from 'vue'
+<script setup lang="ts">
+import HeroArtwork from '~/components/hero/Artwork.vue'
+import HeroBackground from '~/components/hero/Background.vue'
+import HeroLayout from '~/components/hero/Layout.vue'
+import HeroMetadata from '~/components/hero/Metadata.vue'
+import HeroScrollCue from '~/components/hero/ScrollCue.vue'
+import HeroSignalGrid from '~/components/hero/SignalGrid.vue'
+import type { FeaturedRelease } from '~/types/release'
 
-const props = defineProps({
-  spotlightItems: {
-    type: Array,
-    required: true,
-    default: () => []
-  }
-});
+defineProps<{ release: FeaturedRelease | null }>()
 
-const loading = ref(true)
-const tableData = ref([])
-const backgroundColors = ref({})
-const currentSpotlightIndex = ref(0)
-const progressWidth = ref(100)
-let animationFrameId = null
-let animationTimer = null
+const hero = ref<HTMLElement | null>(null)
+let frameId: number | null = null
+let observer: IntersectionObserver | null = null
+let motionQuery: MediaQueryList | null = null
+let isNearViewport = true
 
-// Snelheidsregeling (pas de delay aan om de snelheid te wijzigen)
-const delay = 80; // 80ms vertraging tussen updates
+const clamp = (value: number, minimum = 0, maximum = 1) => Math.min(maximum, Math.max(minimum, value))
 
-const getDominantColor = async (imageUrl) => {
-  if (!imageUrl) return 'rgb(42, 42, 42)';
+const updateFrame = () => {
+  frameId = null
+  const element = hero.value
+  if (!element || document.hidden || !isNearViewport) return
 
-  const thumbnailUrl = `${imageUrl}?tr=w-1,h-1`;
-  try {
-    const response = await fetch(thumbnailUrl);
-    const blob = await response.blob();
-    const img = await createImageBitmap(blob);
-    const canvas = new OffscreenCanvas(1, 1);
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, 1, 1);
-    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-    return `rgb(${r}, ${g}, ${b})`;
-  } catch (error) {
-    console.error('Error getting dominant color:', error);
-    return 'rgb(42, 42, 42)';
-  }
-};
+  const bounds = element.getBoundingClientRect()
+  const runway = Math.max(1, bounds.height - window.innerHeight)
+  const progress = motionQuery?.matches ? 0 : clamp(-bounds.top / runway)
+  const lateProgress = clamp((progress - .66) / .34)
 
-const sortedTableData = computed(() => {
-  return tableData.value.slice().sort((a, b) => {
-    if (a.ACB === b.ACB) {
-      return a.releaseName?.localeCompare(b.releaseName || '') || 0;
-    } else {
-      return (b.ACB || 0) - (a.ACB || 0);
-    }
-  });
-});
+  element.style.setProperty('--hero-progress', progress.toFixed(4))
+  element.style.setProperty('--hero-late-progress', lateProgress.toFixed(4))
+  element.style.setProperty('--hero-title-y', `${(-progress * 8).toFixed(3)}svh`)
+  element.style.setProperty('--hero-mobile-title-y', `${(-progress * 2).toFixed(3)}rem`)
+  element.style.setProperty('--hero-title-opacity', (1 - progress * .92).toFixed(4))
+  element.style.setProperty('--hero-title-blur', `${(lateProgress * 8).toFixed(3)}px`)
+  element.style.setProperty('--hero-art-y', `${(-progress * 5).toFixed(3)}svh`)
+  element.style.setProperty('--hero-mobile-art-y', `${(-progress * 1.5).toFixed(3)}rem`)
+  element.style.setProperty('--hero-art-scale', (1 - progress * .12).toFixed(4))
+  element.style.setProperty('--hero-mobile-art-scale', (1 - progress * .05).toFixed(4))
+  element.style.setProperty('--hero-art-opacity', (1 - lateProgress * .28).toFixed(4))
+  element.style.setProperty('--hero-rail-slow-y', `${(progress * 4).toFixed(3)}svh`)
+  element.style.setProperty('--hero-rail-fast-y', `${(-progress * 6).toFixed(3)}svh`)
+  element.style.setProperty('--hero-rail-focus-y', `${(-progress * 3).toFixed(3)}svh`)
+  element.style.setProperty('--hero-rail-opacity', (.12 + progress * .28).toFixed(4))
+  element.style.setProperty('--hero-focus-rail-opacity', (.26 + progress * .35).toFixed(4))
+  element.style.setProperty('--hero-threshold-opacity', (.12 + lateProgress * .5).toFixed(4))
+  element.style.setProperty('--hero-portal-opacity', (1 - lateProgress).toFixed(4))
+  element.style.setProperty('--hero-veil-y', `${((1 - lateProgress) * 35).toFixed(3)}%`)
+  document.documentElement.style.setProperty('--hero-progress', progress.toFixed(4))
+  document.documentElement.style.setProperty('--hero-thesis-y', `${((1 - progress) * 2.5).toFixed(3)}rem`)
+}
 
-const spotlightItems = computed(() => {
-  return sortedTableData.value.slice(0, 4);
-});
+const scheduleFrame = () => {
+  if (frameId === null && !document.hidden && isNearViewport) frameId = requestAnimationFrame(updateFrame)
+}
 
-const currentBackgroundColor = computed(() => {
-  const currentItem = spotlightItems.value[currentSpotlightIndex.value];
-  return currentItem ? backgroundColors.value[currentItem.ACB] || 'rgb(42, 42, 42)' : 'rgb(42, 42, 42)';
-});
-
-const nextSpotlight = () => {
-  currentSpotlightIndex.value = (currentSpotlightIndex.value + 1) % Math.min(4, spotlightItems.value.length || 1);
-  progressWidth.value = 100;
-};
-
-const changeSlide = (index) => {
-  if (index >= 0 && index < spotlightItems.value.length) {
-    currentSpotlightIndex.value = index;
-    progressWidth.value = 100;
-
-    const item = spotlightItems.value[index];
-    if (item && backgroundColors.value[item.ACB]) {
-      activeColor.value = backgroundColors.value[item.ACB];
-    }
-
-    // Stop en herstart de animatie
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId);
-    }
-    if (animationTimer) {
-      clearTimeout(animationTimer);
-    }
-    animationFrameId = requestAnimationFrame(animateProgress);
-  }
-};
-
-watch(() => spotlightItems.value, async (items) => {
-  if (items && items.length > 0) {
-    for (const item of items) {
-      if (item && item.ACB && item.imageUrl && !backgroundColors.value[item.ACB]) {
-        backgroundColors.value[item.ACB] = await getDominantColor(item.imageUrl);
-
-        // Initial color setup
-        if (items.indexOf(item) === 0) {
-          activeColor.value = backgroundColors.value[item.ACB];
-        }
-      }
-    }
-  }
-}, { immediate: true });
-
-useHead(() => ({
-  link: [
-    {
-      rel: 'preload',
-      as: 'image',
-      href: spotlightItems.value?.[currentSpotlightIndex.value]?.imageUrl
-        ? `${spotlightItems.value[currentSpotlightIndex.value].imageUrl}?tr=w-800,q-80`
-        : ''
-    }
-  ]
-}));
-
-const animateProgress = () => {
-  if (progressWidth.value > 0) {
-    progressWidth.value -= 1; // Verlaag de progressie
-    animationTimer = setTimeout(() => {
-      animationFrameId = requestAnimationFrame(animateProgress);
-    }, delay);
+const handleVisibility = () => {
+  if (document.hidden && frameId !== null) {
+    cancelAnimationFrame(frameId)
+    frameId = null
   } else {
-    nextSpotlight(); // Ga naar de volgende slide
-    progressWidth.value = 100; // Reset de progressie
-    animationFrameId = requestAnimationFrame(animateProgress);
+    scheduleFrame()
   }
-};
+}
 
-onMounted(async () => {
-  try {
-    const { getFirestore, collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
-    const db = getFirestore();
-    const q = query(
-      collection(db, 'users'),
-      orderBy('ACB', 'desc'),
-      limit(4)
-    );
+onMounted(() => {
+  const element = hero.value
+  if (!element) return
 
-    const querySnapshot = await getDocs(q);
-    tableData.value = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+  motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  observer = new IntersectionObserver(([entry]) => {
+    isNearViewport = Boolean(entry?.isIntersecting)
+    if (isNearViewport) scheduleFrame()
+  }, { rootMargin: '100% 0px' })
+  observer.observe(element)
 
-    loading.value = false;
-
-    if (typeof window !== 'undefined' && tableData.value.length) {
-      // Vertraag de start van de animatie om ervoor te zorgen dat de component volledig is geladen
-      setTimeout(() => {
-        animationFrameId = requestAnimationFrame(animateProgress);
-      }, 500);
-    }
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    loading.value = false;
-  }
-});
+  window.addEventListener('scroll', scheduleFrame, { passive: true })
+  window.addEventListener('resize', scheduleFrame, { passive: true })
+  document.addEventListener('visibilitychange', handleVisibility)
+  motionQuery.addEventListener('change', scheduleFrame)
+  scheduleFrame()
+})
 
 onBeforeUnmount(() => {
-  // Zorg ervoor dat alle animatie-resources worden opgeruimd
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
-    animationFrameId = null;
-  }
-  if (animationTimer) {
-    clearTimeout(animationTimer);
-    animationTimer = null;
-  }
-});
+  window.removeEventListener('scroll', scheduleFrame)
+  window.removeEventListener('resize', scheduleFrame)
+  document.removeEventListener('visibilitychange', handleVisibility)
+  motionQuery?.removeEventListener('change', scheduleFrame)
+  observer?.disconnect()
+  if (frameId !== null) cancelAnimationFrame(frameId)
+  document.documentElement.style.removeProperty('--hero-progress')
+  document.documentElement.style.removeProperty('--hero-thesis-y')
+})
 </script>
 
 <template>
-  <section class="section-releases" aria-label="Nieuwste releases">
-    <div v-if="loading" class="skeleton-loader" aria-label="Bezig met laden van nieuwste releases">
-      <div class="skeleton-image" aria-hidden="true"></div>
-      <div class="skeleton-text" aria-hidden="true">
-        <div class="skeleton-title"></div>
-        <div class="skeleton-description"></div>
-      </div>
-    </div>
+  <section ref="hero" class="hero" aria-labelledby="hero-title">
+    <div class="hero__stage">
+      <HeroBackground />
+      <HeroSignalGrid />
 
-    <template v-else-if="spotlightItems.length > 0">
-      <div class="break-line top">
-        <p class="break-line-text">WELCOME</p>
-      </div>
-      <div class="header">
-        <h1 class="h1">LATEST RELEASES</h1>
-        <NuxtLink to="/releases" class="btn-more-link top-btn" aria-label="Bekijk alle releases" v-scramble.hover>
-          <p class="btn-more-p">VIEW ALL RELEASES</p>
-        </NuxtLink>
-      </div>
-
-      <div class="hero-video-wrapper">
-        <video autoplay loop muted playsinline class="hero-bg-video" aria-hidden="true">
-          <source
-            src="https://assets.mixkit.co/videos/preview/mixkit-abstract-dark-underwater-particles-and-structures-loop-3221-large.mp4"
-            type="video/mp4" />
-        </video>
-        <div class="hero-overlay"></div>
-      </div>
-
-      <div v-for="(spotlightItem, index) in spotlightItems" :key="spotlightItem.ACB" class="hero"
-        v-show="currentSpotlightIndex === index" :aria-hidden="currentSpotlightIndex !== index">
-        <div class="spotlight-container">
-          <NuxtImg :src="spotlightItem.imageUrl"
-            :alt="`Album cover voor ${spotlightItem.releaseName} door ${spotlightItem.artist}`" class="spotlight-image"
-            width="480" height="480" sizes="(max-width: 768px) 288px, (max-width: 1024px) 320px, 480px" format="webp"
-            loading="eager" fetchpriority="high" />
-          <div class="spotlight-text">
-            <p class="title">{{ spotlightItem.releaseName }}</p>
-            <p class="artist">{{ spotlightItem.artist }}</p>
-            <p class="desc">{{ spotlightItem.description }}</p>
-            <div class="btn-more container">
-              <NuxtLink :to="`/releases/${spotlightItem.ACB}`" class="btn-more-link check-out"
-                :aria-label="`Bekijk en luister naar ${spotlightItem.releaseName} door ${spotlightItem.artist}`"
-                v-scramble.hover>
-                <p class="btn-more-p">CHECK OUT & LISTEN</p>
-              </NuxtLink>
-            </div>
-          </div>
+      <HeroLayout v-if="release">
+        <div class="hero__copy">
+          <p class="hero__overline">LATEST RELEASE / SELECTED WORK</p>
+          <p class="hero__artist">{{ release.artist }}</p>
+          <h1 id="hero-title" class="hero__title">{{ release.title }}</h1>
         </div>
-      </div>
 
-      <div class="progress-bars" role="tablist" aria-label="Release navigatie">
-        <div v-for="(item, index) in spotlightItems.slice(0, 4)" :key="item?.ACB || index" class="progress-bar"
-          :class="{ active: index === currentSpotlightIndex }" @click="changeSlide(index)" role="tab"
-          :aria-selected="index === currentSpotlightIndex"
-          :aria-label="`Toon ${item?.releaseName || 'release'} door ${item?.artist || 'artiest'}`">
-          <div class="progress" :style="{ width: (index === currentSpotlightIndex ? progressWidth : 0) + '%' }"></div>
-          <p class="slide-title">{{ item?.releaseName }}</p>
-          <p class="slide-artist">{{ item?.artist }}</p>
+        <HeroArtwork :release="release" />
+        <HeroMetadata :catalog-number="release.catalogNumber" :year="release.year" />
+        <HeroScrollCue />
+        <p class="hero__position" aria-label="Section 1 of 4">01 / 04</p>
+      </HeroLayout>
+
+      <HeroLayout v-else>
+        <div class="hero__copy hero__copy--fallback">
+          <p class="hero__overline">INDEPENDENT ELECTRONIC MUSIC LABEL</p>
+          <h1 id="hero-title" class="hero__title">ACCURATE BLACK</h1>
         </div>
-      </div>
+        <HeroScrollCue />
+      </HeroLayout>
 
-      <div class="single-progress-bar" aria-hidden="true" v-if="spotlightItems.length > 0">
-        <div class="progress" :style="{ width: progressWidth + '%' }"></div>
-      </div>
-    </template>
-
-    <div v-else class="no-releases" aria-label="Geen releases gevonden">
-      <p>Er zijn momenteel geen releases beschikbaar.</p>
+      <div class="hero__veil" aria-hidden="true" />
     </div>
   </section>
 </template>
 
-<style scoped lang="scss">
-.section-releases {
-  padding: 1rem 2rem 2rem 2rem;
-  width: 100%;
-  height: 100%;
-  min-height: 55vh;
-  box-sizing: border-box;
-  margin-bottom: 4rem;
-
-  @include respond(phone) {
-    padding: 0 1em;
-  }
-}
-
-.no-releases {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 55vh;
-  font-size: 1.2rem;
-  color: var(--primary-grey-light1);
-}
-
-.skeleton-loader {
-  width: 100%;
-  height: 55vh;
-  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-@keyframes loading {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.skeleton-image {
-  width: 30rem;
-  height: 30rem;
-  background-color: #2a2a2a;
-  margin: 6rem;
-}
-
-.skeleton-text {
-  width: 50%;
-}
-
-.skeleton-title {
-  height: 4rem;
-  background-color: #2a2a2a;
-  margin-bottom: 2rem;
-}
-
-.skeleton-description {
-  height: 1.2rem;
-  background-color: #2a2a2a;
-  width: 75%;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: -4rem;
-  position: relative;
-  z-index: 2;
-
-  @include respond(phone) {
-    margin-bottom: .5rem;
-  }
-}
-
-.h1 {
-  font-size: 2rem;
-
-  @include respond(phone) {
-    font-size: 1.4rem;
-  }
-}
-
-.btn-more-link {
-  margin: 0;
-}
-
-.btn-more-p {
-  margin: 0;
-}
-
-.top-btn {
-  justify-content: end;
-  width: 50%;
-}
-
-.hero-video-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: 0;
-
-  @include respond(tab-land) {
-    height: 100vh;
-  }
-
-  @include respond(tab-port) {
-    height: 100vh;
-  }
-
-  @include respond(phone) {
-    height: 100vh;
-  }
-}
-
-.hero-bg-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: blur(10px);
-}
-
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(10, 10, 10, 0.65);
-}
-
+<style scoped>
 .hero {
-  display: flex;
-  justify-items: center;
-  align-items: center;
-  width: 100%;
+  --hero-progress: 0;
+  --hero-late-progress: 0;
+  --hero-title-y: 0px;
+  --hero-mobile-title-y: 0px;
+  --hero-title-opacity: 1;
+  --hero-title-blur: 0px;
+  --hero-art-y: 0px;
+  --hero-mobile-art-y: 0px;
+  --hero-art-scale: 1;
+  --hero-mobile-art-scale: 1;
+  --hero-art-opacity: 1;
+  --hero-rail-slow-y: 0px;
+  --hero-rail-fast-y: 0px;
+  --hero-rail-focus-y: 0px;
+  --hero-rail-opacity: .12;
+  --hero-focus-rail-opacity: .26;
+  --hero-threshold-opacity: .12;
+  --hero-portal-opacity: 1;
+  --hero-veil-y: 35%;
+
   position: relative;
+  z-index: var(--z-hero);
+  height: 158svh;
+  background: var(--color-void);
+  color: var(--color-paper);
+  isolation: isolate;
 }
 
-.spotlight-container {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 2rem;
-  min-height: 40vh;
-  position: relative;
-  z-index: 1;
-
-  @include respond(tab-port) {
-    flex-direction: column;
-    margin-top: 2rem;
-  }
-
-  @include respond(phone) {
-    flex-direction: column;
-    margin-top: 0rem;
-  }
-}
-
-.spotlight-image {
-  width: 30rem;
-  height: 30rem;
-  max-width: 750px;
-  aspect-ratio: 1/1;
-  display: flex;
-  justify-content: center;
-  margin: 6rem;
-  border-radius: 3px;
-  z-index: 2;
-  box-shadow: 0 25px 25px rgba(0, 0, 0, 0.4);
-  object-fit: cover;
-
-  @include respond(tab-land) {
-    width: 20rem;
-    height: 20rem;
-  }
-
-  @include respond(tab-port) {
-    width: 18rem;
-    height: 18rem;
-    margin-top: 1rem;
-  }
-}
-
-@keyframes slideInLetter {
-  0% {
-    transform: translate3d(-20rem, 0, 0);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
-  }
-}
-
-.spotlight-text {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  animation: slideInLetter 1s ease forwards;
-
-  @include respond(tab-port) {
-    height: 18rem;
-  }
-
-  @include respond(phone) {
-    height: 1rem;
-  }
-}
-
-.title {
-  margin-top: -4rem;
-  margin-bottom: 2rem;
-  font-size: 4rem;
-
-  @include respond(tab-land) {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
-}
-
-.artist {
-  font-size: 2.5rem;
-  color: var(--primary-grey-light1);
-  margin-top: -1.5rem;
-
-  @include respond(tab-land) {
-    font-size: 2rem;
-    margin-top: -2.5rem;
-  }
-
-  @include respond(phone) {
-    margin-bottom: 0;
-  }
-}
-
-.desc {
-  font-size: 1.2rem;
-  margin-top: 1rem;
-  width: 75%;
-  text-transform: none;
-  font-style: italic;
-  font-weight: 300;
-  margin-bottom: 3rem;
-  color: rgba(255, 255, 255, 0.76);
-
-  @include respond(tab-land) {
-    font-size: 1rem;
-  }
-
-  @include respond(tab-port) {
-    width: 60%;
-  }
-
-  @include respond(phone) {
-    opacity: 0;
-    visibility: hidden;
-    display: none;
-  }
-}
-
-.check-out {
-  margin-bottom: -2rem;
-  display: flex;
-  justify-content: flex-start;
-  margin-right: 3rem;
-
-  @include respond(phone) {
-    margin-top: 1rem;
-    justify-content: center;
-  }
-}
-
-.progress-bars {
-  display: flex;
-  justify-content: space-between;
-  margin-top: -2rem;
-  cursor: pointer;
-  position: relative;
-  z-index: 3;
-
-  @include respond(phone) {
-    display: none;
-  }
-}
-
-.progress-bar {
-  width: calc(25% - 6rem);
-  height: 2px;
-  background-color: var(--primary-grey-light2);
-  position: relative;
-}
-
-.progress {
-  height: 100%;
-  background-color: white;
-  transition: width 0.04s linear;
+.hero__stage {
+  position: sticky;
   top: 0;
-  right: 0;
-}
-
-.slide-title,
-.slide-artist {
-  margin: 0.5rem 0;
-  font-weight: 100;
-  width: 20rem;
-  color: var(--primary-grey-light1);
-  text-overflow: ellipsis;
+  height: 100svh;
+  min-height: 40rem;
   overflow: hidden;
-  white-space: nowrap;
+  background: var(--color-void);
+  isolation: isolate;
 }
 
-.slide-artist {
-  margin-top: -0.5rem;
-}
-
-.active .slide-title,
-.active .slide-artist {
-  font-weight: 400;
-  color: white;
-  letter-spacing: 0.05rem;
-  transition: all 0.4s ease;
-}
-
-.single-progress-bar {
-  position: absolute;
-  bottom: 0;
-  display: none;
-  width: 100%;
-  height: 2px;
-  background-color: var(--primary-grey-light2);
-  position: relative;
-  margin-top: 4rem;
+.hero__copy {
+  grid-column: 2 / 8;
+  grid-row: 3 / 6;
   z-index: 3;
+  align-self: center;
+  max-width: 46rem;
+  animation: hero-copy-resolve 720ms var(--ease-reveal) 220ms both;
+  transform: translate3d(0, var(--hero-title-y), 0);
+  opacity: var(--hero-title-opacity);
+  filter: blur(var(--hero-title-blur));
+  will-change: transform, opacity, filter;
+}
 
-  @include respond(phone) {
-    display: block;
-  }
+.hero__overline { margin: 0 0 2.25rem; color: var(--color-muted); font-family: var(--font-mono); font-size: .6875rem; line-height: 1.2; letter-spacing: .1em; }
+.hero__artist { margin: 0 0 .6rem; color: var(--color-ash); font-size: clamp(1rem, 1.4vw, 1.25rem); line-height: 1.1; letter-spacing: .03em; text-transform: uppercase; }
+.hero__title { max-width: 46rem; margin: 0; font-size: clamp(4rem, 7.6vw, 7rem); font-weight: 400; line-height: .84; letter-spacing: -.07em; text-transform: uppercase; text-wrap: balance; }
+.hero__position { grid-column: 12 / 13; grid-row: 6; z-index: 3; align-self: center; justify-self: end; margin: 0; color: var(--color-muted); font-family: var(--font-mono); font-size: .625rem; letter-spacing: .08em; writing-mode: vertical-rl; opacity: var(--hero-portal-opacity); }
+.hero__copy--fallback { grid-column-end: 12; }
 
-  .progress {
-    height: 100%;
-    background-color: white;
-    transition: width 0.04s linear;
-  }
+.hero__veil {
+  position: absolute;
+  inset: 55% 0 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgb(18 18 18 / 72%) 68%, var(--color-void));
+  opacity: var(--hero-late-progress);
+  transform: translate3d(0, var(--hero-veil-y), 0);
+  will-change: transform, opacity;
+}
+
+@keyframes hero-copy-resolve {
+  from { opacity: 0; translate: 0 .9rem; }
+}
+
+@media (width < 1024px) {
+  .hero__copy { grid-column: 2 / 7; }
+  .hero__title { font-size: clamp(3.5rem, 7.8vw, 5.75rem); }
+}
+
+@media (width < 768px) {
+  .hero { height: auto; min-height: 100svh; }
+  .hero__stage { position: relative; height: auto; min-height: 100svh; overflow: hidden; }
+  .hero__copy { grid-column: 1 / -1; grid-row: 2; align-self: start; max-width: none; padding-top: .75rem; transform: translate3d(0, var(--hero-mobile-title-y), 0); filter: none; }
+  .hero__overline { margin-bottom: 1rem; font-size: .625rem; }
+  .hero__artist { margin-bottom: .35rem; }
+  .hero__title { max-width: 22rem; font-size: clamp(2.625rem, 13vw, 3.5rem); line-height: .9; }
+  .hero__position { display: none; }
+  .hero__veil { inset-block-start: 68%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero { height: auto; min-height: 100svh; }
+  .hero__stage { position: relative; height: auto; min-height: 100svh; }
+  .hero__copy { opacity: 1; filter: none; animation: none; transform: none; }
+  .hero__veil { display: none; }
 }
 </style>

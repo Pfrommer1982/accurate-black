@@ -23,7 +23,14 @@ import useLogin from '../composables/useLogin';
 
 export default {
   setup() {
-    useHead({ title: 'Login' })
+    useHead({
+      title: 'Login',
+      meta: [{ name: 'robots', content: 'noindex, nofollow' }],
+    })
+    useSeoMeta({
+      robots: 'noindex, nofollow',
+      title: 'Login',
+    })
     const email = ref('');
     const password = ref('');
     const { login, error } = useLogin();
