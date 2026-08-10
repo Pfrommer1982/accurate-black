@@ -1,4 +1,6 @@
 export default defineNuxtConfig({
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
+
   // Modules
   modules: [
     '@nuxt/eslint',
@@ -229,8 +231,24 @@ export default defineNuxtConfig({
     prerender: {
       routes: await fetchDynamicRoutes(),
       ignore: ['/_ipx/', '/artists/_payload'],
-      crawlLinks: false
-    }
+      crawlLinks: false,
+    },
+    routeRules: {
+      '/**': {
+        headers: {
+          'X-Frame-Options': 'SAMEORIGIN',
+          'X-Content-Type-Options': 'nosniff',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+          'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+        },
+      },
+      '/admin/**': {
+        headers: {
+          'X-Robots-Tag': 'noindex, nofollow',
+        },
+      },
+    },
   },
 
   // Contact forms (demo + bookings). Override with CONTACT_INBOX env when ready for production.

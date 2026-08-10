@@ -7,10 +7,10 @@ export default defineNuxtRouteMiddleware(async () => {
   const auth = getAuth(getFirebaseClientApp())
   if (auth.currentUser) return
 
-  const user = await new Promise(resolve => {
+  const user = await new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(
       auth,
-      currentUser => {
+      (currentUser) => {
         unsubscribe()
         resolve(currentUser)
       },
@@ -23,4 +23,3 @@ export default defineNuxtRouteMiddleware(async () => {
 
   if (!user) return navigateTo('/login')
 })
-
