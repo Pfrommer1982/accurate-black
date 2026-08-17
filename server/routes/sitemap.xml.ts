@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
 
     for (const artist of artists) {
       entries.push({
-        loc: absoluteUrl(`/artists/${encodeURIComponent(artist.name)}`),
+        loc: absoluteUrl(`/artists/${encodeURIComponent(artist.id)}`),
         changefreq: 'monthly',
         priority: '0.65',
       })
