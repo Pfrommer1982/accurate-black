@@ -2,6 +2,7 @@
 import type { ArtistDetailResponse } from '~/types/release'
 
 definePageMeta({
+  middleware: 'artist-canonical',
   validate: (route) => {
     const value = String(route.params.artist ?? '').trim()
     // Prevent Nuxt payload/data routes from being captured as artist names.
@@ -15,9 +16,17 @@ const { data, error } = await useFetch<ArtistDetailResponse>(`/api/artists/${enc
 if (error.value || !data.value?.artist) throw createError({ statusCode: 404, statusMessage: 'Artist not found' })
 const artist = computed(() => data.value!.artist)
 const visual = computed(() => artist.value.imageUrl ?? artist.value.latestRelease.artworkUrl)
+const seoDescription = computed(() => {
+  if (artist.value.bio?.trim()) return artist.value.bio.trim()
+  const titles = artist.value.releases.slice(0, 3).map(release => release.title).filter(Boolean)
+  const catalogue = titles.length
+    ? ` Notable releases: ${titles.join(', ')}.`
+    : ''
+  return `${artist.value.name} is an Accurate Black artist with ${artist.value.releaseCount} catalogue release${artist.value.releaseCount === 1 ? '' : 's'}.${catalogue} Deep, dark underground electronic music from Accurate Black.`
+})
 usePageSeo(
   () => `${artist.value.name} | Artists`,
-  () => artist.value.bio ?? `${artist.value.name} releases on Accurate Black, an independent electronic music label.`,
+  seoDescription,
   visual,
   {
     path: () => `/artists/${encodeURIComponent(artist.value.id)}`,
@@ -29,11 +38,11 @@ useHead({
   script: [{
     key: 'artist-jsonld',
     type: 'application/ld+json',
-    children: computed(() => JSON.stringify({
+    innerHTML: computed(() => JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'MusicGroup',
       name: artist.value.name,
-      description: artist.value.bio || `${artist.value.name} on Accurate Black.`,
+      description: seoDescription.value,
       url: `https://www.accurateblack.nl/artists/${encodeURIComponent(artist.value.id)}`,
       image: visual.value || undefined,
       album: artist.value.releases.map(release => ({

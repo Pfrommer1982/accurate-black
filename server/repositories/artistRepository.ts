@@ -1,10 +1,11 @@
 import { getPublicReleaseDocuments } from '~/server/repositories/releaseRepository'
 import { compareCatalogueDescending, safeHttpUrl, toReleaseSummary, type ReleaseDocument } from '~/server/utils/releaseContent'
 import type { ArtistDetail, ArtistLink, ArtistSocialProvider, ArtistSummary, ReleaseSummary } from '~/types/release'
+import { artistId } from '~/utils/artistId'
 
 interface ArtistRecord { summary: ReleaseSummary, data: Record<string, unknown> }
 const artistKey = (value: string) => value.trim().toLocaleLowerCase('en')
-export const artistId = (value: string) => value.trim().toLocaleLowerCase('en').normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'artist'
+export { artistId } from '~/utils/artistId'
 const stringValue = (data: Record<string, unknown>, field: string): string | null => typeof data[field] === 'string' && (data[field] as string).trim() ? (data[field] as string).trim() : null
 
 const providerForUrl = (url: string): ArtistSocialProvider | null => {
