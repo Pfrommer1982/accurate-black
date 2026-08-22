@@ -16,14 +16,15 @@ updates:
         patterns:
           - '*'
 
-  # Actions: keep a small weekly batch, no major churn spam.
+  # Same policy for Actions: security PRs only, no routine major spam.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 0
     groups:
-      github-actions:
+      github-actions-security:
+        applies-to: security-updates
         patterns:
           - '*'
