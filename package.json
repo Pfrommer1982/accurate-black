@@ -19,7 +19,6 @@
     "@nuxt/image": "^1.10.0",
     "@nuxtjs/robots": "^5.2.8",
     "@vueuse/motion": "^2.2.6",
-    "dropzone": "6.0.0-beta.2",
     "firebase": "^11.10.0",
     "gsap": "^3.14.2",
     "nuxt": "3.21.11",
